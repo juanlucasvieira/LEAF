@@ -46,7 +46,7 @@
   
   > Modo Bloqueio do CSA: Sem Efeito
 
-- Laptop Dell - STA 40:49:0f:fe:40:77
+- Laptop Dell - STA 40:49:0f:fe:40:77 - Qualcomm Atheros QCA6174 802.11ac Wireless Network Adapter (rev 32)
   > Behavior: Sem reassociação
   
   > Modo Bloqueio do CSA: Bloqueia transmissão - chan_switch 100 2412
