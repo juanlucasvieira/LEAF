@@ -41,12 +41,12 @@
 - Moto G4 Play XT1600 - STA f4:f5:24:9e:bd:9b
   > Behavior: Reassociação com timeouts
 
-- Raspberry Model B - STA b8:27:eb:b1:83:2d  - com timestamps
+- Raspberry Model B - Broadcom BCM43438 - STA b8:27:eb:b1:83:2d  - com timestamps
   > Behavior: Sem reassociação
   
   > Modo Bloqueio do CSA: Sem Efeito
 
-- Laptop Dell - STA 40:49:0f:fe:40:77 - Qualcomm Atheros QCA6174 802.11ac Wireless Network Adapter (rev 32)
+- Laptop Dell - Qualcomm Atheros QCA6174 802.11ac Wireless Network Adapter (rev 32) - STA 40:49:0f:fe:40:77
   > Behavior: Sem reassociação
   
   > Modo Bloqueio do CSA: Bloqueia transmissão - chan_switch 100 2412
