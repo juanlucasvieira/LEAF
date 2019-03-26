@@ -14,7 +14,8 @@
 **Número máximo de APs para cada dispositivo**
 - Raspberry Pi - Broadcom BCM43438 - **1**
 - Laptop Acer - Qualcomm Atheros AR9485 Wireless Network Adapter (rev 01) - **8**
-- Adaptador TP-Link TL-WN722N - Qualcomm Atheros AR9271 - **2**
+- Adaptador TP-Link TL-WN722N - Qualcomm Atheros AR9271 - **2** - **Obs.: Comportamento incorreto do CSA com 2 APs simultâneos**
+- AirPcap NX - Qualcomm Atheros AR9001U - **2** -  **Obs.: CSA não suportado**
 
 **Testes de comportamento do CSA em diferentes dispositivos**
 
