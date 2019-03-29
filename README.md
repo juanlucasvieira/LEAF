@@ -20,6 +20,10 @@
 - AirPcap NX - Qualcomm Atheros AR9001U - **2** -  **Obs.: CSA não suportado**
 
 **Compilando HostAPD**
+- Instalar dependências
+  > sudo apt-get install libnl-3-dev
+
+  > sudo apt-get install libnl-genl-3-dev
 - Ir até a pasta hostapd
 - Copiar **defconfig** como **.config**
 - Executar comando Make
