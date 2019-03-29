@@ -11,6 +11,8 @@
 
   > TODO
   
+  > Necessário mudar a porta que está sendo utilizada pelo serviced.resolv
+  
 **Número máximo de APs para cada dispositivo**
 - Raspberry Pi - Broadcom BCM43438 - **1**
 - Laptop Acer - Qualcomm Atheros AR9485 Wireless Network Adapter (rev 01) - **8**
