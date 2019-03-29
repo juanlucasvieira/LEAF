@@ -1,0 +1,7 @@
+#Make
+*.o
+*.d
+#Ignore executables
+hostapd-2.7/hostapd/hostapd
+hostapd-2.7/hostapd/hostapd_cli
+hostapd-2.7/hostapd/.config
