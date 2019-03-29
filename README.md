@@ -17,6 +17,11 @@
 - Adaptador TP-Link TL-WN722N - Qualcomm Atheros AR9271 - **2** - **Obs.: Comportamento incorreto do CSA com 2 APs simultâneos**
 - AirPcap NX - Qualcomm Atheros AR9001U - **2** -  **Obs.: CSA não suportado**
 
+**Compilando HostAPD**
+- Ir até a pasta hostapd
+- Copiar **defconfig** como **.config**
+- Executar comando Make
+
 **Testes de comportamento do CSA em diferentes dispositivos**
 
   Execução -> Ping - chan_switch 10 2412 - 2437
