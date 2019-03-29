@@ -1,0 +1,77 @@
+LG E612F - 00:aa:70:5c:8f:85
+
+juan@Aspire-E1-471:~$ sudo hostapd /etc/hostapd/hostapd.conf
+Configuration file: /etc/hostapd/hostapd.conf
+Using interface wlp9s0 with hwaddr 2c:d0:5a:42:73:13 and ssid "TESTE_CSA"
+wlp9s0: interface state UNINITIALIZED->ENABLED
+wlp9s0: AP-ENABLED 
+wlp9s0: STA 00:aa:70:5c:8f:85 IEEE 802.11: authenticated
+wlp9s0: STA 00:aa:70:5c:8f:85 IEEE 802.11: associated (aid 1)
+wlp9s0: AP-STA-CONNECTED 00:aa:70:5c:8f:85
+wlp9s0: STA 00:aa:70:5c:8f:85 RADIUS: starting accounting session 6F6575658571DDF8
+wlp9s0: IEEE 802.11 driver had channel switch: freq=2437, ht=0, offset=0, width=0 (20 MHz (no HT)), cf1=2437, cf2=0
+wlp9s0: AP-CSA-FINISHED freq=2437 dfs=0
+wlp9s0: STA 00:aa:70:5c:8f:85 IEEE 802.11: authenticated
+wlp9s0: STA 00:aa:70:5c:8f:85 IEEE 802.11: associated (aid 1)
+wlp9s0: AP-STA-CONNECTED 00:aa:70:5c:8f:85
+wlp9s0: STA 00:aa:70:5c:8f:85 RADIUS: starting accounting session 6F6575658571DDF8
+wlp9s0: IEEE 802.11 driver had channel switch: freq=2412, ht=0, offset=0, width=0 (20 MHz (no HT)), cf1=2412, cf2=0
+wlp9s0: AP-CSA-FINISHED freq=2412 dfs=0
+wlp9s0: STA 00:aa:70:5c:8f:85 IEEE 802.11: authenticated
+wlp9s0: STA 00:aa:70:5c:8f:85 IEEE 802.11: associated (aid 1)
+wlp9s0: AP-STA-CONNECTED 00:aa:70:5c:8f:85
+wlp9s0: STA 00:aa:70:5c:8f:85 RADIUS: starting accounting session 6F6575658571DDF8
+wlp9s0: IEEE 802.11 driver had channel switch: freq=2437, ht=0, offset=0, width=0 (20 MHz (no HT)), cf1=2437, cf2=0
+wlp9s0: AP-CSA-FINISHED freq=2437 dfs=0
+wlp9s0: STA 00:aa:70:5c:8f:85 IEEE 802.11: authenticated
+wlp9s0: STA 00:aa:70:5c:8f:85 IEEE 802.11: associated (aid 1)
+wlp9s0: AP-STA-CONNECTED 00:aa:70:5c:8f:85
+wlp9s0: STA 00:aa:70:5c:8f:85 RADIUS: starting accounting session 6F6575658571DDF8
+wlp9s0: IEEE 802.11 driver had channel switch: freq=2412, ht=0, offset=0, width=0 (20 MHz (no HT)), cf1=2412, cf2=0
+wlp9s0: AP-CSA-FINISHED freq=2412 dfs=0
+wlp9s0: STA 00:aa:70:5c:8f:85 IEEE 802.11: authenticated
+wlp9s0: STA 00:aa:70:5c:8f:85 IEEE 802.11: associated (aid 1)
+wlp9s0: AP-STA-CONNECTED 00:aa:70:5c:8f:85
+wlp9s0: STA 00:aa:70:5c:8f:85 RADIUS: starting accounting session 6F6575658571DDF8
+wlp9s0: IEEE 802.11 driver had channel switch: freq=2437, ht=0, offset=0, width=0 (20 MHz (no HT)), cf1=2437, cf2=0
+wlp9s0: AP-CSA-FINISHED freq=2437 dfs=0
+wlp9s0: STA 00:aa:70:5c:8f:85 IEEE 802.11: authenticated
+wlp9s0: STA 00:aa:70:5c:8f:85 IEEE 802.11: associated (aid 1)
+wlp9s0: AP-STA-CONNECTED 00:aa:70:5c:8f:85
+wlp9s0: STA 00:aa:70:5c:8f:85 RADIUS: starting accounting session 6F6575658571DDF8
+wlp9s0: IEEE 802.11 driver had channel switch: freq=2412, ht=0, offset=0, width=0 (20 MHz (no HT)), cf1=2412, cf2=0
+wlp9s0: AP-CSA-FINISHED freq=2412 dfs=0
+wlp9s0: STA 00:aa:70:5c:8f:85 IEEE 802.11: authenticated
+wlp9s0: STA 00:aa:70:5c:8f:85 IEEE 802.11: associated (aid 1)
+wlp9s0: AP-STA-CONNECTED 00:aa:70:5c:8f:85
+wlp9s0: STA 00:aa:70:5c:8f:85 RADIUS: starting accounting session 6F6575658571DDF8
+wlp9s0: IEEE 802.11 driver had channel switch: freq=2437, ht=0, offset=0, width=0 (20 MHz (no HT)), cf1=2437, cf2=0
+wlp9s0: AP-CSA-FINISHED freq=2437 dfs=0
+wlp9s0: STA 00:aa:70:5c:8f:85 IEEE 802.11: authenticated
+wlp9s0: STA 00:aa:70:5c:8f:85 IEEE 802.11: associated (aid 1)
+wlp9s0: AP-STA-CONNECTED 00:aa:70:5c:8f:85
+wlp9s0: STA 00:aa:70:5c:8f:85 RADIUS: starting accounting session 6F6575658571DDF8
+wlp9s0: IEEE 802.11 driver had channel switch: freq=2412, ht=0, offset=0, width=0 (20 MHz (no HT)), cf1=2412, cf2=0
+wlp9s0: AP-CSA-FINISHED freq=2412 dfs=0
+wlp9s0: STA 00:aa:70:5c:8f:85 IEEE 802.11: authenticated
+wlp9s0: STA 00:aa:70:5c:8f:85 IEEE 802.11: associated (aid 1)
+wlp9s0: AP-STA-CONNECTED 00:aa:70:5c:8f:85
+wlp9s0: STA 00:aa:70:5c:8f:85 RADIUS: starting accounting session 6F6575658571DDF8
+wlp9s0: IEEE 802.11 driver had channel switch: freq=2437, ht=0, offset=0, width=0 (20 MHz (no HT)), cf1=2437, cf2=0
+wlp9s0: AP-CSA-FINISHED freq=2437 dfs=0
+wlp9s0: STA 00:aa:70:5c:8f:85 IEEE 802.11: authenticated
+wlp9s0: STA 00:aa:70:5c:8f:85 IEEE 802.11: associated (aid 1)
+wlp9s0: AP-STA-CONNECTED 00:aa:70:5c:8f:85
+wlp9s0: STA 00:aa:70:5c:8f:85 RADIUS: starting accounting session 6F6575658571DDF8
+wlp9s0: IEEE 802.11 driver had channel switch: freq=2412, ht=0, offset=0, width=0 (20 MHz (no HT)), cf1=2412, cf2=0
+wlp9s0: AP-CSA-FINISHED freq=2412 dfs=0
+wlp9s0: STA 00:aa:70:5c:8f:85 IEEE 802.11: authenticated
+wlp9s0: STA 00:aa:70:5c:8f:85 IEEE 802.11: associated (aid 1)
+wlp9s0: AP-STA-CONNECTED 00:aa:70:5c:8f:85
+wlp9s0: STA 00:aa:70:5c:8f:85 RADIUS: starting accounting session 6F6575658571DDF8
+wlp9s0: IEEE 802.11 driver had channel switch: freq=2437, ht=0, offset=0, width=0 (20 MHz (no HT)), cf1=2437, cf2=0
+wlp9s0: AP-CSA-FINISHED freq=2437 dfs=0
+wlp9s0: STA 00:aa:70:5c:8f:85 IEEE 802.11: authenticated
+wlp9s0: STA 00:aa:70:5c:8f:85 IEEE 802.11: associated (aid 1)
+wlp9s0: AP-STA-CONNECTED 00:aa:70:5c:8f:85
+wlp9s0: STA 00:aa:70:5c:8f:85 RADIUS: starting accounting session 6F6575658571DDF8

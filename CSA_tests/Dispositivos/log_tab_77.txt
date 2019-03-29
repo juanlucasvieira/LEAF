@@ -1,0 +1,188 @@
+Samsung P6800 - 18:3f:47:6f:b0:f9
+
+juan@Aspire-E1-471:~$ sudo hostapd /etc/hostapd/hostapd.conf -t
+1551372991.851111: Configuration file: /etc/hostapd/hostapd.conf
+1551372991.855903: Using interface wlp9s0 with hwaddr 2c:d0:5a:42:73:13 and ssid "TESTE_CSA"
+1551372991.873322: wlp9s0: interface state UNINITIALIZED->ENABLED
+1551372991.873346: wlp9s0: AP-ENABLED 
+1551373821.308276: 1551373821.308280: wlp9s0: STA 18:3f:47:6f:b0:f9 IEEE 802.11: authenticated
+1551373821.313602: 1551373821.313608: wlp9s0: STA 18:3f:47:6f:b0:f9 IEEE 802.11: associated (aid 1)
+1551373821.313722: wlp9s0: AP-STA-CONNECTED 18:3f:47:6f:b0:f9
+1551373821.314041: 1551373821.314044: wlp9s0: STA 18:3f:47:6f:b0:f9 RADIUS: starting accounting session 8950212F97AEA1CD
+1551373875.375373: 1551373875.375380: wlp9s0: IEEE 802.11 driver had channel switch: freq=2437, ht=0, offset=0, width=0 (20 MHz (no HT)), cf1=2437, cf2=0
+1551373875.375598: wlp9s0: AP-CSA-FINISHED freq=2437 dfs=0
+1551373875.584338: 1551373875.584343: wlp9s0: STA 18:3f:47:6f:b0:f9 IEEE 802.11: authenticated
+1551373875.587530: 1551373875.587534: wlp9s0: STA 18:3f:47:6f:b0:f9 IEEE 802.11: associated (aid 1)
+1551373875.587619: wlp9s0: AP-STA-CONNECTED 18:3f:47:6f:b0:f9
+1551373875.587953: 1551373875.587956: wlp9s0: STA 18:3f:47:6f:b0:f9 RADIUS: starting accounting session 8950212F97AEA1CD
+1551373882.749537: 1551373882.749542: wlp9s0: IEEE 802.11 driver had channel switch: freq=2412, ht=0, offset=0, width=0 (20 MHz (no HT)), cf1=2412, cf2=0
+1551373882.749763: wlp9s0: AP-CSA-FINISHED freq=2412 dfs=0
+1551373882.958888: 1551373882.958893: wlp9s0: STA 18:3f:47:6f:b0:f9 IEEE 802.11: authenticated
+1551373882.963113: 1551373882.963119: wlp9s0: STA 18:3f:47:6f:b0:f9 IEEE 802.11: associated (aid 1)
+1551373882.963216: wlp9s0: AP-STA-CONNECTED 18:3f:47:6f:b0:f9
+1551373882.963559: 1551373882.963562: wlp9s0: STA 18:3f:47:6f:b0:f9 RADIUS: starting accounting session 8950212F97AEA1CD
+1551373891.759600: 1551373891.759607: wlp9s0: IEEE 802.11 driver had channel switch: freq=2437, ht=0, offset=0, width=0 (20 MHz (no HT)), cf1=2437, cf2=0
+1551373891.759846: wlp9s0: AP-CSA-FINISHED freq=2437 dfs=0
+1551373891.971243: 1551373891.971248: wlp9s0: STA 18:3f:47:6f:b0:f9 IEEE 802.11: authenticated
+1551373891.974517: 1551373891.974523: wlp9s0: STA 18:3f:47:6f:b0:f9 IEEE 802.11: associated (aid 1)
+1551373891.974620: wlp9s0: AP-STA-CONNECTED 18:3f:47:6f:b0:f9
+1551373891.975087: 1551373891.975091: wlp9s0: STA 18:3f:47:6f:b0:f9 RADIUS: starting accounting session 8950212F97AEA1CD
+1551373897.188103: 1551373897.188108: wlp9s0: IEEE 802.11 driver had channel switch: freq=2412, ht=0, offset=0, width=0 (20 MHz (no HT)), cf1=2412, cf2=0
+1551373897.188300: wlp9s0: AP-CSA-FINISHED freq=2412 dfs=0
+1551373897.397095: 1551373897.397100: wlp9s0: STA 18:3f:47:6f:b0:f9 IEEE 802.11: authenticated
+1551373897.406867: 1551373897.406873: wlp9s0: STA 18:3f:47:6f:b0:f9 IEEE 802.11: associated (aid 1)
+1551373897.406982: wlp9s0: AP-STA-CONNECTED 18:3f:47:6f:b0:f9
+1551373897.407343: 1551373897.407346: wlp9s0: STA 18:3f:47:6f:b0:f9 RADIUS: starting accounting session 8950212F97AEA1CD
+1551373903.125550: 1551373903.125557: wlp9s0: IEEE 802.11 driver had channel switch: freq=2437, ht=0, offset=0, width=0 (20 MHz (no HT)), cf1=2437, cf2=0
+1551373903.125814: wlp9s0: AP-CSA-FINISHED freq=2437 dfs=0
+1551373903.333072: 1551373903.333076: wlp9s0: STA 18:3f:47:6f:b0:f9 IEEE 802.11: authenticated
+1551373903.336094: 1551373903.336098: wlp9s0: STA 18:3f:47:6f:b0:f9 IEEE 802.11: associated (aid 1)
+1551373903.336178: wlp9s0: AP-STA-CONNECTED 18:3f:47:6f:b0:f9
+1551373903.336508: 1551373903.336511: wlp9s0: STA 18:3f:47:6f:b0:f9 RADIUS: starting accounting session 8950212F97AEA1CD
+1551373911.626751: 1551373911.626758: wlp9s0: IEEE 802.11 driver had channel switch: freq=2412, ht=0, offset=0, width=0 (20 MHz (no HT)), cf1=2412, cf2=0
+1551373911.626986: wlp9s0: AP-CSA-FINISHED freq=2412 dfs=0
+1551373911.837817: 1551373911.837822: wlp9s0: STA 18:3f:47:6f:b0:f9 IEEE 802.11: authenticated
+1551373911.843019: 1551373911.843023: wlp9s0: STA 18:3f:47:6f:b0:f9 IEEE 802.11: associated (aid 1)
+1551373911.843096: wlp9s0: AP-STA-CONNECTED 18:3f:47:6f:b0:f9
+1551373911.843435: 1551373911.843438: wlp9s0: STA 18:3f:47:6f:b0:f9 RADIUS: starting accounting session 8950212F97AEA1CD
+1551373918.999031: 1551373918.999037: wlp9s0: IEEE 802.11 driver had channel switch: freq=2437, ht=0, offset=0, width=0 (20 MHz (no HT)), cf1=2437, cf2=0
+1551373918.999317: wlp9s0: AP-CSA-FINISHED freq=2437 dfs=0
+1551373919.210745: 1551373919.210749: wlp9s0: STA 18:3f:47:6f:b0:f9 IEEE 802.11: authenticated
+1551373919.213743: 1551373919.213747: wlp9s0: STA 18:3f:47:6f:b0:f9 IEEE 802.11: associated (aid 1)
+1551373919.213822: wlp9s0: AP-STA-CONNECTED 18:3f:47:6f:b0:f9
+1551373919.214163: 1551373919.214166: wlp9s0: STA 18:3f:47:6f:b0:f9 RADIUS: starting accounting session 8950212F97AEA1CD
+1551373924.222017: 1551373924.222023: wlp9s0: IEEE 802.11 driver had channel switch: freq=2412, ht=0, offset=0, width=0 (20 MHz (no HT)), cf1=2412, cf2=0
+1551373924.222264: wlp9s0: AP-CSA-FINISHED freq=2412 dfs=0
+1551373924.432235: 1551373924.432239: wlp9s0: STA 18:3f:47:6f:b0:f9 IEEE 802.11: authenticated
+1551373924.439419: 1551373924.439425: wlp9s0: STA 18:3f:47:6f:b0:f9 IEEE 802.11: associated (aid 1)
+1551373924.439530: wlp9s0: AP-STA-CONNECTED 18:3f:47:6f:b0:f9
+1551373924.439883: 1551373924.439886: wlp9s0: STA 18:3f:47:6f:b0:f9 RADIUS: starting accounting session 8950212F97AEA1CD
+1551373930.979307: 1551373930.979313: wlp9s0: IEEE 802.11 driver had channel switch: freq=2437, ht=0, offset=0, width=0 (20 MHz (no HT)), cf1=2437, cf2=0
+1551373930.979589: wlp9s0: AP-CSA-FINISHED freq=2437 dfs=0
+1551373931.188084: 1551373931.188089: wlp9s0: STA 18:3f:47:6f:b0:f9 IEEE 802.11: authenticated
+1551373931.191149: 1551373931.191153: wlp9s0: STA 18:3f:47:6f:b0:f9 IEEE 802.11: associated (aid 1)
+1551373931.191222: wlp9s0: AP-STA-CONNECTED 18:3f:47:6f:b0:f9
+1551373931.191545: 1551373931.191548: wlp9s0: STA 18:3f:47:6f:b0:f9 RADIUS: starting accounting session 8950212F97AEA1CD
+1551373940.707128: 1551373940.707130: wlp9s0: IEEE 802.11 driver had channel switch: freq=2412, ht=0, offset=0, width=0 (20 MHz (no HT)), cf1=2412, cf2=0
+1551373940.707237: wlp9s0: AP-CSA-FINISHED freq=2412 dfs=0
+1551373940.916709: 1551373940.916715: wlp9s0: STA 18:3f:47:6f:b0:f9 IEEE 802.11: authenticated
+1551373940.919542: 1551373940.919547: wlp9s0: STA 18:3f:47:6f:b0:f9 IEEE 802.11: associated (aid 1)
+1551373940.919623: wlp9s0: AP-STA-CONNECTED 18:3f:47:6f:b0:f9
+1551373940.919959: 1551373940.919963: wlp9s0: STA 18:3f:47:6f:b0:f9 RADIUS: starting accounting session 8950212F97AEA1CD
+1551373947.568390: 1551373947.568396: wlp9s0: IEEE 802.11 driver had channel switch: freq=2437, ht=0, offset=0, width=0 (20 MHz (no HT)), cf1=2437, cf2=0
+1551373947.568668: wlp9s0: AP-CSA-FINISHED freq=2437 dfs=0
+1551373964.974721: 1551373964.974726: wlp9s0: STA 18:3f:47:6f:b0:f9 IEEE 802.11: authenticated
+1551373964.977640: 1551373964.977644: wlp9s0: STA 18:3f:47:6f:b0:f9 IEEE 802.11: associated (aid 1)
+1551373964.977716: wlp9s0: AP-STA-CONNECTED 18:3f:47:6f:b0:f9
+1551373964.977995: 1551373964.977998: wlp9s0: STA 18:3f:47:6f:b0:f9 RADIUS: starting accounting session 8950212F97AEA1CD
+1551374016.280337: 1551374016.280343: wlp9s0: IEEE 802.11 driver had channel switch: freq=2412, ht=0, offset=0, width=0 (20 MHz (no HT)), cf1=2412, cf2=0
+1551374016.280588: wlp9s0: AP-CSA-FINISHED freq=2412 dfs=0
+1551374016.488736: 1551374016.488741: wlp9s0: STA 18:3f:47:6f:b0:f9 IEEE 802.11: authenticated
+1551374016.502417: 1551374016.502423: wlp9s0: STA 18:3f:47:6f:b0:f9 IEEE 802.11: associated (aid 1)
+1551374016.502532: wlp9s0: AP-STA-CONNECTED 18:3f:47:6f:b0:f9
+1551374016.502919: 1551374016.502922: wlp9s0: STA 18:3f:47:6f:b0:f9 RADIUS: starting accounting session 8950212F97AEA1CD
+1551374035.531971: 1551374035.531976: wlp9s0: IEEE 802.11 driver had channel switch: freq=2437, ht=0, offset=0, width=0 (20 MHz (no HT)), cf1=2437, cf2=0
+1551374035.532217: wlp9s0: AP-CSA-FINISHED freq=2437 dfs=0
+1551374035.743404: 1551374035.743409: wlp9s0: STA 18:3f:47:6f:b0:f9 IEEE 802.11: authenticated
+1551374035.749910: 1551374035.749915: wlp9s0: STA 18:3f:47:6f:b0:f9 IEEE 802.11: associated (aid 1)
+1551374035.750008: wlp9s0: AP-STA-CONNECTED 18:3f:47:6f:b0:f9
+1551374035.750375: 1551374035.750379: wlp9s0: STA 18:3f:47:6f:b0:f9 RADIUS: starting accounting session 8950212F97AEA1CD
+^C1551374050.921490: wlp9s0: interface state ENABLED->DISABLED
+1551374050.921560: wlp9s0: AP-STA-DISCONNECTED 18:3f:47:6f:b0:f9
+1551374050.921784: wlp9s0: AP-DISABLED 
+1551374050.921938: nl80211: deinit ifname=wlp9s0 disabled_11b_rates=0
+
+
+juan@Aspire-E1-471:~$ sudo hostapd /etc/hostapd/hostapd.conf
+Configuration file: /etc/hostapd/hostapd.conf
+Using interface wlp9s0 with hwaddr 2c:d0:5a:42:73:13 and ssid "TESTE_CSA"
+wlp9s0: interface state UNINITIALIZED->ENABLED
+wlp9s0: AP-ENABLED 
+wlp9s0: STA 18:3f:47:6f:b0:f9 IEEE 802.11: authenticated
+wlp9s0: STA 18:3f:47:6f:b0:f9 IEEE 802.11: associated (aid 1)
+wlp9s0: AP-STA-CONNECTED 18:3f:47:6f:b0:f9
+wlp9s0: STA 18:3f:47:6f:b0:f9 RADIUS: starting accounting session 6F5F07E9C02E25EB
+wlp9s0: IEEE 802.11 driver had channel switch: freq=2437, ht=0, offset=0, width=0 (20 MHz (no HT)), cf1=2437, cf2=0
+wlp9s0: AP-CSA-FINISHED freq=2437 dfs=0
+wlp9s0: STA 18:3f:47:6f:b0:f9 IEEE 802.11: authenticated
+wlp9s0: STA 18:3f:47:6f:b0:f9 IEEE 802.11: associated (aid 1)
+wlp9s0: AP-STA-CONNECTED 18:3f:47:6f:b0:f9
+wlp9s0: STA 18:3f:47:6f:b0:f9 RADIUS: starting accounting session 6F5F07E9C02E25EB
+wlp9s0: IEEE 802.11 driver had channel switch: freq=2412, ht=0, offset=0, width=0 (20 MHz (no HT)), cf1=2412, cf2=0
+wlp9s0: AP-CSA-FINISHED freq=2412 dfs=0
+wlp9s0: STA 18:3f:47:6f:b0:f9 IEEE 802.11: authenticated
+wlp9s0: STA 18:3f:47:6f:b0:f9 IEEE 802.11: associated (aid 1)
+wlp9s0: AP-STA-CONNECTED 18:3f:47:6f:b0:f9
+wlp9s0: STA 18:3f:47:6f:b0:f9 RADIUS: starting accounting session 6F5F07E9C02E25EB
+wlp9s0: IEEE 802.11 driver had channel switch: freq=2437, ht=0, offset=0, width=0 (20 MHz (no HT)), cf1=2437, cf2=0
+wlp9s0: AP-CSA-FINISHED freq=2437 dfs=0
+wlp9s0: STA 18:3f:47:6f:b0:f9 IEEE 802.11: authenticated
+wlp9s0: STA 18:3f:47:6f:b0:f9 IEEE 802.11: associated (aid 1)
+wlp9s0: AP-STA-CONNECTED 18:3f:47:6f:b0:f9
+wlp9s0: STA 18:3f:47:6f:b0:f9 RADIUS: starting accounting session 6F5F07E9C02E25EB
+wlp9s0: IEEE 802.11 driver had channel switch: freq=2412, ht=0, offset=0, width=0 (20 MHz (no HT)), cf1=2412, cf2=0
+wlp9s0: AP-CSA-FINISHED freq=2412 dfs=0
+wlp9s0: STA 18:3f:47:6f:b0:f9 IEEE 802.11: authenticated
+wlp9s0: STA 18:3f:47:6f:b0:f9 IEEE 802.11: associated (aid 1)
+wlp9s0: AP-STA-CONNECTED 18:3f:47:6f:b0:f9
+wlp9s0: STA 18:3f:47:6f:b0:f9 RADIUS: starting accounting session 6F5F07E9C02E25EB
+wlp9s0: IEEE 802.11 driver had channel switch: freq=2437, ht=0, offset=0, width=0 (20 MHz (no HT)), cf1=2437, cf2=0
+wlp9s0: AP-CSA-FINISHED freq=2437 dfs=0
+wlp9s0: STA 18:3f:47:6f:b0:f9 IEEE 802.11: authenticated
+wlp9s0: STA 18:3f:47:6f:b0:f9 IEEE 802.11: associated (aid 1)
+wlp9s0: AP-STA-CONNECTED 18:3f:47:6f:b0:f9
+wlp9s0: STA 18:3f:47:6f:b0:f9 RADIUS: starting accounting session 6F5F07E9C02E25EB
+wlp9s0: IEEE 802.11 driver had channel switch: freq=2412, ht=0, offset=0, width=0 (20 MHz (no HT)), cf1=2412, cf2=0
+wlp9s0: AP-CSA-FINISHED freq=2412 dfs=0
+wlp9s0: STA 18:3f:47:6f:b0:f9 IEEE 802.11: authenticated
+wlp9s0: STA 18:3f:47:6f:b0:f9 IEEE 802.11: associated (aid 1)
+wlp9s0: AP-STA-CONNECTED 18:3f:47:6f:b0:f9
+wlp9s0: STA 18:3f:47:6f:b0:f9 RADIUS: starting accounting session 6F5F07E9C02E25EB
+wlp9s0: IEEE 802.11 driver had channel switch: freq=2437, ht=0, offset=0, width=0 (20 MHz (no HT)), cf1=2437, cf2=0
+wlp9s0: AP-CSA-FINISHED freq=2437 dfs=0
+wlp9s0: STA 18:3f:47:6f:b0:f9 IEEE 802.11: authenticated
+wlp9s0: STA 18:3f:47:6f:b0:f9 IEEE 802.11: associated (aid 1)
+wlp9s0: AP-STA-CONNECTED 18:3f:47:6f:b0:f9
+wlp9s0: STA 18:3f:47:6f:b0:f9 RADIUS: starting accounting session 6F5F07E9C02E25EB
+wlp9s0: IEEE 802.11 driver had channel switch: freq=2412, ht=0, offset=0, width=0 (20 MHz (no HT)), cf1=2412, cf2=0
+wlp9s0: AP-CSA-FINISHED freq=2412 dfs=0
+wlp9s0: STA 18:3f:47:6f:b0:f9 IEEE 802.11: authenticated
+wlp9s0: STA 18:3f:47:6f:b0:f9 IEEE 802.11: associated (aid 1)
+wlp9s0: AP-STA-CONNECTED 18:3f:47:6f:b0:f9
+wlp9s0: STA 18:3f:47:6f:b0:f9 RADIUS: starting accounting session 6F5F07E9C02E25EB
+wlp9s0: IEEE 802.11 driver had channel switch: freq=2437, ht=0, offset=0, width=0 (20 MHz (no HT)), cf1=2437, cf2=0
+wlp9s0: AP-CSA-FINISHED freq=2437 dfs=0
+wlp9s0: STA 18:3f:47:6f:b0:f9 IEEE 802.11: authenticated
+wlp9s0: STA 18:3f:47:6f:b0:f9 IEEE 802.11: associated (aid 1)
+wlp9s0: AP-STA-CONNECTED 18:3f:47:6f:b0:f9
+wlp9s0: STA 18:3f:47:6f:b0:f9 RADIUS: starting accounting session 6F5F07E9C02E25EB
+wlp9s0: IEEE 802.11 driver had channel switch: freq=2412, ht=0, offset=0, width=0 (20 MHz (no HT)), cf1=2412, cf2=0
+wlp9s0: AP-CSA-FINISHED freq=2412 dfs=0
+wlp9s0: STA 18:3f:47:6f:b0:f9 IEEE 802.11: authenticated
+wlp9s0: STA 18:3f:47:6f:b0:f9 IEEE 802.11: associated (aid 1)
+wlp9s0: AP-STA-CONNECTED 18:3f:47:6f:b0:f9
+wlp9s0: STA 18:3f:47:6f:b0:f9 RADIUS: starting accounting session 6F5F07E9C02E25EB
+wlp9s0: IEEE 802.11 driver had channel switch: freq=2437, ht=0, offset=0, width=0 (20 MHz (no HT)), cf1=2437, cf2=0
+wlp9s0: AP-CSA-FINISHED freq=2437 dfs=0
+wlp9s0: STA 18:3f:47:6f:b0:f9 IEEE 802.11: authenticated
+wlp9s0: STA 18:3f:47:6f:b0:f9 IEEE 802.11: associated (aid 1)
+wlp9s0: AP-STA-CONNECTED 18:3f:47:6f:b0:f9
+wlp9s0: STA 18:3f:47:6f:b0:f9 RADIUS: starting accounting session 6F5F07E9C02E25EB
+wlp9s0: IEEE 802.11 driver had channel switch: freq=2412, ht=0, offset=0, width=0 (20 MHz (no HT)), cf1=2412, cf2=0
+wlp9s0: AP-CSA-FINISHED freq=2412 dfs=0
+wlp9s0: STA 18:3f:47:6f:b0:f9 IEEE 802.11: authenticated
+wlp9s0: STA 18:3f:47:6f:b0:f9 IEEE 802.11: associated (aid 1)
+wlp9s0: AP-STA-CONNECTED 18:3f:47:6f:b0:f9
+wlp9s0: STA 18:3f:47:6f:b0:f9 RADIUS: starting accounting session 6F5F07E9C02E25EB
+wlp9s0: IEEE 802.11 driver had channel switch: freq=2437, ht=0, offset=0, width=0 (20 MHz (no HT)), cf1=2437, cf2=0
+wlp9s0: AP-CSA-FINISHED freq=2437 dfs=0
+wlp9s0: STA 18:3f:47:6f:b0:f9 IEEE 802.11: authenticated
+wlp9s0: STA 18:3f:47:6f:b0:f9 IEEE 802.11: associated (aid 1)
+wlp9s0: AP-STA-CONNECTED 18:3f:47:6f:b0:f9
+wlp9s0: STA 18:3f:47:6f:b0:f9 RADIUS: starting accounting session 6F5F07E9C02E25EB
+wlp9s0: IEEE 802.11 driver had channel switch: freq=2412, ht=0, offset=0, width=0 (20 MHz (no HT)), cf1=2412, cf2=0
+wlp9s0: AP-CSA-FINISHED freq=2412 dfs=0
+wlp9s0: STA 18:3f:47:6f:b0:f9 IEEE 802.11: authenticated
+wlp9s0: STA 18:3f:47:6f:b0:f9 IEEE 802.11: associated (aid 1)
+wlp9s0: AP-STA-CONNECTED 18:3f:47:6f:b0:f9
+wlp9s0: STA 18:3f:47:6f:b0:f9 RADIUS: starting accounting session 6F5F07E9C02E25EB

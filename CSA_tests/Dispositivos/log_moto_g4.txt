@@ -1,0 +1,92 @@
+Moto G4 Play XT1600 - STA f4:f5:24:9e:bd:9b
+
+juan@Aspire-E1-471:~$ sudo hostapd /etc/hostapd/hostapd.conf
+Configuration file: /etc/hostapd/hostapd.conf
+Using interface wlp9s0 with hwaddr 2c:d0:5a:42:73:13 and ssid "TESTE_CSA"
+wlp9s0: interface state UNINITIALIZED->ENABLED
+wlp9s0: AP-ENABLED 
+wlp9s0: STA f4:f5:24:9e:bd:9b IEEE 802.11: authenticated
+wlp9s0: STA f4:f5:24:9e:bd:9b IEEE 802.11: associated (aid 1)
+wlp9s0: AP-STA-CONNECTED f4:f5:24:9e:bd:9b
+wlp9s0: STA f4:f5:24:9e:bd:9b RADIUS: starting accounting session 52B421DDA8A7F13C
+Cannot set beacons during CSA period
+wlp9s0: IEEE 802.11 driver had channel switch: freq=2437, ht=0, offset=0, width=0 (20 MHz (no HT)), cf1=2437, cf2=0
+wlp9s0: AP-CSA-FINISHED freq=2437 dfs=0
+wlp9s0: STA f4:f5:24:9e:bd:9b IEEE 802.11: authenticated
+wlp9s0: STA f4:f5:24:9e:bd:9b IEEE 802.11: associated (aid 1)
+wlp9s0: AP-STA-CONNECTED f4:f5:24:9e:bd:9b
+wlp9s0: STA f4:f5:24:9e:bd:9b RADIUS: starting accounting session 52B421DDA8A7F13C
+chanswitch: invalid freq provided
+wlp9s0: IEEE 802.11 driver had channel switch: freq=2412, ht=0, offset=0, width=0 (20 MHz (no HT)), cf1=2412, cf2=0
+wlp9s0: AP-CSA-FINISHED freq=2412 dfs=0
+wlp9s0: STA f4:f5:24:9e:bd:9b IEEE 802.11: authenticated
+wlp9s0: STA f4:f5:24:9e:bd:9b IEEE 802.11: associated (aid 1)
+wlp9s0: AP-STA-CONNECTED f4:f5:24:9e:bd:9b
+wlp9s0: STA f4:f5:24:9e:bd:9b RADIUS: starting accounting session 52B421DDA8A7F13C
+wlp9s0: IEEE 802.11 driver had channel switch: freq=2437, ht=0, offset=0, width=0 (20 MHz (no HT)), cf1=2437, cf2=0
+wlp9s0: AP-CSA-FINISHED freq=2437 dfs=0
+wlp9s0: STA f4:f5:24:9e:bd:9b IEEE 802.11: authenticated
+wlp9s0: STA f4:f5:24:9e:bd:9b IEEE 802.11: associated (aid 1)
+wlp9s0: AP-STA-CONNECTED f4:f5:24:9e:bd:9b
+wlp9s0: STA f4:f5:24:9e:bd:9b RADIUS: starting accounting session 52B421DDA8A7F13C
+wlp9s0: IEEE 802.11 driver had channel switch: freq=2412, ht=0, offset=0, width=0 (20 MHz (no HT)), cf1=2412, cf2=0
+wlp9s0: AP-CSA-FINISHED freq=2412 dfs=0
+wlp9s0: STA f4:f5:24:9e:bd:9b IEEE 802.11: authenticated
+wlp9s0: STA f4:f5:24:9e:bd:9b IEEE 802.11: associated (aid 1)
+wlp9s0: AP-STA-CONNECTED f4:f5:24:9e:bd:9b
+wlp9s0: STA f4:f5:24:9e:bd:9b RADIUS: starting accounting session 52B421DDA8A7F13C
+wlp9s0: IEEE 802.11 driver had channel switch: freq=2437, ht=0, offset=0, width=0 (20 MHz (no HT)), cf1=2437, cf2=0
+wlp9s0: AP-CSA-FINISHED freq=2437 dfs=0
+wlp9s0: STA f4:f5:24:9e:bd:9b IEEE 802.11: authenticated
+wlp9s0: STA f4:f5:24:9e:bd:9b IEEE 802.11: associated (aid 1)
+wlp9s0: AP-STA-CONNECTED f4:f5:24:9e:bd:9b
+wlp9s0: STA f4:f5:24:9e:bd:9b RADIUS: starting accounting session 52B421DDA8A7F13C
+wlp9s0: IEEE 802.11 driver had channel switch: freq=2412, ht=0, offset=0, width=0 (20 MHz (no HT)), cf1=2412, cf2=0
+wlp9s0: AP-CSA-FINISHED freq=2412 dfs=0
+wlp9s0: STA f4:f5:24:9e:bd:9b IEEE 802.11: authenticated
+wlp9s0: STA f4:f5:24:9e:bd:9b IEEE 802.11: associated (aid 1)
+wlp9s0: AP-STA-CONNECTED f4:f5:24:9e:bd:9b
+wlp9s0: STA f4:f5:24:9e:bd:9b RADIUS: starting accounting session 52B421DDA8A7F13C
+wlp9s0: IEEE 802.11 driver had channel switch: freq=2437, ht=0, offset=0, width=0 (20 MHz (no HT)), cf1=2437, cf2=0
+wlp9s0: AP-CSA-FINISHED freq=2437 dfs=0
+wlp9s0: STA f4:f5:24:9e:bd:9b IEEE 802.11: authenticated
+wlp9s0: STA f4:f5:24:9e:bd:9b IEEE 802.11: associated (aid 1)
+wlp9s0: AP-STA-CONNECTED f4:f5:24:9e:bd:9b
+wlp9s0: STA f4:f5:24:9e:bd:9b RADIUS: starting accounting session 52B421DDA8A7F13C
+wlp9s0: IEEE 802.11 driver had channel switch: freq=2412, ht=0, offset=0, width=0 (20 MHz (no HT)), cf1=2412, cf2=0
+wlp9s0: AP-CSA-FINISHED freq=2412 dfs=0
+wlp9s0: STA f4:f5:24:9e:bd:9b IEEE 802.11: authenticated
+wlp9s0: STA f4:f5:24:9e:bd:9b IEEE 802.11: associated (aid 1)
+wlp9s0: AP-STA-CONNECTED f4:f5:24:9e:bd:9b
+wlp9s0: STA f4:f5:24:9e:bd:9b RADIUS: starting accounting session 52B421DDA8A7F13C
+wlp9s0: IEEE 802.11 driver had channel switch: freq=2437, ht=0, offset=0, width=0 (20 MHz (no HT)), cf1=2437, cf2=0
+wlp9s0: AP-CSA-FINISHED freq=2437 dfs=0
+wlp9s0: STA f4:f5:24:9e:bd:9b IEEE 802.11: authenticated
+wlp9s0: STA f4:f5:24:9e:bd:9b IEEE 802.11: associated (aid 1)
+wlp9s0: AP-STA-CONNECTED f4:f5:24:9e:bd:9b
+wlp9s0: STA f4:f5:24:9e:bd:9b RADIUS: starting accounting session 52B421DDA8A7F13C
+wlp9s0: IEEE 802.11 driver had channel switch: freq=2412, ht=0, offset=0, width=0 (20 MHz (no HT)), cf1=2412, cf2=0
+wlp9s0: AP-CSA-FINISHED freq=2412 dfs=0
+wlp9s0: STA f4:f5:24:9e:bd:9b IEEE 802.11: authenticated
+wlp9s0: STA f4:f5:24:9e:bd:9b IEEE 802.11: associated (aid 1)
+wlp9s0: AP-STA-CONNECTED f4:f5:24:9e:bd:9b
+wlp9s0: STA f4:f5:24:9e:bd:9b RADIUS: starting accounting session 52B421DDA8A7F13C
+wlp9s0: IEEE 802.11 driver had channel switch: freq=2437, ht=0, offset=0, width=0 (20 MHz (no HT)), cf1=2437, cf2=0
+wlp9s0: AP-CSA-FINISHED freq=2437 dfs=0
+wlp9s0: STA f4:f5:24:9e:bd:9b IEEE 802.11: authenticated
+wlp9s0: STA f4:f5:24:9e:bd:9b IEEE 802.11: associated (aid 1)
+wlp9s0: AP-STA-CONNECTED f4:f5:24:9e:bd:9b
+wlp9s0: STA f4:f5:24:9e:bd:9b RADIUS: starting accounting session 52B421DDA8A7F13C
+wlp9s0: IEEE 802.11 driver had channel switch: freq=2412, ht=0, offset=0, width=0 (20 MHz (no HT)), cf1=2412, cf2=0
+wlp9s0: AP-CSA-FINISHED freq=2412 dfs=0
+wlp9s0: STA f4:f5:24:9e:bd:9b IEEE 802.11: authenticated
+wlp9s0: STA f4:f5:24:9e:bd:9b IEEE 802.11: associated (aid 1)
+wlp9s0: AP-STA-CONNECTED f4:f5:24:9e:bd:9b
+wlp9s0: STA f4:f5:24:9e:bd:9b RADIUS: starting accounting session 52B421DDA8A7F13C
+Cannot set beacons during CSA period
+wlp9s0: IEEE 802.11 driver had channel switch: freq=2437, ht=0, offset=0, width=0 (20 MHz (no HT)), cf1=2437, cf2=0
+wlp9s0: AP-CSA-FINISHED freq=2437 dfs=0
+wlp9s0: STA f4:f5:24:9e:bd:9b IEEE 802.11: authenticated
+wlp9s0: STA f4:f5:24:9e:bd:9b IEEE 802.11: associated (aid 1)
+wlp9s0: AP-STA-CONNECTED f4:f5:24:9e:bd:9b
+wlp9s0: STA f4:f5:24:9e:bd:9b RADIUS: starting accounting session 52B421DDA8A7F13C

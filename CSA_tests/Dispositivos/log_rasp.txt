@@ -1,0 +1,38 @@
+Raspberry Model B
+
+juan@Aspire-E1-471:~$ sudo hostapd /etc/hostapd/hostapd.conf -t
+[sudo] password for juan: 
+1551372044.552224: Configuration file: /etc/hostapd/hostapd.conf
+1551372044.556527: Using interface wlp9s0 with hwaddr 2c:d0:5a:42:73:13 and ssid "TESTE_CSA"
+1551372044.571560: wlp9s0: interface state UNINITIALIZED->ENABLED
+1551372044.571582: wlp9s0: AP-ENABLED 
+1551372055.171736: 1551372055.171740: wlp9s0: STA b8:27:eb:b1:83:2d IEEE 802.11: authenticated
+1551372055.173920: 1551372055.173923: wlp9s0: STA b8:27:eb:b1:83:2d IEEE 802.11: associated (aid 1)
+1551372055.173972: wlp9s0: AP-STA-CONNECTED b8:27:eb:b1:83:2d
+1551372055.174132: 1551372055.174133: wlp9s0: STA b8:27:eb:b1:83:2d RADIUS: starting accounting session EB557F7633C45C5E
+1551372105.262501: 1551372105.262507: wlp9s0: IEEE 802.11 driver had channel switch: freq=2437, ht=0, offset=0, width=0 (20 MHz (no HT)), cf1=2437, cf2=0
+1551372105.262748: wlp9s0: AP-CSA-FINISHED freq=2437 dfs=0
+1551372116.423365: 1551372116.423371: wlp9s0: IEEE 802.11 driver had channel switch: freq=2412, ht=0, offset=0, width=0 (20 MHz (no HT)), cf1=2412, cf2=0
+1551372116.423612: wlp9s0: AP-CSA-FINISHED freq=2412 dfs=0
+1551372127.073507: 1551372127.073514: wlp9s0: IEEE 802.11 driver had channel switch: freq=2437, ht=0, offset=0, width=0 (20 MHz (no HT)), cf1=2437, cf2=0
+1551372127.073757: wlp9s0: AP-CSA-FINISHED freq=2437 dfs=0
+1551372136.596767: 1551372136.596774: wlp9s0: IEEE 802.11 driver had channel switch: freq=2412, ht=0, offset=0, width=0 (20 MHz (no HT)), cf1=2412, cf2=0
+1551372136.596992: wlp9s0: AP-CSA-FINISHED freq=2412 dfs=0
+1551372144.483079: 1551372144.483086: wlp9s0: IEEE 802.11 driver had channel switch: freq=2437, ht=0, offset=0, width=0 (20 MHz (no HT)), cf1=2437, cf2=0
+1551372144.483330: wlp9s0: AP-CSA-FINISHED freq=2437 dfs=0
+1551372151.956817: 1551372151.956823: wlp9s0: IEEE 802.11 driver had channel switch: freq=2412, ht=0, offset=0, width=0 (20 MHz (no HT)), cf1=2412, cf2=0
+1551372151.957055: wlp9s0: AP-CSA-FINISHED freq=2412 dfs=0
+1551372160.353738: 1551372160.353744: wlp9s0: IEEE 802.11 driver had channel switch: freq=2437, ht=0, offset=0, width=0 (20 MHz (no HT)), cf1=2437, cf2=0
+1551372160.353983: wlp9s0: AP-CSA-FINISHED freq=2437 dfs=0
+1551372169.160456: 1551372169.160459: wlp9s0: IEEE 802.11 driver had channel switch: freq=2412, ht=0, offset=0, width=0 (20 MHz (no HT)), cf1=2412, cf2=0
+1551372169.160584: wlp9s0: AP-CSA-FINISHED freq=2412 dfs=0
+1551372176.124861: 1551372176.124870: wlp9s0: IEEE 802.11 driver had channel switch: freq=2437, ht=0, offset=0, width=0 (20 MHz (no HT)), cf1=2437, cf2=0
+1551372176.125131: wlp9s0: AP-CSA-FINISHED freq=2437 dfs=0
+1551372203.259972: 1551372203.259978: wlp9s0: IEEE 802.11 driver had channel switch: freq=2412, ht=0, offset=0, width=0 (20 MHz (no HT)), cf1=2412, cf2=0
+1551372203.260318: wlp9s0: AP-CSA-FINISHED freq=2412 dfs=0
+1551372213.092073: 1551372213.092079: wlp9s0: IEEE 802.11 driver had channel switch: freq=2437, ht=0, offset=0, width=0 (20 MHz (no HT)), cf1=2437, cf2=0
+1551372213.092312: wlp9s0: AP-CSA-FINISHED freq=2437 dfs=0
+1551372221.692484: 1551372221.692489: wlp9s0: IEEE 802.11 driver had channel switch: freq=2412, ht=0, offset=0, width=0 (20 MHz (no HT)), cf1=2412, cf2=0
+1551372221.692713: wlp9s0: AP-CSA-FINISHED freq=2412 dfs=0
+1551372256.305566: 1551372256.305572: wlp9s0: IEEE 802.11 driver had channel switch: freq=2437, ht=0, offset=0, width=0 (20 MHz (no HT)), cf1=2437, cf2=0
+1551372256.305785: wlp9s0: AP-CSA-FINISHED freq=2437 dfs=0
