@@ -977,6 +977,9 @@ static int hostapd_config_bss(struct hostapd_config *conf, const char *ifname)
 	if (*ifname == '\0')
 		return -1;
 
+	wpa_printf(MSG_INFO, ">DEBUG: hostapd_config_bss called");
+	wpa_printf(MSG_INFO, ">DEBUG: Num of BSSs: %ld", conf->num_bss);
+
 	all = os_realloc_array(conf->bss, conf->num_bss + 1,
 			       sizeof(struct hostapd_bss_config *));
 	if (all == NULL) {
@@ -1003,6 +1006,7 @@ static int hostapd_config_bss(struct hostapd_config *conf, const char *ifname)
 	hostapd_config_defaults_bss(bss);
 	os_strlcpy(bss->iface, ifname, sizeof(bss->iface));
 	os_memcpy(bss->ssid.vlan, bss->iface, IFNAMSIZ + 1);
+	wpa_printf(MSG_INFO, ">DEBUG: Num of BSSs: %ld", conf->num_bss);
 
 	return 0;
 }
@@ -4193,6 +4197,7 @@ struct hostapd_config * hostapd_config_read(const char *fname)
 
 	fclose(f);
 
+	wpa_printf(MSG_INFO, ">DEBUG: config_file.c: hostapd_config_read(). The config file has %ld BSSs", conf->num_bss);
 	for (i = 0; i < conf->num_bss; i++)
 		hostapd_set_security_params(conf->bss[i], 1);
 

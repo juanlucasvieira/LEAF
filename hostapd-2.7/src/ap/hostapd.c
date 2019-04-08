@@ -179,6 +179,7 @@ static void hostapd_clear_old(struct hostapd_iface *iface)
 static int hostapd_iface_conf_changed(struct hostapd_config *newconf,
 				      struct hostapd_config *oldconf)
 {
+	wpa_printf(MSG_INFO, ">DEBUG: hostapd_iface_conf_changed() called");
 	size_t i;
 
 	if (newconf->num_bss != oldconf->num_bss)
@@ -201,8 +202,10 @@ int hostapd_reload_config(struct hostapd_iface *iface)
 	struct hostapd_config *newconf, *oldconf;
 	size_t j;
 
+	wpa_printf(MSG_INFO, ">DEBUG: hostapd_reload_config() called");
 	if (iface->config_fname == NULL) {
 		/* Only in-memory config in use - assume it has been updated */
+		wpa_printf(MSG_INFO, ">DEBUG: IN MEMORY CONFIG ONLY");
 		hostapd_clear_old(iface);
 		for (j = 0; j < iface->num_bss; j++)
 			hostapd_reload_bss(iface->bss[j]);
@@ -216,6 +219,7 @@ int hostapd_reload_config(struct hostapd_iface *iface)
 	if (newconf == NULL)
 		return -1;
 
+	//This deauthenticate all stations.
 	hostapd_clear_old(iface);
 
 	oldconf = hapd->iconf;
@@ -223,14 +227,17 @@ int hostapd_reload_config(struct hostapd_iface *iface)
 		char *fname;
 		int res;
 
-		wpa_printf(MSG_DEBUG,
-			   "Configuration changes include interface/BSS modification - force full disable+enable sequence");
+		//wpa_printf(MSG_DEBUG, "Configuration changes include interface/BSS modification - force full disable+enable sequence");
+		wpa_printf(MSG_INFO,
+			   ">DEBUG: Configuration changes include interface/BSS modification - force full disable+enable sequence");
 		fname = os_strdup(iface->config_fname);
 		if (!fname) {
 			hostapd_config_free(newconf);
 			return -1;
 		}
+		//It seems that this method deauthenticates the stations
 		hostapd_remove_iface(interfaces, hapd->conf->iface);
+		//Initialize the interfaces again
 		iface = hostapd_init(interfaces, fname);
 		os_free(fname);
 		hostapd_config_free(newconf);
@@ -242,7 +249,7 @@ int hostapd_reload_config(struct hostapd_iface *iface)
 		iface->interfaces = interfaces;
 		interfaces->iface[interfaces->count] = iface;
 		interfaces->count++;
-		res = hostapd_enable_iface(iface);
+		res = hostapd_enable_iface(iface); //Enables de initialized interfaces
 		if (res < 0)
 			wpa_printf(MSG_ERROR,
 				   "Failed to enable interface on config reload");
@@ -2447,11 +2454,18 @@ hostapd_interface_init_bss(struct hapd_interfaces *interfaces, const char *phy,
 	int k;
 	size_t i, bss_idx;
 
+	wpa_printf(MSG_INFO, ">DEBUG: hostapd_interface_init_bss() called");
+
 	if (!phy || !*phy)
 		return NULL;
+	//Phy: specified physical interface
+	wpa_printf(MSG_INFO, ">DEBUG: Specified phy: %s", phy);
 
+	wpa_printf(MSG_INFO,">DEBUG: Num of interfaces: %ld", interfaces->count);
 	for (i = 0; i < interfaces->count; i++) {
+		wpa_printf(MSG_INFO, ">DEBUG: Interface: %s", interfaces->iface[i]->phy);
 		if (os_strcmp(interfaces->iface[i]->phy, phy) == 0) {
+			wpa_printf(MSG_INFO, ">DEBUG: Interface found! %s",interfaces->iface[i]->phy);
 			iface = interfaces->iface[i];
 			break;
 		}
@@ -2467,15 +2481,16 @@ hostapd_interface_init_bss(struct hapd_interfaces *interfaces, const char *phy,
 		const char *ifname;
 
 		/* Add new BSS to existing iface */
+		wpa_printf(MSG_INFO, ">>>>>>>>>>>>Adding BSS to existing interface!!!");
 		conf = interfaces->config_read_cb(config_fname);
 		if (conf == NULL)
 			return NULL;
 		if (conf->num_bss > 1) {
-			wpa_printf(MSG_ERROR, "Multiple BSSes specified in BSS-config");
+			wpa_printf(MSG_ERROR, "Multiple BSSes specified in BSS-config: %ld", conf->num_bss);
 			hostapd_config_free(conf);
 			return NULL;
 		}
-
+		//IFNAME: Interface name inside configuration file.
 		ifname = conf->bss[0]->iface;
 		if (ifname[0] != '\0' && ifname_in_use(interfaces, ifname)) {
 			wpa_printf(MSG_ERROR,
@@ -2515,10 +2530,12 @@ hostapd_interface_init_bss(struct hapd_interfaces *interfaces, const char *phy,
 		bss_idx = iface->num_bss++;
 		conf->num_bss--;
 		conf->bss[0] = NULL;
+		wpa_printf(MSG_INFO, "BSS Number: %ld", conf->num_bss);
 		hostapd_config_free(conf);
 	} else {
 		/* Add a new iface with the first BSS */
 		new_iface = iface = hostapd_init(interfaces, config_fname);
+		wpa_printf(MSG_INFO, ">>>>>>>Adding a new interface...");
 		if (!iface)
 			return NULL;
 		os_strlcpy(iface->phy, phy, sizeof(iface->phy));
@@ -2624,7 +2641,7 @@ int hostapd_enable_iface(struct hostapd_iface *hapd_iface)
 	return 0;
 }
 
-
+//It seems that this method only reloads the interface without re-reading the configuration file
 int hostapd_reload_iface(struct hostapd_iface *hapd_iface)
 {
 	size_t j;
@@ -2827,10 +2844,14 @@ int hostapd_add_iface(struct hapd_interfaces *interfaces, char *buf)
 		if (!os_strlen(conf_file))
 			return -1;
 
+		wpa_printf(MSG_INFO, ">>>>ADD INTERFACE %s", phy_name);
+
 		hapd_iface = hostapd_interface_init_bss(interfaces, phy_name,
 							conf_file, 0);
-		if (!hapd_iface)
+		if (!hapd_iface) {
+			wpa_printf(MSG_INFO, ">>>>hapd_iface is NULL");
 			return -1;
+		}
 		for (j = 0; j < interfaces->count; j++) {
 			if (interfaces->iface[j] == hapd_iface)
 				break;
@@ -2850,6 +2871,7 @@ int hostapd_add_iface(struct hapd_interfaces *interfaces, char *buf)
 		}
 
 		if (new_iface) {
+			wpa_printf(MSG_INFO, "THIS IS A BRAND NEW INTERFACE!");
 			if (interfaces->driver_init(hapd_iface))
 				goto fail;
 
@@ -2861,6 +2883,7 @@ int hostapd_add_iface(struct hapd_interfaces *interfaces, char *buf)
 				goto fail;
 			}
 		} else {
+			wpa_printf(MSG_INFO, "Assign new BSS with bss[0]'s driver info");
 			/* Assign new BSS with bss[0]'s driver info */
 			hapd = hapd_iface->bss[hapd_iface->num_bss - 1];
 			hapd->driver = hapd_iface->bss[0]->driver;
@@ -3044,7 +3067,7 @@ int hostapd_remove_iface(struct hapd_interfaces *interfaces, char *buf)
 				hapd_iface->driver_ap_teardown =
 					!(hapd_iface->drv_flags &
 					  WPA_DRIVER_FLAGS_AP_TEARDOWN_SUPPORT);
-				return hostapd_remove_bss(hapd_iface, j);
+				return hostapd_remove_bss(hapd_iface, j); //This deauthenticates stations!
 			}
 		}
 	}

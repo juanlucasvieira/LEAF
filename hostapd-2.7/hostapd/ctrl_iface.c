@@ -1470,6 +1470,7 @@ static int hostapd_ctrl_iface_enable(struct hostapd_iface *iface)
 
 static int hostapd_ctrl_iface_reload(struct hostapd_iface *iface)
 {
+	wpa_printf(MSG_INFO, ">DEBUG: RELOAD COMMAND RECEIVED!!!");
 	if (hostapd_reload_iface(iface) < 0) {
 		wpa_printf(MSG_ERROR, "Reloading of interface failed");
 		return -1;
@@ -4014,7 +4015,8 @@ static void hostapd_global_ctrl_iface_receive(int sock, void *eloop_ctx,
 		return;
 	}
 	buf[res] = '\0';
-	wpa_printf(MSG_DEBUG, "Global ctrl_iface command: %s", buf);
+	//wpa_printf(MSG_DEBUG, "Global ctrl_iface command: %s", buf);
+	wpa_printf(MSG_INFO, ">DEBUG: Global ctrl_iface command: %s", buf);
 
 	reply = os_malloc(reply_size);
 	if (reply == NULL) {

@@ -873,6 +873,7 @@ int main(int argc, char *argv[])
 	 */
 	interfaces.terminate_on_error = interfaces.count;
 	for (i = 0; i < interfaces.count; i++) {
+		wpa_printf(MSG_INFO,">DEBUG: Initializing iface %ld", i);
 		if (hostapd_driver_init(interfaces.iface[i]) ||
 		    hostapd_setup_interface(interfaces.iface[i]))
 			goto out;
