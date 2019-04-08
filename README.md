@@ -26,7 +26,85 @@
   > sudo apt-get install libnl-genl-3-dev
 - Ir até a pasta hostapd
 - Copiar **defconfig** como **.config**
-- Executar comando Make
+- Executar comando make
+
+**Inicialização do HostAPD**
+- Comando de inicialização
+
+  ```sudo hostapd/hostapd -b hostapd/ap_config/ap_configuration.conf ```
+
+- Estrutura do arquivo de configuração
+  ```
+  interface=<wireless_phy_name>
+  driver=nl80211
+  ssid=<SSID>
+  channel=<channel_number>
+
+  ctrl_interface=/var/run/hostapd
+  ctrl_interface_group=0
+
+  bss=<bss_name>
+  bssid=<BSSID_MAC>
+  ssid=<BSS_SSID>
+
+  ctrl_interface=/var/run/hostapd
+  ctrl_interface_group=0
+  ```
+
+  Exemplo:
+  
+  ```
+  interface=wlp9s0
+  driver=nl80211
+  ssid=TESTE_HOSTAPD_1
+  channel=1
+
+  ctrl_interface=/var/run/hostapd
+  ctrl_interface_group=0
+
+  bss=wlan1
+  bssid=2c:d0:5a:42:73:14
+  ssid=TESTE_HOSTAPD_2
+
+  ctrl_interface=/var/run/hostapd
+  ctrl_interface_group=0
+  ```
+
+**Adição / Remoção de BSSs em tempo de execução**
+- Inicialização do HostAPD com GCI e BSS inicial
+
+  ```sudo hostapd/hostapd -b <phy_interface>:<path_to_initial_bss_conf> -g /var/run/hostapd/gci```
+  
+  Exemplo: ```sudo hostapd/hostapd -b wlp9s0:hostapd/ap_config/initial.conf -g /var/run/hostapd/gci```
+- Comando de Adição de BSS no GCI:
+
+  ``` raw ADD bss_config=<phy_interface>:<path_to_bss_conf> ```
+  
+  Exemplo: 
+  ``` raw ADD bss_config=wlp9s0:/home/juan/Documents/vAP-SDN/hostapd-2.7/hostapd/ap_config/bss1.conf ```
+- Comando de Remoção de BSS no GCI:
+
+  ``` raw REMOVE <bss_if_name>```
+  
+  Exemplo: 
+  ``` raw REMOVE wlan1 ```
+- Estrutura do arquivo de configuração bss1.conf
+  ```
+  interface=<bss_if_name>
+  ssid=<SSID>
+  bssid=<BSSID_MAC>
+  ctrl_interface=/var/run/hostapd
+  ctrl_interface_group=0
+  ```
+  
+  Exemplo:
+  ```
+  interface=wlan1
+  ssid=BSS_TEST_1
+  bssid=2c:d0:5a:42:73:21
+  ctrl_interface=/var/run/hostapd
+  ctrl_interface_group=0
+  ```
 
 **Testes de comportamento do CSA em diferentes dispositivos**
 
