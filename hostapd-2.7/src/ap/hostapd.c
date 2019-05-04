@@ -3094,7 +3094,7 @@ void hostapd_new_assoc_sta(struct hostapd_data *hapd, struct sta_info *sta,
 				       WLAN_REASON_MICHAEL_MIC_FAILURE);
 		return;
 	}
-
+	wpa_printf(MSG_INFO, ">DEBUG: hostapd_new_assoc_sta() was called!");
 	hostapd_prune_associations(hapd, sta->addr);
 	ap_sta_clear_disconnect_timeouts(hapd, sta);
 

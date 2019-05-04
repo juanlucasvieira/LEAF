@@ -406,7 +406,7 @@ int hostapd_sta_assoc(struct hostapd_data *hapd, const u8 *addr,
 				       reassoc, status, ie, len);
 }
 
-
+// This function adds the station to the driver
 int hostapd_sta_add(struct hostapd_data *hapd,
 		    const u8 *addr, u16 aid, u16 capability,
 		    const u8 *supp_rates, size_t supp_rates_len,
@@ -417,7 +417,7 @@ int hostapd_sta_add(struct hostapd_data *hapd,
 		    int set)
 {
 	struct hostapd_sta_add_params params;
-
+	wpa_printf(MSG_INFO, ">DEBUG: hostapd_sta_add() called!!");
 	if (hapd->driver == NULL)
 		return 0;
 	if (hapd->driver->sta_add == NULL)

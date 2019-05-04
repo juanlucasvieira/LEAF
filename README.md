@@ -5,6 +5,7 @@
 - [ ] Anunciar CSA sem trocar realmente de canal
 - [ ] Comando channel_switch atua em todos os BSSs
 - [ ] Ler informações de uma STA associada
+- [ ] Forjar RSSI para evitar desassociação do cliente
 
 **Configuraçoes para usar uma interface sem fio no HostAPD**
 - Setar MAC da placa como nao gerenciado em /etc/NetworkManager/NetworkManager.conf

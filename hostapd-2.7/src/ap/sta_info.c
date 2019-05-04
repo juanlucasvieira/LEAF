@@ -656,7 +656,7 @@ void ap_sta_session_warning_timeout(struct hostapd_data *hapd,
 struct sta_info * ap_sta_add(struct hostapd_data *hapd, const u8 *addr)
 {
 	struct sta_info *sta;
-
+	wpa_printf(MSG_INFO, ">DEBUG: ap_sta_add() was called!");
 	sta = ap_get_sta(hapd, addr);
 	if (sta)
 		return sta;
@@ -694,8 +694,8 @@ struct sta_info * ap_sta_add(struct hostapd_data *hapd, const u8 *addr)
 	sta->next = hapd->sta_list;
 	hapd->sta_list = sta;
 	hapd->num_sta++;
-	ap_sta_hash_add(hapd, sta);
-	ap_sta_remove_in_other_bss(hapd, sta);
+	ap_sta_hash_add(hapd, sta); // Add hash of station
+	ap_sta_remove_in_other_bss(hapd, sta); // Removes station from other BSS
 	sta->last_seq_ctrl = WLAN_INVALID_MGMT_SEQ;
 	dl_list_init(&sta->ip6addr);
 
@@ -735,7 +735,7 @@ static void ap_sta_remove_in_other_bss(struct hostapd_data *hapd,
 {
 	struct hostapd_iface *iface = hapd->iface;
 	size_t i;
-
+	wpa_printf(MSG_INFO, ">DEBUG: ap_sta_remove_in_other_bss() was called!");
 	for (i = 0; i < iface->num_bss; i++) {
 		struct hostapd_data *bss = iface->bss[i];
 		struct sta_info *sta2;

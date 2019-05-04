@@ -4398,8 +4398,8 @@ static int wpa_driver_nl80211_sta_add(void *priv,
 	if ((params->flags & WPA_STA_TDLS_PEER) &&
 	    !(drv->capa.flags & WPA_DRIVER_FLAGS_TDLS_SUPPORT))
 		return -EOPNOTSUPP;
-
-	wpa_printf(MSG_DEBUG, "nl80211: %s STA " MACSTR,
+	wpa_printf(MSG_INFO, ">DEBUG: wpa_driver_nl80211_sta_add() called!!");
+	wpa_printf(MSG_INFO, ">DEBUG: nl80211: %s STA " MACSTR,
 		   params->set ? "Set" : "Add", MAC2STR(params->addr));
 	msg = nl80211_bss_msg(bss, 0, params->set ? NL80211_CMD_SET_STATION :
 			      NL80211_CMD_NEW_STATION);
@@ -4596,7 +4596,7 @@ static int wpa_driver_nl80211_sta_add(void *priv,
 	ret = send_and_recv_msgs(drv, msg, NULL, NULL);
 	msg = NULL;
 	if (ret)
-		wpa_printf(MSG_DEBUG, "nl80211: NL80211_CMD_%s_STATION "
+		wpa_printf(MSG_INFO, ">DEBUG: nl80211: NL80211_CMD_%s_STATION "
 			   "result: %d (%s)", params->set ? "SET" : "NEW", ret,
 			   strerror(-ret));
 	if (ret == -EEXIST)
@@ -6279,7 +6279,7 @@ static int i802_read_sta_data(struct i802_bss *bss,
 			      const u8 *addr)
 {
 	struct nl_msg *msg;
-
+	wpa_printf(MSG_INFO, ">DEBUG: i802_read_sta_data() called!");
 	if (!(msg = nl80211_bss_msg(bss, 0, NL80211_CMD_GET_STATION)) ||
 	    nla_put(msg, NL80211_ATTR_MAC, ETH_ALEN, addr)) {
 		nlmsg_free(msg);

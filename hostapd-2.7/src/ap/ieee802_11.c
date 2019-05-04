@@ -1759,7 +1759,7 @@ static void handle_auth(struct hostapd_data *hapd,
 	char *identity = NULL;
 	char *radius_cui = NULL;
 	u16 seq_ctrl;
-
+	wpa_printf(MSG_INFO, "handle_auth() was called!");
 	if (len < IEEE80211_HDRLEN + sizeof(mgmt->u.auth)) {
 		wpa_printf(MSG_INFO, "handle_auth - too short payload (len=%lu)",
 			   (unsigned long) len);
@@ -1787,6 +1787,14 @@ static void handle_auth(struct hostapd_data *hapd,
 	    mgmt->u.auth.variable[0] == WLAN_EID_CHALLENGE &&
 	    mgmt->u.auth.variable[1] == WLAN_AUTH_CHALLENGE_LEN)
 		challenge = &mgmt->u.auth.variable[2];
+
+	wpa_printf(MSG_INFO, ">DEBUG: authentication: STA=" MACSTR " auth_alg=%d "
+		   "auth_transaction=%d status_code=%d wep=%d%s "
+		   "seq_ctrl=0x%x%s",
+		   MAC2STR(mgmt->sa), auth_alg, auth_transaction,
+		   status_code, !!(fc & WLAN_FC_ISWEP),
+		   challenge ? " challenge" : "",
+		   seq_ctrl, (fc & WLAN_FC_RETRY) ? " retry" : "");
 
 	wpa_printf(MSG_DEBUG, "authentication: STA=" MACSTR " auth_alg=%d "
 		   "auth_transaction=%d status_code=%d wep=%d%s "
@@ -3224,7 +3232,7 @@ static void handle_assoc(struct hostapd_data *hapd,
 #ifdef CONFIG_FILS
 	int delay_assoc = 0;
 #endif /* CONFIG_FILS */
-
+	wpa_printf(MSG_INFO, "handle_assoc() was called!");
 	if (len < IEEE80211_HDRLEN + (reassoc ? sizeof(mgmt->u.reassoc_req) :
 				      sizeof(mgmt->u.assoc_req))) {
 		wpa_printf(MSG_INFO, "handle_assoc(reassoc=%d) - too short payload (len=%lu)",
