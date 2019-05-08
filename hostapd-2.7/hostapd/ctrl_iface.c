@@ -157,18 +157,44 @@ static int hostapd_insert_sta(struct hostapd_data *hapd,
 	// int supported_rates_len;
 	// u8 qosinfo; // Valid when WLAN_STA_WMM is set 
 
+	sta->aid = 1;
+	sta->capability = 0x21;
+	sta->supported_rates[0] = 0x82;
+	sta->supported_rates[1] = 0x84;
+	sta->supported_rates[2] = 0x0b;
+	sta->supported_rates[3] = 0x16;
+	sta->supported_rates_len = 4;
+	sta->listen_interval = 10;
+
 	sta->flags |= WLAN_STA_ASSOC;
 	sta->flags |= WLAN_STA_AUTH;
 	sta->flags |= WLAN_STA_AUTHORIZED;
+	sta->flags |= WLAN_STA_SHORT_PREAMBLE;
 
-	if(hostapd_sta_add(hapd, sta->addr, 0, 0, NULL, 0, 0,
-				    NULL, NULL, sta->flags, 0, 0, 0, 0)){
+	wpa_printf(MSG_INFO, ">>>Debug: STA Authorized? %d", ap_sta_is_authorized(sta));
+
+	if(hostapd_sta_add(hapd, 
+					sta->addr, 
+					sta->aid, 
+					sta->capability, 
+					sta->supported_rates, 
+					sta->supported_rates_len, 
+					sta->listen_interval,
+				    NULL, 
+					NULL, 
+					sta->flags, 
+					0, 
+					0, 
+					0, 
+					0)){
 						hostapd_logger(hapd, sta->addr,
 						HOSTAPD_MODULE_IEEE80211, HOSTAPD_LEVEL_NOTICE,
 						"Could not %s STA to kernel driver",
 						set ? "set" : "add");
 						return -1;
 					}
+
+	hostapd_new_assoc_sta(hapd, sta, 0);
 
 	// if (hostapd_sta_add(hapd, 
 	// 			sta->addr, 

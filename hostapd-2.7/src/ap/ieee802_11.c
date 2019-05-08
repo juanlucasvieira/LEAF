@@ -4569,12 +4569,13 @@ void hostapd_client_poll_ok(struct hostapd_data *hapd, const u8 *addr)
 	sta->flags &= ~WLAN_STA_PENDING_POLL;
 }
 
-
+//This is called when a frame from an unknown STA is received.
 void ieee802_11_rx_from_unknown(struct hostapd_data *hapd, const u8 *src,
 				int wds)
 {
 	struct sta_info *sta;
 
+	wpa_printf(MSG_INFO, ">Debug: ieee802_11_rx_from_unknown");
 	sta = ap_get_sta(hapd, src);
 	if (sta &&
 	    ((sta->flags & WLAN_STA_ASSOC) ||
@@ -4623,15 +4624,18 @@ void ieee802_11_rx_from_unknown(struct hostapd_data *hapd, const u8 *src,
 			   MAC2STR(src));
 		return;
 	}
-
-	if (sta && (sta->flags & WLAN_STA_AUTH))
+	//This sends an disassociation/deauthentication frame to the unknown STA
+	if (sta && (sta->flags & WLAN_STA_AUTH)){
+		return;
 		hostapd_drv_sta_disassoc(
 			hapd, src,
 			WLAN_REASON_CLASS3_FRAME_FROM_NONASSOC_STA);
-	else
+	} else {
+		return;
 		hostapd_drv_sta_deauth(
 			hapd, src,
 			WLAN_REASON_CLASS3_FRAME_FROM_NONASSOC_STA);
+	}
 }
 
 
