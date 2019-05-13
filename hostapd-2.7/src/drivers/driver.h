@@ -3563,6 +3563,17 @@ struct wpa_driver_ops {
 	int (*switch_channel)(void *priv, struct csa_settings *settings);
 
 	/**
+	 * send_csa - Only announce channel switch without migrating to the freq
+	 * @priv: Private driver interface data
+	 * @settings: Settings for CSA period and new channel
+	 * Returns: 0 on success, -1 on failure
+	 *
+	 * This function is used to make CSA compilant STAs to change their channel to
+	 * the specified frequency.
+	 */
+	int (*send_csa)(void *priv, struct csa_settings *settings);
+
+	/**
 	 * add_tx_ts - Add traffic stream
 	 * @priv: Private driver interface data
 	 * @tsid: Traffic stream ID

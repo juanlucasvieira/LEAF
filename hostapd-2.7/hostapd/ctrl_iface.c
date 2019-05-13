@@ -2411,6 +2411,34 @@ static int hostapd_ctrl_iface_chan_switch(struct hostapd_iface *iface,
 #endif /* NEED_AP_MLME */
 }
 
+static int hostapd_ctrl_iface_send_csa(struct hostapd_data *hapd,
+					  char *pos)
+{
+#ifdef NEED_AP_MLME
+	struct csa_settings settings;
+	int ret;
+	// unsigned int i;
+
+	ret = hostapd_parse_csa_settings(pos, &settings);
+	if (ret)
+		return ret;
+
+	/* Save CHAN_SWITCH VHT config */
+	hostapd_chan_switch_vht_config(
+		hapd, settings.freq_params.vht_enabled);
+
+	ret = hostapd_send_csa(hapd, &settings);
+	if (ret) {
+		/* FIX: What do we do if CSA fails in the middle of
+			* submitting multi-BSS CSA requests? */
+		return ret;
+	}
+
+	return 0;
+#else /* NEED_AP_MLME */
+	return -1;
+#endif /* NEED_AP_MLME */
+}
 
 static int hostapd_ctrl_iface_mib(struct hostapd_data *hapd, char *reply,
 				  int reply_size, const char *param)
@@ -3200,6 +3228,9 @@ static int hostapd_ctrl_iface_receive_process(struct hostapd_data *hapd,
 #endif /* CONFIG_TESTING_OPTIONS */
 	} else if (os_strncmp(buf, "CHAN_SWITCH ", 12) == 0) {
 		if (hostapd_ctrl_iface_chan_switch(hapd->iface, buf + 12))
+			reply_len = -1;
+	} else if (os_strncmp(buf, "SEND_CSA ", 9) == 0) {
+		if (hostapd_ctrl_iface_send_csa(hapd, buf + 9))
 			reply_len = -1;
 	} else if (os_strncmp(buf, "VENDOR ", 7) == 0) {
 		reply_len = hostapd_ctrl_iface_vendor(hapd, buf + 7, reply,

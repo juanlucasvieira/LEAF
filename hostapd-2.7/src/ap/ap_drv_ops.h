@@ -289,6 +289,16 @@ static inline int hostapd_drv_switch_channel(struct hostapd_data *hapd,
 	return hapd->driver->switch_channel(hapd->drv_priv, settings);
 }
 
+static inline int hostapd_drv_send_csa(struct hostapd_data *hapd,
+					     struct csa_settings *settings)
+{
+	if (hapd->driver == NULL || hapd->driver->send_csa == NULL ||
+	    hapd->drv_priv == NULL)
+		return -1;
+
+	return hapd->driver->send_csa(hapd->drv_priv, settings);
+}
+
 static inline int hostapd_drv_status(struct hostapd_data *hapd, char *buf,
 				     size_t buflen)
 {

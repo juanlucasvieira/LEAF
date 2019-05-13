@@ -570,6 +570,8 @@ int hostapd_csa_in_progress(struct hostapd_iface *iface);
 void hostapd_chan_switch_vht_config(struct hostapd_data *hapd, int vht_enabled);
 int hostapd_switch_channel(struct hostapd_data *hapd,
 			   struct csa_settings *settings);
+int hostapd_send_csa(struct hostapd_data *hapd,
+			   struct csa_settings *settings);
 void
 hostapd_switch_channel_fallback(struct hostapd_iface *iface,
 				const struct hostapd_freq_params *freq_params);

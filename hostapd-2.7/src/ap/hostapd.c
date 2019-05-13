@@ -3498,6 +3498,37 @@ int hostapd_switch_channel(struct hostapd_data *hapd,
 	return 0;
 }
 
+int hostapd_send_csa(struct hostapd_data *hapd,
+			   struct csa_settings *settings)
+{
+	int ret;
+
+	// if (!(hapd->iface->drv_flags & WPA_DRIVER_FLAGS_AP_CSA)) {
+	// 	wpa_printf(MSG_INFO, "CSA is not supported");
+	// 	return -1;
+	// }
+
+	ret = hostapd_fill_csa_settings(hapd, settings);
+	if (ret)
+		return ret;
+
+	ret = hostapd_drv_send_csa(hapd, settings);
+	free_beacon_data(&settings->beacon_csa);
+	free_beacon_data(&settings->beacon_after);
+
+	if (ret) {
+		/* if we failed, clean cs parameters */
+		hostapd_cleanup_cs_params(hapd);
+		return ret;
+	}
+
+	// Undo CSA
+	// hostapd_cleanup_cs_params(hapd);
+
+	hapd->csa_in_progress = 1;
+	return 0;
+}
+
 
 void
 hostapd_switch_channel_fallback(struct hostapd_iface *iface,

@@ -1192,6 +1192,44 @@ static int hostapd_cli_cmd_chan_switch(struct wpa_ctrl *ctrl,
 	return wpa_ctrl_command(ctrl, cmd);
 }
 
+static int hostapd_cli_cmd_send_csa(struct wpa_ctrl *ctrl,
+				       int argc, char *argv[])
+{
+	char cmd[256];
+	int res;
+	int i;
+	char *tmp;
+	int total;
+
+	if (argc < 2) {
+		printf("Invalid send_csa command: needs at least two "
+		       "arguments (count and freq)\n"
+		       "usage: <cs_count> <freq> [sec_channel_offset=] "
+		       "[center_freq1=] [center_freq2=] [bandwidth=] "
+		       "[blocktx] [ht|vht]\n");
+		return -1;
+	}
+
+	res = os_snprintf(cmd, sizeof(cmd), "SEND_CSA %s %s",
+			  argv[0], argv[1]);
+	if (os_snprintf_error(sizeof(cmd), res)) {
+		printf("Too long SEND_CSA command.\n");
+		return -1;
+	}
+
+	total = res;
+	for (i = 2; i < argc; i++) {
+		tmp = cmd + total;
+		res = os_snprintf(tmp, sizeof(cmd) - total, " %s", argv[i]);
+		if (os_snprintf_error(sizeof(cmd) - total, res)) {
+			printf("Too long SEND_CSA command.\n");
+			return -1;
+		}
+		total += res;
+	}
+	return wpa_ctrl_command(ctrl, cmd);
+}
+
 
 static int hostapd_cli_cmd_enable(struct wpa_ctrl *ctrl, int argc,
 				      char *argv[])
@@ -1581,6 +1619,10 @@ static const struct hostapd_cli_cmd hostapd_cli_commands[] = {
 	  "<cs_count> <freq> [sec_channel_offset=] [center_freq1=]\n"
 	  "  [center_freq2=] [bandwidth=] [blocktx] [ht|vht]\n"
 	  "  = initiate channel switch announcement" },
+	{ "send_csa", hostapd_cli_cmd_send_csa, NULL,
+	  "<cs_count> <freq> [sec_channel_offset=] [center_freq1=]\n"
+	  "  [center_freq2=] [bandwidth=] [blocktx] [ht|vht]\n"
+	  "  = Announce CSA w/o changing AP channel" },
 	{ "hs20_wnm_notif", hostapd_cli_cmd_hs20_wnm_notif, NULL,
 	  "<addr> <url>\n"
 	  "  = send WNM-Notification Subscription Remediation Request" },
