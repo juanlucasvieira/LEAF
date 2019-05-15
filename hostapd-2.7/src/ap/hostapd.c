@@ -3001,6 +3001,138 @@ fail:
 	return -1;
 }
 
+int hostapd_add_sta(struct hostapd_data *hapd, char *buf){
+	// MAC2STR(addr) //Converts MAC (u8 [6]) to string
+	// hwaddr_aton(txtaddr, addr)) // Converts ASCII String to MAC Address
+	// sprint("capab_info=0x%02x",capab_info)
+
+	wpa_printf(MSG_INFO, "hostapd_add_sta() called");
+
+	int set = 0;
+	u8 addr[ETH_ALEN];
+	struct sta_info *sta;
+	struct ieee80211_ht_capabilities ht_cap;
+	struct ieee80211_vht_capabilities vht_cap;
+	const char *conf_file = NULL, *txtaddr = NULL;
+	char *pos;
+
+	txtaddr = buf;
+
+	pos = os_strchr(txtaddr, ' ');
+	if (pos)
+		*pos++ = '\0';
+
+	conf_file = pos;
+	
+	if (!os_strlen(conf_file))
+		return -1;
+
+	wpa_printf(MSG_INFO, "STA Configuration file: %s ",
+		conf_file);
+
+	if (hwaddr_aton(txtaddr, addr)) { // Converts ASCII to MAC Address
+		return -1;
+	}
+
+	wpa_printf(MSG_INFO, "Injecting STA %s", txtaddr);
+
+	sta = ap_sta_add(hapd, addr); // Alloc memory for the sta and creates the STA struct
+
+	if (!sta) {
+		wpa_printf(MSG_INFO, ">DEBUG: STA injection failed!");
+		return -1;
+	}
+
+	if(hostapd_sta_info_file_read(sta, hapd, conf_file)){
+		wpa_printf(MSG_ERROR, "Could not fill STA configuration. Deleting STA...");
+		ap_free_sta(hapd, sta);
+	}
+
+
+#ifdef CONFIG_IEEE80211N
+	if (sta->flags & WLAN_STA_HT)
+		hostapd_get_ht_capab(hapd, sta->ht_capabilities, &ht_cap);
+#endif /* CONFIG_IEEE80211N */
+#ifdef CONFIG_IEEE80211AC
+	if (sta->flags & WLAN_STA_VHT)
+		hostapd_get_vht_capab(hapd, sta->vht_capabilities, &vht_cap);
+#endif /* CONFIG_IEEE80211AC */
+
+	
+	// struct sta_info *next; /* next entry in sta list */
+	// struct sta_info *hnext; /* next entry in hash table list */
+	// u8 addr[6]; //POINTER
+	// be32 ipaddr;
+	// struct dl_list ip6addr; /* list head for struct ip6addr */
+	// u16 aid; /* STA's unique AID (1 .. 2007) or 0 if not yet assigned */
+	// u16 disconnect_reason_code; /* RADIUS server override */
+	// u32 flags; /* Bitfield of WLAN_STA_* */
+	// u16 capability;
+	// u16 listen_interval; /* or beacon_int for APs */
+	// u8 supported_rates[WLAN_SUPP_RATES_MAX];
+	// int supported_rates_len;
+	// u8 qosinfo; // Valid when WLAN_STA_WMM is set 
+
+	// sta->aid = 1;
+	// sta->capability = 0x21;
+	// sta->supported_rates[0] = 0x82;
+	// sta->supported_rates[1] = 0x84;
+	// sta->supported_rates[2] = 0x0b;
+	// sta->supported_rates[3] = 0x16;
+	// sta->supported_rates_len = 4;
+	// sta->listen_interval = 10;
+
+	// sta->flags |= WLAN_STA_ASSOC;
+	// sta->flags |= WLAN_STA_AUTH;
+	// sta->flags |= WLAN_STA_AUTHORIZED;
+	// sta->flags |= WLAN_STA_SHORT_PREAMBLE;
+
+	// if(hostapd_sta_add(hapd, 
+	// 				sta->addr, 
+	// 				sta->aid, 
+	// 				sta->capability, 
+	// 				sta->supported_rates, 
+	// 				sta->supported_rates_len, 
+	// 				sta->listen_interval,
+	// 			    NULL, 
+	// 				NULL, 
+	// 				sta->flags, 
+	// 				0, 
+	// 				0, 
+	// 				0, 
+	// 				0)){
+	// 					hostapd_logger(hapd, sta->addr,
+	// 					HOSTAPD_MODULE_IEEE80211, HOSTAPD_LEVEL_NOTICE,
+	// 					"Could not %s STA to kernel driver",
+	// 					set ? "set" : "add");
+	// 					return -1;
+	// 				}
+
+	if (hostapd_sta_add(hapd, 
+			sta->addr, 
+			sta->aid, 
+			sta->capability,
+			sta->supported_rates, 
+			sta->supported_rates_len,
+			sta->listen_interval,
+			sta->flags & WLAN_STA_HT ? &ht_cap : NULL,
+			sta->flags & WLAN_STA_VHT ? &vht_cap : NULL,
+			sta->flags | WLAN_STA_ASSOC, 
+			sta->qosinfo,
+			sta->vht_opmode, 
+			sta->p2p_ie ? 1 : 0,
+			set)) {
+				hostapd_logger(hapd, sta->addr,
+				HOSTAPD_MODULE_IEEE80211, HOSTAPD_LEVEL_NOTICE,
+				"Could not %s STA to kernel driver",
+				set ? "set" : "add");
+				return -1;
+			}
+
+	hostapd_new_assoc_sta(hapd, sta, 0);
+
+	return 0;
+}
 
 static int hostapd_remove_bss(struct hostapd_iface *iface, unsigned int idx)
 {

@@ -707,6 +707,157 @@ struct sta_info * ap_sta_add(struct hostapd_data *hapd, const u8 *addr)
 	return sta;
 }
 
+/**
+ * hostapd_sta_info_file_read - Read and parse STA configuration file
+ * @sta: Station being added
+ * @hapd: Hostapd data
+ * @fname: Configuration file name (including path, if needed)
+ * Returns: 0 if successfull or the number of errors.
+ */
+int hostapd_sta_info_file_read(struct sta_info *sta, struct hostapd_data *hapd, const char *fname)
+{
+	FILE *f;
+	char buf[4096], *pos;
+	int line = 0;
+	int errors = 0;
+
+	f = fopen(fname, "r");
+	if (f == NULL) {
+		wpa_printf(MSG_ERROR, "Could not open configuration file '%s' "
+			   "for reading.", fname);
+		return -1;
+	}
+
+	while (fgets(buf, sizeof(buf), f)) {
+		
+		line++;
+
+		if (buf[0] == '#')
+			continue;
+		pos = buf;
+		while (*pos != '\0') {
+			if (*pos == '\n') {
+				*pos = '\0';
+				break;
+			}
+			pos++;
+		}
+		if (buf[0] == '\0')
+			continue;
+
+		pos = os_strchr(buf, '=');
+		if (pos == NULL) {
+			wpa_printf(MSG_ERROR, "Line %d: invalid line '%s'",
+				   line, buf);
+			errors++;
+			continue;
+		}
+		*pos = '\0';
+		pos++;
+		errors += hostapd_sta_fill(sta, hapd, buf, pos, line);
+	}
+
+	fclose(f);
+
+	if (errors) {
+		wpa_printf(MSG_ERROR, "%d errors found in STA configuration file "
+			   "'%s'", errors, fname);
+	}
+	return errors;
+}
+
+int hostapd_sta_fill(struct sta_info *sta, struct hostapd_data *hapd,
+			       const char *buf, char *pos, int line) {
+	if (os_strcmp(buf, "aid") == 0) {
+		sta->aid = atoi(pos);
+	} else if (os_strcmp(buf, "capability") == 0) {
+		sta->capability = atoi(pos);
+		if (sta->capability & WLAN_CAPABILITY_SHORT_PREAMBLE)
+			sta->flags |= WLAN_STA_SHORT_PREAMBLE;
+		else
+			sta->flags &= ~WLAN_STA_SHORT_PREAMBLE;
+
+		if (!(sta->capability & WLAN_CAPABILITY_SHORT_SLOT_TIME) &&
+	    	!sta->no_short_slot_time_set) {
+			sta->no_short_slot_time_set = 1;
+			hapd->iface->num_sta_no_short_slot_time++;
+			if (hapd->iface->current_mode &&
+		    	hapd->iface->current_mode->mode ==
+		    	HOSTAPD_MODE_IEEE80211G &&
+		    	hapd->iface->num_sta_no_short_slot_time == 1)
+				ieee802_11_set_beacons(hapd->iface);
+		}
+	} else if (os_strcmp(buf, "flag_associated") == 0) {
+		if(atoi(pos) == 1){
+			sta->flags |= WLAN_STA_ASSOC;
+		}
+	} else if (os_strcmp(buf, "flag_authenticated") == 0) {
+		if(atoi(pos) == 1){
+			sta->flags |= WLAN_STA_AUTH;
+		}
+	} else if (os_strcmp(buf, "flag_authorized") == 0) {
+		if(atoi(pos) == 1){
+			sta->flags |= WLAN_STA_AUTHORIZED;
+		}
+	} else if (os_strcmp(buf, "supported_rates") == 0) {
+		int length = hostapd_parse_u8list(sta->supported_rates, pos);
+		if (length < 0) {
+			wpa_printf(MSG_ERROR, "Line %d: invalid STA rate list",
+				   line);
+			return 1;
+		} else {
+			sta->supported_rates_len = length;
+
+			if (hapd->iface->current_mode &&
+				hapd->iface->current_mode->mode == HOSTAPD_MODE_IEEE80211G)
+				sta->flags |= WLAN_STA_NONERP;
+			for (int i = 0; i < sta->supported_rates_len; i++) {
+				if ((sta->supported_rates[i] & 0x7f) > 22) {
+					sta->flags &= ~WLAN_STA_NONERP;
+					break;
+				}
+			}
+			if (sta->flags & WLAN_STA_NONERP && !sta->nonerp_set) {
+				sta->nonerp_set = 1;
+				hapd->iface->num_sta_non_erp++;
+			if (hapd->iface->num_sta_non_erp == 1)
+				ieee802_11_set_beacons(hapd->iface);
+			}
+		}
+	} else if (os_strcmp(buf, "listen_interval") == 0) {
+		sta->listen_interval = atoi(pos);
+	} else {
+		wpa_printf(MSG_ERROR,
+			   "Line %d: unknown STA configuration item '%s'",
+			   line, buf);
+		return 1;
+	}
+
+	return 0;
+}
+
+int hostapd_parse_u8list(u8 *u8_list, char *val)
+{
+	int count;
+	char *pos, *end;
+
+	pos = val;
+	count = 0;
+	while (*pos != '\0') {
+		end = os_strchr(pos, ' ');
+		if (end)
+			*end = '\0';
+		int value = atoi(pos);
+		if (value <= 0)
+			return -1;
+		u8_list[count++] = value;
+		if (!end)
+			break;
+		pos = end + 1;
+	}
+	return count;
+}
+
 
 static int ap_sta_remove(struct hostapd_data *hapd, struct sta_info *sta)
 {
