@@ -86,6 +86,19 @@
   ```sudo hostapd/hostapd -b <phy_interface>:<path_to_initial_bss_conf> -g /var/run/hostapd/gci```
   
   Exemplo: ```sudo hostapd/hostapd -b wlp9s0:hostapd/ap_config/initial.conf -g /var/run/hostapd/gci```
+  
+- Utilizar socket UDP para recepção de comandos do HostAPD:
+
+  - GCI:
+  ```hostapd -g udp:<udp_port>```
+  
+  Exemplo: ```hostapd -b wlp9s0:hostapd/ap_config/initial.conf -g udp:8888```
+  
+  - Configuration File:
+  ```ctrl_interface=udp:<udp_port>```
+  
+  Exemplo: ```ctrl_interface=udp:8877```
+  
 - Comando de Adição de BSS no GCI:
 
   ``` raw ADD bss_config=<phy_interface>:<path_to_bss_conf> ```
