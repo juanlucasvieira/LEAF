@@ -1,11 +1,14 @@
 # vAP-SDN
 
 **TODO**
-- [ ] Carregar informação de uma STA em tempo de execução sem associação
-- [ ] Anunciar CSA sem trocar realmente de canal
-- [ ] Comando channel_switch atua em todos os BSSs
+- [X] Carregar informação de uma STA em tempo de execução sem reassociação
+- [X] Anunciar CSA sem trocar realmente de canal
+- [X] Comando channel_switch atua em todos os BSSs
 - [ ] Ler informações de uma STA associada
 - [ ] Forjar RSSI para evitar desassociação do cliente
+- [ ] Utilizar socket para receber comandos
+- [ ] Criar protótipo de uma entidade central de controle
+- [ ] Rejeitar associação de uma estação no BSS que já contém uma STA associada.
 
 **Configuraçoes para usar uma interface sem fio no HostAPD**
 - Setar MAC da placa como nao gerenciado em /etc/NetworkManager/NetworkManager.conf
