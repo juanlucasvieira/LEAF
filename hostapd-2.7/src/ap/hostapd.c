@@ -3001,7 +3001,7 @@ fail:
 	return -1;
 }
 
-int hostapd_add_sta(struct hostapd_data *hapd, char *buf){
+int hostapd_add_sta(struct hostapd_data *hapd, char *buf, int filemode){
 	// MAC2STR(addr) //Converts MAC (u8 [6]) to string
 	// hwaddr_aton(txtaddr, addr)) // Converts ASCII String to MAC Address
 	// sprint("capab_info=0x%02x",capab_info)
@@ -3009,6 +3009,7 @@ int hostapd_add_sta(struct hostapd_data *hapd, char *buf){
 	wpa_printf(MSG_INFO, "hostapd_add_sta() called");
 
 	int set = 0;
+	int error;
 	u8 addr[ETH_ALEN];
 	struct sta_info *sta;
 	struct ieee80211_ht_capabilities ht_cap;
@@ -3022,13 +3023,15 @@ int hostapd_add_sta(struct hostapd_data *hapd, char *buf){
 	if (pos)
 		*pos++ = '\0';
 
-	conf_file = pos;
-	
-	if (!os_strlen(conf_file))
-		return -1;
+	if(filemode){
+		conf_file = pos;
 
-	wpa_printf(MSG_INFO, "STA Configuration file: %s ",
-		conf_file);
+		if (!os_strlen(conf_file))
+			return -1;
+
+		wpa_printf(MSG_INFO, "STA Configuration file: %s ",
+			conf_file);
+	}
 
 	if (hwaddr_aton(txtaddr, addr)) { // Converts ASCII to MAC Address
 		return -1;
@@ -3043,9 +3046,16 @@ int hostapd_add_sta(struct hostapd_data *hapd, char *buf){
 		return -1;
 	}
 
-	if(hostapd_sta_info_file_read(sta, hapd, conf_file)){
-		wpa_printf(MSG_ERROR, "Could not fill STA configuration. Deleting STA...");
+	if(filemode){
+		error = hostapd_sta_info_file_read(sta, hapd, conf_file);
+	} else {
+		error = hostapd_sta_info_param_read(sta, hapd, pos);
+	}
+
+	if(error){
+		wpa_printf(MSG_ERROR, "Could not fill STA params. Deleting STA...");
 		ap_free_sta(hapd, sta);
+		return -1;
 	}
 
 

@@ -104,9 +104,9 @@ static int hostapd_ctrl_iface_level(struct hostapd_data *hapd,
 }
 
 static int hostapd_ctrl_iface_add_sta(struct hostapd_data *hapd,
-				      char *buf)
+				      char *buf, int filemode)
 {
-	if (hostapd_add_sta(hapd, buf)) {
+	if (hostapd_add_sta(hapd, buf, filemode)) {
 		wpa_printf(MSG_ERROR, "Adding STA %s failed", buf);
 		return -1;
 	}
@@ -2946,7 +2946,10 @@ static int hostapd_ctrl_iface_receive_process(struct hostapd_data *hapd,
 		if (hostapd_ctrl_iface_new_sta(hapd, buf + 8))
 			reply_len = -1;
 	} else if (os_strncmp(buf, "ADD_STA ", 8) == 0) {
-		if (hostapd_ctrl_iface_add_sta(hapd, buf + 8))
+		if (hostapd_ctrl_iface_add_sta(hapd, buf + 8, 1))
+			reply_len = -1;
+	} else if (os_strncmp(buf, "ADD_STA_P ", 10) == 0) {
+		if (hostapd_ctrl_iface_add_sta(hapd, buf + 10, 0))
 			reply_len = -1;
 	} else if (os_strncmp(buf, "DEAUTHENTICATE ", 15) == 0) {
 		if (hostapd_ctrl_iface_deauthenticate(hapd, buf + 15))

@@ -766,12 +766,73 @@ int hostapd_sta_info_file_read(struct sta_info *sta, struct hostapd_data *hapd, 
 	return errors;
 }
 
+/**
+ * hostapd_sta_info_param_read - Read and parse STA params
+ * @sta: Station being added
+ * @hapd: Hostapd data
+ * @params: Parameters of STA
+ * Returns: 0 if successfull or the number of errors.
+ */
+int hostapd_sta_info_param_read(struct sta_info *sta, struct hostapd_data *hapd, char *params)
+{
+	char *pos;
+	int errors = 0;
+
+	int count;
+	char *end, *value;
+
+	//Removes "" from parameters
+	pos = os_strchr(params, '\"');
+	if (pos) 
+		pos++;
+	end = os_strchr(pos, '\"');
+	if (end)
+		*end = '\0';
+	else if (!(pos && end))
+	{
+		wpa_printf(MSG_ERROR, "STA parameters should be passed between double quotation marks (\")");
+		return -1;
+	}
+	
+	count = 0;
+	while (*pos != '\0') {
+		end = os_strchr(pos, ' ');
+		if (end)
+			*end = '\0';
+		value = os_strchr(pos, '=');
+		if (value)
+			*value = '\0';
+		value++;
+
+		//Checks if value contains pipe symbol, which indicates a list of values
+		//Replaces pipes (|) by spaces ' '
+		if (os_strchr(value, '|')){
+			char *pipe_pos;
+			pipe_pos = os_strchr(value, '|');
+			while (pipe_pos){
+				*pipe_pos = ' ';
+				pipe_pos = os_strchr(value, '|');
+			}
+		}
+		count++;
+		errors += hostapd_sta_fill(sta, hapd, pos, value, count);
+		if (!end)
+			break;
+		pos = end + 1;
+	}
+
+	if (errors) {
+		wpa_printf(MSG_ERROR, "%d errors found in STA parameters", errors);
+	}
+	return errors;
+}
+
 int hostapd_sta_fill(struct sta_info *sta, struct hostapd_data *hapd,
-			       const char *buf, char *pos, int line) {
-	if (os_strcmp(buf, "aid") == 0) {
-		sta->aid = atoi(pos);
-	} else if (os_strcmp(buf, "capability") == 0) {
-		sta->capability = atoi(pos);
+			       const char *param, char *value, int line) {
+	if (os_strcmp(param, "aid") == 0) {
+		sta->aid = atoi(value);
+	} else if (os_strcmp(param, "capability") == 0) {
+		sta->capability = atoi(value);
 		if (sta->capability & WLAN_CAPABILITY_SHORT_PREAMBLE)
 			sta->flags |= WLAN_STA_SHORT_PREAMBLE;
 		else
@@ -787,22 +848,22 @@ int hostapd_sta_fill(struct sta_info *sta, struct hostapd_data *hapd,
 		    	hapd->iface->num_sta_no_short_slot_time == 1)
 				ieee802_11_set_beacons(hapd->iface);
 		}
-	} else if (os_strcmp(buf, "flag_associated") == 0) {
-		if(atoi(pos) == 1){
+	} else if (os_strcmp(param, "flag_associated") == 0) {
+		if(atoi(value) == 1){
 			sta->flags |= WLAN_STA_ASSOC;
 		}
-	} else if (os_strcmp(buf, "flag_authenticated") == 0) {
-		if(atoi(pos) == 1){
+	} else if (os_strcmp(param, "flag_authenticated") == 0) {
+		if(atoi(value) == 1){
 			sta->flags |= WLAN_STA_AUTH;
 		}
-	} else if (os_strcmp(buf, "flag_authorized") == 0) {
-		if(atoi(pos) == 1){
+	} else if (os_strcmp(param, "flag_authorized") == 0) {
+		if(atoi(value) == 1){
 			sta->flags |= WLAN_STA_AUTHORIZED;
 		}
-	} else if (os_strcmp(buf, "supported_rates") == 0) {
-		int length = hostapd_parse_u8list(sta->supported_rates, pos);
+	} else if (os_strcmp(param, "supported_rates") == 0) {
+		int length = hostapd_parse_u8list(sta->supported_rates, value);
 		if (length < 0) {
-			wpa_printf(MSG_ERROR, "Line %d: invalid STA rate list",
+			wpa_printf(MSG_ERROR, "Param %d: invalid STA rate list",
 				   line);
 			return 1;
 		} else {
@@ -824,12 +885,12 @@ int hostapd_sta_fill(struct sta_info *sta, struct hostapd_data *hapd,
 				ieee802_11_set_beacons(hapd->iface);
 			}
 		}
-	} else if (os_strcmp(buf, "listen_interval") == 0) {
-		sta->listen_interval = atoi(pos);
+	} else if (os_strcmp(param, "listen_interval") == 0) {
+		sta->listen_interval = atoi(value);
 	} else {
 		wpa_printf(MSG_ERROR,
-			   "Line %d: unknown STA configuration item '%s'",
-			   line, buf);
+			   "Param %d: unknown STA configuration item '%s'",
+			   line, param);
 		return 1;
 	}
 

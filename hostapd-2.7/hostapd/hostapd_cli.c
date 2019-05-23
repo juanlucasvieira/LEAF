@@ -361,6 +361,22 @@ static int hostapd_cli_cmd_add_sta(struct wpa_ctrl *ctrl, int argc,
 	return wpa_ctrl_command(ctrl, buf);
 }
 
+static int hostapd_cli_cmd_add_sta_p(struct wpa_ctrl *ctrl, int argc,
+				   char *argv[])
+{
+	char buf[512];
+	if (argc != 2) {
+		printf("Invalid 'add_sta_p' command - two arguments, STA MAC address, \n"
+		       "STA params (surrounded by \"\"), are required.\n"
+					 "Example: add_sta_p 00:00:00:00:00:01 \"aid=1 capability=22\"\n"
+					 "List values should contain a pipe separator between them.\n"
+					 "Example: supported_rates=130|132|11|22\n");
+		return -1;
+	}
+	snprintf(buf, sizeof(buf), "ADD_STA_P %s %s", argv[0], argv[1]);
+	return wpa_ctrl_command(ctrl, buf);
+}
+
 
 static int hostapd_cli_cmd_deauthenticate(struct wpa_ctrl *ctrl, int argc,
 					  char *argv[])
@@ -1556,7 +1572,9 @@ static const struct hostapd_cli_cmd hostapd_cli_commands[] = {
 	{ "new_sta", hostapd_cli_cmd_new_sta, NULL,
 	  "<addr> = add a new station" },
 	{ "add_sta", hostapd_cli_cmd_add_sta, NULL,
-	  "<addr> <config_path> = add a station given the configuration path" },
+	  "<addr> <config_path> = add a station given the configuration file path" },
+	{ "add_sta_p", hostapd_cli_cmd_add_sta_p, NULL,
+	  "<addr> <params> = add a station given the params (separated by '|')" },
 	{ "deauthenticate", hostapd_cli_cmd_deauthenticate,
 	  hostapd_complete_stations,
 	  "<addr> = deauthenticate a station" },
