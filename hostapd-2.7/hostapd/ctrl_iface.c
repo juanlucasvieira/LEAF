@@ -4129,6 +4129,9 @@ static void hostapd_global_ctrl_iface_receive(int sock, void *eloop_ctx,
 	} else if (os_strncmp(buf, "ADD ", 4) == 0) {
 		if (hostapd_ctrl_iface_add(interfaces, buf + 4) < 0)
 			reply_len = -1;
+	} else if (os_strncmp(buf, "ADD_BSS ", 8) == 0) {
+		if (hostapd_ctrl_iface_add(interfaces, buf + 8) < 0)
+			reply_len = -1;
 	} else if (os_strncmp(buf, "REMOVE ", 7) == 0) {
 		if (hostapd_ctrl_iface_remove(interfaces, buf + 7) < 0)
 			reply_len = -1;

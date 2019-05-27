@@ -38,7 +38,7 @@ struct hostapd_iface;
 
 struct hapd_interfaces {
 	int (*reload_config)(struct hostapd_iface *iface);
-	struct hostapd_config * (*config_read_cb)(const char *config_fname);
+	struct hostapd_config * (*config_read_cb)(char *config_fname);
 	int (*ctrl_iface_init)(struct hostapd_data *hapd);
 	void (*ctrl_iface_deinit)(struct hostapd_data *hapd);
 	int (*for_each_interface)(struct hapd_interfaces *interfaces,
@@ -554,14 +554,14 @@ struct hostapd_iface * hostapd_init(struct hapd_interfaces *interfaces,
 				    const char *config_file);
 struct hostapd_iface *
 hostapd_interface_init_bss(struct hapd_interfaces *interfaces, const char *phy,
-			   const char *config_fname, int debug);
+			   char *bss_conf, int debug);
 void hostapd_new_assoc_sta(struct hostapd_data *hapd, struct sta_info *sta,
 			   int reassoc);
 void hostapd_interface_deinit_free(struct hostapd_iface *iface);
 int hostapd_enable_iface(struct hostapd_iface *hapd_iface);
 int hostapd_reload_iface(struct hostapd_iface *hapd_iface);
 int hostapd_disable_iface(struct hostapd_iface *hapd_iface);
-int hostapd_add_iface(struct hapd_interfaces *ifaces, char *buf);
+int hostapd_add_iface(struct hapd_interfaces *interfaces, char *buf);
 int hostapd_add_sta(struct hostapd_data *hapd, char *buf, int filemode);
 int hostapd_remove_iface(struct hapd_interfaces *ifaces, char *buf);
 void hostapd_channel_list_updated(struct hostapd_iface *iface, int initiator);

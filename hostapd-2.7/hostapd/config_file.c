@@ -4127,29 +4127,32 @@ static int hostapd_config_fill(struct hostapd_config *conf,
 
 
 /**
- * hostapd_config_read - Read and parse a configuration file
- * @fname: Configuration file name (including path, if needed)
+ * hostapd_config_read - Read and parse a configuration
+ * @iface_params: Configuration params / file path
  * Returns: Allocated configuration data structure
  */
-struct hostapd_config * hostapd_config_read(const char *fname)
+struct hostapd_config * hostapd_config_read(char *iface_params)
 {
 	struct hostapd_config *conf;
-	FILE *f;
-	char buf[4096], *pos;
-	int line = 0;
+	const char *fname;
+	char *pos;
+	int count = 0;
 	int errors = 0;
 	size_t i;
 
-	f = fopen(fname, "r");
-	if (f == NULL) {
-		wpa_printf(MSG_ERROR, "Could not open configuration file '%s' "
-			   "for reading.", fname);
-		return NULL;
+	char *params = iface_params;
+
+	int fileMode = 1;
+
+	if (os_strncmp(params, "bss_params=", 11) == 0) {
+		fileMode = 0;
+		params = iface_params + 11;
+	} else {
+		fname = iface_params;
 	}
 
 	conf = hostapd_config_defaults();
 	if (conf == NULL) {
-		fclose(f);
 		return NULL;
 	}
 
@@ -4158,56 +4161,111 @@ struct hostapd_config * hostapd_config_read(const char *fname)
 	if (conf->driver == NULL) {
 		wpa_printf(MSG_ERROR, "No driver wrappers registered!");
 		hostapd_config_free(conf);
-		fclose(f);
 		return NULL;
 	}
 
 	conf->last_bss = conf->bss[0];
 
-	while (fgets(buf, sizeof(buf), f)) {
-		struct hostapd_bss_config *bss;
+	if (fileMode){
+		char buf[4096];
+		FILE *f;
+		f = fopen(fname, "r");
+		if (f == NULL) {
+			wpa_printf(MSG_ERROR, "Could not open configuration file '%s' "
+			   	"for reading.", fname);
+			return NULL;
+		}
 
-		bss = conf->last_bss;
-		line++;
+		while (fgets(buf, sizeof(buf), f)) {
+			struct hostapd_bss_config *bss;
 
-		if (buf[0] == '#')
-			continue;
-		pos = buf;
-		while (*pos != '\0') {
-			if (*pos == '\n') {
-				*pos = '\0';
-				break;
+			bss = conf->last_bss;
+			count++;
+
+			if (buf[0] == '#')
+				continue;
+			pos = buf;
+			while (*pos != '\0') {
+				if (*pos == '\n') {
+					*pos = '\0';
+					break;
+				}
+				pos++;
 			}
-			pos++;
-		}
-		if (buf[0] == '\0')
-			continue;
+			if (buf[0] == '\0')
+				continue;
 
-		pos = os_strchr(buf, '=');
-		if (pos == NULL) {
-			wpa_printf(MSG_ERROR, "Line %d: invalid line '%s'",
-				   line, buf);
-			errors++;
-			continue;
+			pos = os_strchr(buf, '=');
+			if (pos == NULL) {
+				wpa_printf(MSG_ERROR, "Line %d: invalid line '%s'",
+					count, buf);
+				errors++;
+				continue;
+			}
+			*pos = '\0';
+			pos++;
+			errors += hostapd_config_fill(conf, bss, buf, pos, count);
 		}
-		*pos = '\0';
-		pos++;
-		errors += hostapd_config_fill(conf, bss, buf, pos, line);
+
+		fclose(f);
+
+	} else {
+		int count;
+		char *end, *value;
+
+		//Removes "" from parameters
+		pos = os_strchr(params, '\"');
+		if (pos) 
+			pos++;
+		end = os_strchr(pos, '\"');
+		if (end)
+			*end = '\0';
+		else if (!(pos && end))
+		{
+			wpa_printf(MSG_ERROR, "Parameters should be passed between double quotation marks (\")");
+			return NULL;
+		}
+	
+		count = 0;
+		while (*pos != '\0') {
+			struct hostapd_bss_config *bss;
+			bss = conf->last_bss;
+			end = os_strchr(pos, ' ');
+			if (end)
+				*end = '\0';
+			value = os_strchr(pos, '=');
+			if (value)
+				*value = '\0';
+			value++;
+
+			//Checks if value contains pipe symbol, which indicates a list of values
+			//Replaces pipes (|) by spaces ' '
+			if (os_strchr(value, '|')){
+				char *pipe_pos;
+				pipe_pos = os_strchr(value, '|');
+				while (pipe_pos){
+					*pipe_pos = ' ';
+					pipe_pos = os_strchr(value, '|');
+				}
+			}
+		count++;
+		errors += hostapd_config_fill(conf, bss, pos, value, count);
+		if (!end)
+			break;
+		pos = end + 1;
+		}	
 	}
 
-	fclose(f);
-
-	wpa_printf(MSG_INFO, ">DEBUG: config_file.c: hostapd_config_read(). The config file has %ld BSSs", conf->num_bss);
 	for (i = 0; i < conf->num_bss; i++)
 		hostapd_set_security_params(conf->bss[i], 1);
-
+	
 	if (hostapd_config_check(conf, 1))
 		errors++;
 
 #ifndef WPA_IGNORE_CONFIG_ERRORS
 	if (errors) {
-		wpa_printf(MSG_ERROR, "%d errors found in configuration file "
-			   "'%s'", errors, fname);
+		wpa_printf(MSG_ERROR, "%d errors found in configuration"
+			   "'%s'", errors, iface_params);
 		hostapd_config_free(conf);
 		conf = NULL;
 	}

@@ -2447,7 +2447,7 @@ static int ifname_in_use(struct hapd_interfaces *interfaces, const char *ifname)
  */
 struct hostapd_iface *
 hostapd_interface_init_bss(struct hapd_interfaces *interfaces, const char *phy,
-			   const char *config_fname, int debug)
+			   char *bss_config, int debug)
 {
 	struct hostapd_iface *new_iface = NULL, *iface = NULL;
 	struct hostapd_data *hapd;
@@ -2471,8 +2471,8 @@ hostapd_interface_init_bss(struct hapd_interfaces *interfaces, const char *phy,
 		}
 	}
 
-	wpa_printf(MSG_INFO, "Configuration file: %s (phy %s)%s",
-		   config_fname, phy, iface ? "" : " --> new PHY");
+	wpa_printf(MSG_INFO, "BSS configuration: %s (phy %s)%s",
+		   bss_config, phy, iface ? "" : " --> new PHY");
 	if (iface) {
 		struct hostapd_config *conf;
 		struct hostapd_bss_config **tmp_conf;
@@ -2482,7 +2482,7 @@ hostapd_interface_init_bss(struct hapd_interfaces *interfaces, const char *phy,
 
 		/* Add new BSS to existing iface */
 		wpa_printf(MSG_INFO, ">>>>>>>>>>>>Adding BSS to existing interface!!!");
-		conf = interfaces->config_read_cb(config_fname);
+		conf = interfaces->config_read_cb(bss_config);
 		if (conf == NULL)
 			return NULL;
 		if (conf->num_bss > 1) {
@@ -2534,7 +2534,7 @@ hostapd_interface_init_bss(struct hapd_interfaces *interfaces, const char *phy,
 		hostapd_config_free(conf);
 	} else {
 		/* Add a new iface with the first BSS */
-		new_iface = iface = hostapd_init(interfaces, config_fname);
+		new_iface = iface = hostapd_init(interfaces, bss_config);
 		wpa_printf(MSG_INFO, ">>>>>>>Adding a new interface...");
 		if (!iface)
 			return NULL;
@@ -2551,7 +2551,7 @@ hostapd_interface_init_bss(struct hapd_interfaces *interfaces, const char *phy,
 	if (iface->conf->bss[bss_idx]->iface[0] == '\0' &&
 	    !hostapd_drv_none(iface->bss[bss_idx])) {
 		wpa_printf(MSG_ERROR, "Interface name not specified in %s",
-			   config_fname);
+			   bss_config);
 		if (new_iface)
 			hostapd_interface_deinit_free(new_iface);
 		return NULL;
@@ -2831,7 +2831,8 @@ int hostapd_add_iface(struct hapd_interfaces *interfaces, char *buf)
 	struct hostapd_data *hapd;
 	char *ptr;
 	size_t i, j;
-	const char *conf_file = NULL, *phy_name = NULL;
+	char *conf_file = NULL, *phy_name = NULL;
+	char *bss_conf = NULL;
 
 	if (os_strncmp(buf, "bss_config=", 11) == 0) {
 		char *pos;
@@ -2840,14 +2841,14 @@ int hostapd_add_iface(struct hapd_interfaces *interfaces, char *buf)
 		if (!pos)
 			return -1;
 		*pos++ = '\0';
-		conf_file = pos;
-		if (!os_strlen(conf_file))
+
+		bss_conf = pos;
+		if (!os_strlen(bss_conf))
 			return -1;
 
 		wpa_printf(MSG_INFO, ">>>>ADD INTERFACE %s", phy_name);
-
 		hapd_iface = hostapd_interface_init_bss(interfaces, phy_name,
-							conf_file, 0);
+								bss_conf, 0);
 		if (!hapd_iface) {
 			wpa_printf(MSG_INFO, ">>>>hapd_iface is NULL");
 			return -1;

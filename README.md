@@ -31,11 +31,20 @@
 
 **Compilando HostAPD**
 - Instalar dependências
-  > sudo apt-get install libnl-3-dev
+  > sudo apt-get install libnl-3-dev libnl-genl-3-dev libssl-dev
 
-  > sudo apt-get install libnl-genl-3-dev
 - Ir até a pasta hostapd
 - Copiar **defconfig** como **.config**
+
+- Adicionar um dos comandos abaixo para controle por porta UDP (opcional)
+
+  ``` 
+  CONFIG_CTRL_IFACE=udp
+  CONFIG_CTRL_IFACE=udp-remote
+  CONFIG_CTRL_IFACE=udp6
+  CONFIG_CTRL_IFACE=udp6-remote 
+  ```
+
 - Executar comando make
 
 **Inicialização do HostAPD**
@@ -80,6 +89,12 @@
   ctrl_interface_group=0
   ```
 
+**Inicializando HostAPD CLI usando conexão UDP**
+  ``` hostapd_cli -i <ip>:<porta> ```
+
+  Exemplo: ``` hostapd_cli -i localhost:8888 ```
+
+
 **Adição / Remoção de BSSs em tempo de execução**
 - Inicialização do HostAPD com GCI e BSS inicial
 
@@ -101,10 +116,18 @@
   
 - Comando de Adição de BSS no GCI:
 
+  - Padrão:
   ``` raw ADD bss_config=<phy_interface>:<path_to_bss_conf> ```
   
   Exemplo: 
   ``` raw ADD bss_config=wlp9s0:/home/juan/Documents/vAP-SDN/hostapd-2.7/hostapd/ap_config/bss1.conf ```
+
+  - Com parâmetros:
+  ``` raw ADD_BSS bss_config=wlp9s0:bss_params="<bss_params_separated_by_space> ```
+
+  Exemplo:
+  ``` raw ADD_BSS bss_config=wlp9s0:bss_params="interface=wlan1 ssid=BSS_B1 bssid=2c:d0:5a:42:73:21 ctrl_interface=udp:8882 ctrl_interface_group=0 ```
+
 - Comando de Remoção de BSS no GCI:
 
   ``` raw REMOVE <bss_if_name>```
