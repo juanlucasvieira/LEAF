@@ -796,10 +796,12 @@ int hostapd_ctrl_iface_status(struct hostapd_data *hapd, char *buf,
 		ret = os_snprintf(buf + len, buflen - len,
 				  "bss[%d]=%s\n"
 				  "bssid[%d]=" MACSTR "\n"
+				  "ctrl_interface[%d]=%s\n"
 				  "ssid[%d]=%s\n"
 				  "num_sta[%d]=%d\n",
 				  (int) i, bss->conf->iface,
 				  (int) i, MAC2STR(bss->own_addr),
+				  (int) i, bss->conf->ctrl_interface,
 				  (int) i,
 				  wpa_ssid_txt(bss->conf->ssid.ssid,
 					       bss->conf->ssid.ssid_len),
