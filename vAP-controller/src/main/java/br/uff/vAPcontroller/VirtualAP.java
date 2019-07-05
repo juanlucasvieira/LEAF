@@ -1,4 +1,4 @@
-package vap.controller;
+package br.uff.vAPcontroller;
 
 public class VirtualAP {
     private String v_interface;

@@ -3,12 +3,15 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package vap.controller;
+package br.uff.vAPcontroller;
 
 /**
  *
  * @author juan
  */
-public class Interface {
-    private String id;
+public class Cmds {
+    
+    public static String REQ_AP_INFO = "status";
+    public static String REQ_STA_INFO = "sta";
+    
 }

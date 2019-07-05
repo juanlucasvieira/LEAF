@@ -1,4 +1,4 @@
-package vap.controller;
+package br.uff.vAPcontroller;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -12,13 +12,13 @@ public class CtrlInterface {
 
     private DatagramSocket udp_socket;
     private String cookie = null;
-    public short port;
-    public InetAddress ip;
+    private int port;
+    private InetAddress ip;
     public String id;
     DatagramPacket request;
     DatagramPacket response;
 
-    public CtrlInterface(InetAddress ip, short port) {
+    public CtrlInterface(InetAddress ip, int port) {
         this.ip = ip;
         this.port = port;
         id = ip.getHostAddress() + "" + port;
@@ -37,7 +37,7 @@ public class CtrlInterface {
 //        }
 //    }
 
-    public short getPort() {
+    public int getPort() {
         return port;
     }
 
@@ -52,24 +52,24 @@ public class CtrlInterface {
         return null;
     }
     
-    public void cookieRequest(){
-        try {
-            byte[] msg = "GET_COOKIE".getBytes();
-            request = new DatagramPacket(msg, msg.length, ip, port);
-            udp_socket.send(request);
-            byte[] buffer = new byte[512];
-            response = new DatagramPacket(buffer, buffer.length);
-            udp_socket.receive(response);
-            String answer = new String(buffer, 0, response.getLength());
-            if (sendReceive("GET_COOKIE").contains("COOKIE=")){
-                cookie = answer;
-            }
-        } catch (SocketException e) {
-            System.err.println(e);
-        } catch (IOException ex) {
-            Logger.getLogger(CtrlInterface.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
+//    public void cookieRequest(){
+//        try {
+//            byte[] msg = "GET_COOKIE".getBytes();
+//            request = new DatagramPacket(msg, msg.length, ip, port);
+//            udp_socket.send(request);
+//            byte[] buffer = new byte[512];
+//            response = new DatagramPacket(buffer, buffer.length);
+//            udp_socket.receive(response);
+//            String answer = new String(buffer, 0, response.getLength());
+//            if (sendReceive("GET_COOKIE").contains("COOKIE=")){
+//                cookie = answer;
+//            }
+//        } catch (SocketException e) {
+//            System.err.println(e);
+//        } catch (IOException ex) {
+//            Logger.getLogger(CtrlInterface.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+//    }
 
     public String sendReceive(String command){
         try {
