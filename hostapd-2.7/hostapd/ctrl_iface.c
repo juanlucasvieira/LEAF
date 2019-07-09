@@ -66,8 +66,11 @@
 
 #ifdef CONFIG_CTRL_IFACE_UDP
 #define COOKIE_LEN 8
+#define TID_LEN 32
 static unsigned char cookie[COOKIE_LEN];
 static unsigned char gcookie[COOKIE_LEN];
+static unsigned char tid[TID_LEN];
+static unsigned int tid_set = 0;
 #define HOSTAPD_CTRL_IFACE_PORT		8877
 #define HOSTAPD_CTRL_IFACE_PORT_LIMIT	50
 #define HOSTAPD_GLOBAL_CTRL_IFACE_PORT		8878
@@ -3324,6 +3327,8 @@ static void hostapd_ctrl_iface_receive(int sock, void *eloop_ctx,
 	socklen_t fromlen = sizeof(from);
 	char *reply, *pos = buf;
 	const int reply_size = 4096;
+	char *reply_tid;
+	const int reply_tid_size = 4096;
 	int reply_len;
 	int level = MSG_DEBUG;
 #ifdef CONFIG_CTRL_IFACE_UDP
@@ -3350,7 +3355,7 @@ static void hostapd_ctrl_iface_receive(int sock, void *eloop_ctx,
 	}
 
 #ifdef CONFIG_CTRL_IFACE_UDP
-	if (os_strcmp(buf, "GET_COOKIE") == 0) {
+	if (os_strncmp(buf, "GET_COOKIE", 10) == 0) {
 		os_memcpy(reply, "COOKIE=", 7);
 		wpa_snprintf_hex(reply + 7, 2 * COOKIE_LEN + 1,
 				 cookie, COOKIE_LEN);
@@ -3376,6 +3381,15 @@ static void hostapd_ctrl_iface_receive(int sock, void *eloop_ctx,
 	pos = buf + 7 + 2 * COOKIE_LEN;
 	while (*pos == ' ')
 		pos++;
+
+	/* TID STUFF */
+	if (os_strncmp(buf, "TID=", 4) == 0) {
+		hexstr2bin(buf + 4, tid, TID_LEN); // Records the transaction ID in a variable
+		tid_set = 1;
+		buf += 4 + TID_LEN;
+		while (*buf == ' ')
+			buf++;
+	}
 #endif /* CONFIG_CTRL_IFACE_UDP */
 
 	if (os_strcmp(pos, "PING") == 0)
@@ -3388,6 +3402,32 @@ static void hostapd_ctrl_iface_receive(int sock, void *eloop_ctx,
 
 #ifdef CONFIG_CTRL_IFACE_UDP
 done:
+	if(tid_set){
+		reply_tid = os_malloc(reply_tid_size);
+		if (reply_tid == NULL) {
+			if (sendto(sock, "FAIL\n", 5, 0, (struct sockaddr *) &from,
+				fromlen) < 0) {
+				wpa_printf(MSG_DEBUG, "CTRL: sendto failed: %s",
+					strerror(errno));
+			}
+			return;
+		}
+		os_memcpy(reply_tid, "TID=", 4);
+		wpa_snprintf_hex(reply_tid + 4, TID_LEN + 1,
+					tid, TID_LEN);
+
+		int add_space = TID_LEN + 4;
+
+		reply_tid[add_space] = ' ';
+		add_space++;
+		reply_tid[add_space] = '\0';
+
+		os_memcpy(reply_tid + 4 + TID_LEN + 1, reply, reply_len);
+
+		reply_len = (reply_len + 4 + TID_LEN + 1);
+		reply = reply_tid;
+		wpa_printf(MSG_INFO, ">DEBUG: Reply Size %d",reply_len);
+	}
 #endif /* CONFIG_CTRL_IFACE_UDP */
 	if (sendto(sock, reply, reply_len, 0, (struct sockaddr *) &from,
 		   fromlen) < 0) {
@@ -4048,6 +4088,8 @@ static void hostapd_global_ctrl_iface_receive(int sock, void *eloop_ctx,
 	socklen_t fromlen = sizeof(from);
 	char *reply;
 	int reply_len;
+	char *reply_tid;
+	const int reply_tid_size = 4096;
 	const int reply_size = 4096;
 #ifdef CONFIG_CTRL_IFACE_UDP
 	unsigned char lcookie[COOKIE_LEN];
@@ -4078,7 +4120,7 @@ static void hostapd_global_ctrl_iface_receive(int sock, void *eloop_ctx,
 	reply_len = 3;
 
 #ifdef CONFIG_CTRL_IFACE_UDP
-	if (os_strcmp(buf, "GET_COOKIE") == 0) {
+	if (os_strncmp(buf, "GET_COOKIE", 10) == 0) {
 		os_memcpy(reply, "COOKIE=", 7);
 		wpa_snprintf_hex(reply + 7, 2 * COOKIE_LEN + 1,
 				 gcookie, COOKIE_LEN);
@@ -4104,6 +4146,18 @@ static void hostapd_global_ctrl_iface_receive(int sock, void *eloop_ctx,
 	buf += 7 + 2 * COOKIE_LEN;
 	while (*buf == ' ')
 		buf++;
+
+
+	/* TID STUFF */
+	if (os_strncmp(buf, "TID=", 4) == 0) {
+		hexstr2bin(buf + 4, tid, TID_LEN); // Records the transaction ID in a variable
+		tid_set = 1;
+		buf += 4 + TID_LEN;
+		while (*buf == ' ')
+			buf++;
+	}
+
+
 #endif /* CONFIG_CTRL_IFACE_UDP */
 
 	if (os_strncmp(buf, "IFNAME=", 7) == 0) {
@@ -4188,6 +4242,34 @@ send_reply:
 		os_memcpy(reply, "FAIL\n", 5);
 		reply_len = 5;
 	}
+	#ifdef CONFIG_CTRL_IFACE_UDP
+	if(tid_set){
+		reply_tid = os_malloc(reply_tid_size);
+		if (reply_tid == NULL) {
+			if (sendto(sock, "FAIL\n", 5, 0, (struct sockaddr *) &from,
+				fromlen) < 0) {
+				wpa_printf(MSG_DEBUG, "CTRL: sendto failed: %s",
+					strerror(errno));
+			}
+			return;
+		}
+		os_memcpy(reply_tid, "TID=", 4);
+		wpa_snprintf_hex(reply_tid + 4, TID_LEN + 1,
+					tid, TID_LEN);
+
+		int add_space = TID_LEN + 4;
+
+		reply_tid[add_space] = ' ';
+		add_space++;
+		reply_tid[add_space] = '\0';
+
+		os_memcpy(reply_tid + 4 + TID_LEN + 1, reply, reply_len);
+
+		reply_len = (reply_len + 4 + TID_LEN + 1);
+		reply = reply_tid;
+		wpa_printf(MSG_INFO, ">DEBUG: Reply Size %d",reply_len);
+	}
+	#endif //CONFIG_CTRL_IFACE_UDP
 
 	if (sendto(sock, reply, reply_len, 0, (struct sockaddr *) &from,
 		   fromlen) < 0) {
