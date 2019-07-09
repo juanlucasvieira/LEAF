@@ -3355,7 +3355,17 @@ static void hostapd_ctrl_iface_receive(int sock, void *eloop_ctx,
 	}
 
 #ifdef CONFIG_CTRL_IFACE_UDP
-	if (os_strncmp(buf, "GET_COOKIE", 10) == 0) {
+	/* TID STUFF */
+	// Records the transaction ID in a variable
+	if (os_strncmp(buf, "TID=", 4) == 0) {
+		hexstr2bin(buf + 4, tid, TID_LEN); 
+		tid_set = 1;
+		pos = buf + 4 + TID_LEN;
+		while (*pos == ' ')
+			pos++;
+	}
+
+	if (os_strncmp(pos, "GET_COOKIE", 10) == 0) {
 		os_memcpy(reply, "COOKIE=", 7);
 		wpa_snprintf_hex(reply + 7, 2 * COOKIE_LEN + 1,
 				 cookie, COOKIE_LEN);
@@ -3363,8 +3373,8 @@ static void hostapd_ctrl_iface_receive(int sock, void *eloop_ctx,
 		goto done;
 	}
 
-	if (os_strncmp(buf, "COOKIE=", 7) != 0 ||
-	    hexstr2bin(buf + 7, lcookie, COOKIE_LEN) < 0) {
+	if (os_strncmp(pos, "COOKIE=", 7) != 0 ||
+	    hexstr2bin(pos + 7, lcookie, COOKIE_LEN) < 0) {
 		wpa_printf(MSG_DEBUG,
 			   "CTRL: No cookie in the request - drop request");
 		os_free(reply);
@@ -3378,18 +3388,10 @@ static void hostapd_ctrl_iface_receive(int sock, void *eloop_ctx,
 		return;
 	}
 
-	pos = buf + 7 + 2 * COOKIE_LEN;
+	pos += 7 + (2 * COOKIE_LEN);
 	while (*pos == ' ')
 		pos++;
 
-	/* TID STUFF */
-	if (os_strncmp(buf, "TID=", 4) == 0) {
-		hexstr2bin(buf + 4, tid, TID_LEN); // Records the transaction ID in a variable
-		tid_set = 1;
-		buf += 4 + TID_LEN;
-		while (*buf == ' ')
-			buf++;
-	}
 #endif /* CONFIG_CTRL_IFACE_UDP */
 
 	if (os_strcmp(pos, "PING") == 0)
@@ -3416,17 +3418,20 @@ done:
 		wpa_snprintf_hex(reply_tid + 4, TID_LEN + 1,
 					tid, TID_LEN);
 
-		int add_space = TID_LEN + 4;
+		int add_separator = TID_LEN + 4;
 
-		reply_tid[add_space] = ' ';
-		add_space++;
-		reply_tid[add_space] = '\0';
+		reply_tid[add_separator] = '\n';
+		add_separator++;
+		reply_tid[add_separator] = '\0';
 
 		os_memcpy(reply_tid + 4 + TID_LEN + 1, reply, reply_len);
 
 		reply_len = (reply_len + 4 + TID_LEN + 1);
 		reply = reply_tid;
+
 		wpa_printf(MSG_INFO, ">DEBUG: Reply Size %d",reply_len);
+		wpa_printf(MSG_INFO, ">DEBUG: REPLY: %s", reply);
+		tid_set = 0;
 	}
 #endif /* CONFIG_CTRL_IFACE_UDP */
 	if (sendto(sock, reply, reply_len, 0, (struct sockaddr *) &from,
@@ -4120,6 +4125,15 @@ static void hostapd_global_ctrl_iface_receive(int sock, void *eloop_ctx,
 	reply_len = 3;
 
 #ifdef CONFIG_CTRL_IFACE_UDP
+	/* TID STUFF */
+	if (os_strncmp(buf, "TID=", 4) == 0) {
+		hexstr2bin(buf + 4, tid, TID_LEN); // Records the transaction ID in a variable
+		tid_set = 1;
+		buf += 4 + TID_LEN;
+		while (*buf == ' ')
+			buf++;
+	}
+
 	if (os_strncmp(buf, "GET_COOKIE", 10) == 0) {
 		os_memcpy(reply, "COOKIE=", 7);
 		wpa_snprintf_hex(reply + 7, 2 * COOKIE_LEN + 1,
@@ -4146,16 +4160,6 @@ static void hostapd_global_ctrl_iface_receive(int sock, void *eloop_ctx,
 	buf += 7 + 2 * COOKIE_LEN;
 	while (*buf == ' ')
 		buf++;
-
-
-	/* TID STUFF */
-	if (os_strncmp(buf, "TID=", 4) == 0) {
-		hexstr2bin(buf + 4, tid, TID_LEN); // Records the transaction ID in a variable
-		tid_set = 1;
-		buf += 4 + TID_LEN;
-		while (*buf == ' ')
-			buf++;
-	}
 
 
 #endif /* CONFIG_CTRL_IFACE_UDP */
@@ -4257,17 +4261,20 @@ send_reply:
 		wpa_snprintf_hex(reply_tid + 4, TID_LEN + 1,
 					tid, TID_LEN);
 
-		int add_space = TID_LEN + 4;
+		int add_separator = TID_LEN + 4;
 
-		reply_tid[add_space] = ' ';
-		add_space++;
-		reply_tid[add_space] = '\0';
+		reply_tid[add_separator] = '\n';
+		add_separator++;
+		reply_tid[add_separator] = '\0';
 
 		os_memcpy(reply_tid + 4 + TID_LEN + 1, reply, reply_len);
 
 		reply_len = (reply_len + 4 + TID_LEN + 1);
 		reply = reply_tid;
+
 		wpa_printf(MSG_INFO, ">DEBUG: Reply Size %d",reply_len);
+		wpa_printf(MSG_INFO, ">DEBUG: REPLY: %s", reply);
+		tid_set = 0;
 	}
 	#endif //CONFIG_CTRL_IFACE_UDP
 
