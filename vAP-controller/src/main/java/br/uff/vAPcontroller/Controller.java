@@ -12,8 +12,9 @@ public class Controller {
     
     private ArrayList<AP> phy_aps;
     private CommunicationHandler comm;
+    private TransactionHandler thand;
     private static Controller c;
-
+    
     public Controller() {
         this.phy_aps = new ArrayList<>();
     }
@@ -27,8 +28,9 @@ public class Controller {
        
     public void begin(){
         try {
-            phy_aps.add(new AP(InetAddress.getByName("127.0.0.1"), 8888));
-            comm = new CommunicationHandler(this);
+            thand = new TransactionHandler();
+            phy_aps.add(new AP("AP@1",InetAddress.getByName("127.0.0.1"), 8888,thand));
+            phy_aps.get(0).requestInterfaces();
         } catch (UnknownHostException ex) {
             System.err.println("Unknown IP format");
         } catch (IOException ex) {
@@ -46,9 +48,7 @@ public class Controller {
 //        }
     }
     
-    public void processMessage(DatagramPacket pckt){
-//        Do something with the received message.
-    }
+
     
     public String sendRequest(){
         return "GOT A REQUEST!!";

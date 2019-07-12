@@ -5,14 +5,18 @@
  */
 package br.uff.vAPcontroller;
 
-import java.net.DatagramPacket;
-
 /**
  *
  * @author juan
  */
-public interface ReceiveCallback {
+public interface Observer {
     
-    public void receiveCallback(DatagramPacket dp);
+    public String getId();
+    
+//    public String sendRequest();
+    
+    public void notify(Transaction t);
+    
+    //public void updateState();
     
 }

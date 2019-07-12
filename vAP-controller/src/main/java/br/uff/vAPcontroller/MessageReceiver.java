@@ -31,9 +31,9 @@ public class MessageReceiver extends Thread {
                 DatagramPacket response = new DatagramPacket(resp_buffer, resp_buffer.length);
                 socket.receive(response);
                 System.out.println("End");
-                rc.rcv_callback(response);
+                rc.receiveCallback(response);
             } catch (IOException e) {
-                rc.rcv_callback(null);
+                rc.receiveCallback(null);
             }
         }
     }

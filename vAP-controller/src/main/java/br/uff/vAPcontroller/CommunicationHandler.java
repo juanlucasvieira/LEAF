@@ -19,14 +19,14 @@ public class CommunicationHandler implements ReceiveCallback {
 
     MessageReceiver receiver;
     
-    Controller c;
+    TransactionHandler handler;
 
     boolean listening = false;
 
-    public CommunicationHandler(Controller c) {
+    public CommunicationHandler(TransactionHandler handler) {
         try {
 //            this.socket = new DatagramSocket();
-            this.c = c;
+            this.handler = handler;
             this.recv_socket = new DatagramSocket(null);
         } catch (SocketException ex) {
             Logger.getLogger(CommunicationHandler.class.getName()).log(Level.SEVERE, null, ex);
@@ -44,11 +44,7 @@ public class CommunicationHandler implements ReceiveCallback {
         }
     }
 
-    public void receiveMsg(DatagramPacket answer, String requestID) {
-
-    }
-
-    public void sendMsg(String msg, CtrlInterface iface) {
+    public void sendRequest(String msg, CtrlInterface iface) {
         try {
             if (iface.getCookie().length() > 0) {
                 msg = iface.getCookie() + " " + msg;
@@ -66,11 +62,11 @@ public class CommunicationHandler implements ReceiveCallback {
 //        smr.run();
 //    }
     @Override
-    public void rcv_callback(DatagramPacket dp) {
+    public void receiveCallback(DatagramPacket dp) {
         //  TODO: Do something with received answer.
         System.out.println("I received this: " + new String(dp.getData()));
         System.out.println("Sender: " + dp.getAddress().getHostName() + ":" + dp.getPort());
-        c.processMessage(dp);
+        handler.processMessage(dp);
         //Send it to the correspondent CtrlInterface
 
 //        System.exit(0);

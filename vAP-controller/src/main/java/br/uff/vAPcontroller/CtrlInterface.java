@@ -10,7 +10,7 @@ import java.util.logging.Logger;
 
 public class CtrlInterface {
 
-    private DatagramSocket udp_socket;
+//    private DatagramSocket udp_socket;
     private String cookie = null;
     private int port;
     private InetAddress ip;
@@ -52,6 +52,10 @@ public class CtrlInterface {
         return null;
     }
     
+    public void setCookie(String c){
+        this.cookie = c;
+    }
+    
 //    public void cookieRequest(){
 //        try {
 //            byte[] msg = "GET_COOKIE".getBytes();
@@ -71,25 +75,25 @@ public class CtrlInterface {
 //        }
 //    }
 
-    public String sendReceive(String command){
-        try {
-            command = cookie + " " + command;
-            byte[] msg = command.getBytes();
-            request = new DatagramPacket(msg, msg.length, ip, port);
-            udp_socket.send(request);
-            byte[] buffer = new byte[512];
-            response = new DatagramPacket(buffer, buffer.length);
-            udp_socket.receive(response);
-            return new String(buffer, 0, response.getLength());
-        } catch (SocketException e) {
-            System.err.println(e);
-        } catch (IOException ex) {
-            Logger.getLogger(CtrlInterface.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return null;
-    }
+//    public String sendReceive(String command){
+//        try {
+//            command = cookie + " " + command;
+//            byte[] msg = command.getBytes();
+//            request = new DatagramPacket(msg, msg.length, ip, port);
+//            udp_socket.send(request);
+//            byte[] buffer = new byte[512];
+//            response = new DatagramPacket(buffer, buffer.length);
+//            udp_socket.receive(response);
+//            return new String(buffer, 0, response.getLength());
+//        } catch (SocketException e) {
+//            System.err.println(e);
+//        } catch (IOException ex) {
+//            Logger.getLogger(CtrlInterface.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+//        return null;
+//    }
     
-    public boolean checkConnectivity(){
-        return sendReceive("PING").equals("PONG");
-    }
+//    public boolean checkConnectivity(){
+//        return sendReceive("PING").equals("PONG");
+//    }
 }
