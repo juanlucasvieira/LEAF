@@ -13,6 +13,6 @@ public class Cmds {
     
     public static final String REQ_VAP_INFO = "STATUS";
     public static final String REQ_STA_INFO = "STA";
+    public static final String REQ_ALL_STA_INFO = "ALL_STA";
     public static final String GET_AP_IFACES = "INTERFACES ctrl";
-    
 }

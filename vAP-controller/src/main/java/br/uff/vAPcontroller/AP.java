@@ -35,7 +35,7 @@ public class AP implements Observer{
     
     public void vAPUpdate(){
         for(VirtualAP vap : vaps.values()){
-            vap.update();
+            vap.update(handler);
         }
     }
     
@@ -52,11 +52,15 @@ public class AP implements Observer{
     }
 
     private void updateIfaces(String response) {
-        //TODO: Fill fields using response
-        String vap_id = "";
-        String port = "";
-        if(vaps.get(vap_id) == null){
-            vaps.put(vap_id, new VirtualAP(ap_id + "@" + vap_id, gci.getIp(), Integer.parseInt(port)));
+        //wlp9s0 ctrl_iface=udp:8881
+        String[] lines = response.split("\n");
+        for (int i = 0; i < lines.length; i++) {
+            String line = lines[i];
+            String vap_id = line.split(" ")[0];
+            String port = line.substring(line.lastIndexOf(':'));
+            if(vaps.get(vap_id) == null){
+                vaps.put(vap_id, new VirtualAP(ap_id + "@" + vap_id, vap_id, gci.getIp(), Integer.parseInt(port)));
+            }
         }
     }
     

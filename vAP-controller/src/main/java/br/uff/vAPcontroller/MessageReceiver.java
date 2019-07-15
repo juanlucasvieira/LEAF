@@ -30,6 +30,7 @@ public class MessageReceiver extends Thread {
                 byte[] resp_buffer = new byte[512];
                 DatagramPacket response = new DatagramPacket(resp_buffer, resp_buffer.length);
                 socket.receive(response);
+                System.out.println(new String (response.getData()));
                 System.out.println("End");
                 rc.receiveCallback(response);
             } catch (IOException e) {
