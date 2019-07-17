@@ -1,5 +1,6 @@
 package br.uff.vAPcontroller;
 
+import br.uff.vAPcontroller.CtrlInterface;
 import java.util.UUID;
 
 public class Transaction {

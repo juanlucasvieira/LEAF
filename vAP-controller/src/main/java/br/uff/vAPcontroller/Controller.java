@@ -9,51 +9,58 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Controller {
-    
+
     private ArrayList<AP> phy_aps;
     private CommunicationHandler comm;
     private TransactionHandler thand;
     private static Controller c;
     
+    private long updateTimeMillis = 1000;
+
     public Controller() {
         this.phy_aps = new ArrayList<>();
     }
-    
-    public static Controller getInstance(){
-        if(c == null){
+
+    public static Controller getInstance() {
+        if (c == null) {
             c = new Controller();
         }
         return c;
     }
-       
-    public void begin(){
+
+    public void begin() throws InterruptedException {
         try {
             thand = new TransactionHandler();
-            phy_aps.add(new AP("AP@1",InetAddress.getByName("127.0.0.1"), 8888,thand));
-            phy_aps.get(0).requestInterfaces();
+            phy_aps.add(new AP("AP@1", InetAddress.getByName("127.0.0.1"), 8888, thand));
+            updateLoop();
         } catch (UnknownHostException ex) {
             System.err.println("Unknown IP format");
         } catch (IOException ex) {
             Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-        
-    public void run() throws InterruptedException{
-        while(true){
+
+    public void updateLoop() throws InterruptedException {
+        while (true) {
             System.out.println("RUNNING");
-            Thread.sleep(1000);
+            for (AP ap : phy_aps) {
+                ap.requestInterfaces();
+                ap.vAPUpdate();
+            }            
+            Thread.sleep(updateTimeMillis);
         }
 //        for (AP phy_ap : phy_aps) {
 //            phy_ap.update();
 //        }
     }
-    
 
-    
-    public String sendRequest(){
+    public void migrateVAP(AP source, AP dest, VirtualAP target) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+
+    }
+
+    public String sendRequest() {
         return "GOT A REQUEST!!";
     }
-    
-    
-    
+
 }

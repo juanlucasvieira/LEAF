@@ -1,5 +1,9 @@
 package br.uff.vAPcontroller;
 
+import br.uff.vAPcontroller.Cmds;
+import br.uff.vAPcontroller.CtrlInterface;
+import br.uff.vAPcontroller.Observer;
+import br.uff.vAPcontroller.TransactionHandler;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -7,7 +11,7 @@ import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class AP implements Observer{
+public class AP implements Observer {
     
     private CtrlInterface gci;
     private HashMap<String,VirtualAP> vaps;

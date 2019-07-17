@@ -1,7 +1,7 @@
 package br.uff.vAPcontroller;
 
 public class Station {
-    private String mac_address;
+    private final String mac_address;
     private short aid;
     private int capabilities;
     private int[] supported_rates;
@@ -20,8 +20,36 @@ public class Station {
         this.authenticated = authenticated;
         this.authorized = authorized;
     }
+
+    public void setAid(short aid) {
+        this.aid = aid;
+    }
+
+    public void setCapabilities(int capabilities) {
+        this.capabilities = capabilities;
+    }
+
+    public void setSupportedRates(int[] supported_rates) {
+        this.supported_rates = supported_rates;
+    }
+
+    public void setListenInterval(int listen_interval) {
+        this.listen_interval = listen_interval;
+    }
+
+    public void setAssociated(boolean associated) {
+        this.associated = associated;
+    }
+
+    public void setAuthenticated(boolean authenticated) {
+        this.authenticated = authenticated;
+    }
+
+    public void setAuthorized(boolean authorized) {
+        this.authorized = authorized;
+    }
   
-    public String getMac_address() {
+    public String getMacAddress() {
         return mac_address;
     }
 
@@ -33,11 +61,11 @@ public class Station {
         return capabilities;
     }
 
-    public int[] getSupported_rates() {
+    public int[] getSupportedRates() {
         return supported_rates;
     }
 
-    public int getListen_interval() {
+    public int getListenInterval() {
         return listen_interval;
     }
 

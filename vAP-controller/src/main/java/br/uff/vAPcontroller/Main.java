@@ -12,7 +12,6 @@ public class Main {
 		SpringApplication.run(Main.class, args);
                 Controller c = Controller.getInstance();
                 c.begin();
-                c.run();
 	}
 
 }
