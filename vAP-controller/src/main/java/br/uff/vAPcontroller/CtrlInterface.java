@@ -8,20 +8,20 @@ import java.net.SocketException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class CtrlInterface {
+public class CtrlInterface implements Observer {
 
 //    private DatagramSocket udp_socket;
     private String cookie = null;
     private int port;
     private InetAddress ip;
-    public String id;
+    private String id;
     DatagramPacket request;
     DatagramPacket response;
 
     public CtrlInterface(InetAddress ip, int port) {
         this.ip = ip;
         this.port = port;
-        id = ip.getHostAddress() + "" + port;
+        id = ip.getHostAddress() + ":" + port;
     }
 
 //    public void bind() {
@@ -36,7 +36,6 @@ public class CtrlInterface {
 //            System.err.println(e);
 //        }
 //    }
-
     public int getPort() {
         return port;
     }
@@ -44,18 +43,33 @@ public class CtrlInterface {
     public InetAddress getIp() {
         return ip;
     }
-    
-    public String getCookie(){
-        if(cookie != null){
+
+    @Override
+    public String toString() {
+        return id;
+    }
+
+    public String getCookie() {
+        if (cookie != null) {
             return cookie;
         }
         return null;
     }
-    
-    public void setCookie(String c){
+
+    public boolean isCookieSet() {
+        return (cookie != null && cookie.length() > 0);
+    }
+
+    private void setCookie(String c) {
+        if (c.startsWith("COOKIE=")) {
+            c.replaceFirst("COOKIE=", "").trim();
+        }
         this.cookie = c;
     }
-    
+
+//    public Transaction buildCookieRequest(){
+//        
+//    }
 //    public void cookieRequest(){
 //        try {
 //            byte[] msg = "GET_COOKIE".getBytes();
@@ -74,7 +88,6 @@ public class CtrlInterface {
 //            Logger.getLogger(CtrlInterface.class.getName()).log(Level.SEVERE, null, ex);
 //        }
 //    }
-
 //    public String sendReceive(String command){
 //        try {
 //            command = cookie + " " + command;
@@ -92,8 +105,25 @@ public class CtrlInterface {
 //        }
 //        return null;
 //    }
-    
 //    public boolean checkConnectivity(){
 //        return sendReceive("PING").equals("PONG");
 //    }
+    @Override
+    public String getId() {
+        return id;
+    }
+
+    @Override
+    public void notify(Transaction t) {
+        if (t.getRequest().equals(Cmds.GET_COOKIE)) {
+            setCookie(t.getResponse());
+        }
+    }
+
+    public void requestCookie(TransactionHandler handler) {
+        if (!handler.isObserverRegistered(this)) {
+            handler.registerObserver(this);
+        }
+        handler.pushTransaction(new Transaction(this.id, Cmds.GET_COOKIE, this));
+    }
 }

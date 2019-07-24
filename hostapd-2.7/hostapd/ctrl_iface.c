@@ -4144,8 +4144,8 @@ static void hostapd_global_ctrl_iface_receive(int sock, void *eloop_ctx,
 
 	if (os_strncmp(buf, "COOKIE=", 7) != 0 ||
 	    hexstr2bin(buf + 7, lcookie, COOKIE_LEN) < 0) {
-		wpa_printf(MSG_DEBUG,
-			   "CTRL: No cookie in the request - drop request");
+		wpa_printf(MSG_INFO,
+			   ">DEBUG: CTRL: No cookie in the request - drop request");
 		os_free(reply);
 		return;
 	}
@@ -4284,6 +4284,11 @@ send_reply:
 			   strerror(errno));
 	}
 	os_free(reply);
+	#ifdef CONFIG_CTRL_IFACE_UDP
+	if(tid_set){
+		os_free(reply_tid);
+	}
+	#endif //CONFIG_CTRL_IFACE_UDP
 }
 
 

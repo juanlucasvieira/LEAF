@@ -18,7 +18,7 @@ public class CommunicationHandler implements ReceiveCallback {
     DatagramSocket recv_socket;
 
     MessageReceiver receiver;
-    
+
     TransactionHandler handler;
 
     boolean listening = false;
@@ -34,22 +34,28 @@ public class CommunicationHandler implements ReceiveCallback {
 
     }
 
-    public void listen(InetAddress addr, int port) throws SocketException {
+    public void listen() {
         if (!listening) {
-            recv_socket.bind(new InetSocketAddress(addr, port));
-            System.out.println("bla");
-            receiver = new MessageReceiver(recv_socket, this);
-            receiver.start();
-            listening = true;
+            try {
+                recv_socket.bind(new InetSocketAddress(Cmds.SEND_LISTEN_PORT));
+                receiver = new MessageReceiver(recv_socket, this);
+                receiver.start();
+                listening = true;
+            } catch (SocketException ex) {
+                Log.print(Cmds.ERROR, "SocketException: " + ex.getMessage());
+            }
         }
     }
 
-    public void sendRequest(String msg, CtrlInterface iface) {
+    public void sendRequest(String tid, String msg, CtrlInterface iface) {
         try {
-            if (iface.getCookie().length() > 0) {
-                msg = iface.getCookie() + " " + msg;
+            if (iface.isCookieSet()) {
+                msg = "TID=" + tid + " " + iface.getCookie() + " " + msg;
+            } else if (msg.contains(Cmds.GET_COOKIE)) {
+                msg = "TID=" + tid + " " + msg;
             }
             byte[] msg_byte = msg.getBytes();
+            Log.print(Cmds.DEBUG_INFO, "Sending message to " + iface.toString() + " :\n" + msg);
             DatagramPacket req_pckt = new DatagramPacket(msg_byte, msg_byte.length, iface.getIp(), iface.getPort());
             recv_socket.send(req_pckt);
         } catch (IOException ex) {
@@ -64,9 +70,10 @@ public class CommunicationHandler implements ReceiveCallback {
     @Override
     public void receiveCallback(DatagramPacket dp) {
         //  TODO: Do something with received answer.
-        System.out.println("I received this: " + new String(dp.getData()));
-        System.out.println("Sender: " + dp.getAddress().getHostName() + ":" + dp.getPort());
-        handler.processMessage(dp);
+        Log.print(Cmds.DEBUG_INFO, "Received message from "
+                + dp.getAddress().getHostName() + ":" + dp.getPort() + ":\n"
+                + new String(dp.getData(), 0, dp.getLength()));
+        handler.processMessage(new String(dp.getData(), 0, dp.getLength()));
         //Send it to the correspondent CtrlInterface
 
 //        System.exit(0);

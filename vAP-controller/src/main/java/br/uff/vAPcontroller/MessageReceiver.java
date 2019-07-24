@@ -26,12 +26,10 @@ public class MessageReceiver extends Thread {
     public void run() {
         while (true) {
             try {
-                System.out.println("Listening for messages...");
-                byte[] resp_buffer = new byte[512];
+                Log.print(Cmds.DEBUG_INFO, "Listening for messages...");
+                byte[] resp_buffer = new byte[2048];
                 DatagramPacket response = new DatagramPacket(resp_buffer, resp_buffer.length);
                 socket.receive(response);
-                System.out.println(new String (response.getData()));
-                System.out.println("End");
                 rc.receiveCallback(response);
             } catch (IOException e) {
                 rc.receiveCallback(null);

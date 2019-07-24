@@ -13,8 +13,9 @@ public class Transaction {
     
     public Transaction(String claimant, String request, CtrlInterface destination){
         this.claimant = claimant;
-        this.tid = UUID.randomUUID().toString();
+        this.tid = UUID.randomUUID().toString().replaceAll("-", "");
         this.request = request;
+        this.destination = destination;
     }
 
     public CtrlInterface getDestination() {
@@ -34,6 +35,24 @@ public class Transaction {
     }
     
     public String getResponse() {
-        return request;
+        return response;
+    }
+
+    public void setResponse(String response) {
+        this.response = response;
+    }
+    
+    @Override
+    public String toString(){
+        String s = "TID: "+tid+"\n";
+        s += "Claimant: " + claimant +"\n";
+        s += "Request: " + request + "\n";
+        if(response != null){
+            s += "Response: " + response + "\n";
+        }
+        if(destination != null){
+            s += destination.toString();
+        }
+        return s;
     }
 }

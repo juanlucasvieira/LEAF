@@ -20,28 +20,30 @@ public class TransactionHandler {
 
     public TransactionHandler() {
         this.comm = new CommunicationHandler(this);
+        this.comm.listen();
     }
 
-    public void processMessage(DatagramPacket pckt) {
-        String data = new String(pckt.getData());
-        String tid = data.substring(4, 36);
-        String response = data.substring(36, data.length());
+    public void processMessage(String pcktData) {
+        String tid = pcktData.substring(4, 36);
+        String response = pcktData.substring(37, pcktData.length());
         processTransactionAnswer(tid, response);
     }
 
     public void registerObserver(Observer o) {
         observers.put(o.getId(), o);
+
     }
 
     public void processTransactionAnswer(String tid, String response) {
         Transaction t = transactions.get(tid);
+        t.setResponse(response);
         Observer o = observers.get(t.getClaimantID());
-        if(t == null){
-            System.out.println("Received answer: Transaction not found.");
+        if (t == null) {
+            Log.print(Cmds.ERROR, "Received answer: Transaction not found.");
             return;
         }
-        if(o != null){
-            System.out.println("Received answer: Claimant not found.");
+        if (o == null) {
+            Log.print(Cmds.ERROR, "Received answer: Claimant not found.");
             return;
         }
         o.notify(t);
@@ -52,13 +54,19 @@ public class TransactionHandler {
         return transactions.get(TID);
     }
 
+    public boolean isObserverRegistered(Observer o) {
+        Observer observer = observers.get(o.getId());
+        return observer != null;
+    }
+
     public boolean pushTransaction(Transaction t) {
         if (observers.containsKey(t.getClaimantID())) {
             transactions.put(t.getTID(), t);
-            comm.sendRequest(t.getRequest(), t.getDestination());
+            Log.print(Cmds.DEBUG_INFO, "Sending Transaction: \n" + t.toString());
+            comm.sendRequest(t.getTID(), t.getRequest(), t.getDestination());
             return true;
         } else {
-            System.out.println("Error: Push Transaction from unknown Claimant");
+            Log.print(Cmds.ERROR, "Error: Push Transaction from unknown Claimant: \n" + t.toString());
             return false;
         }
     }

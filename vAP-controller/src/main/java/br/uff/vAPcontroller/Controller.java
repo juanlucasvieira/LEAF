@@ -14,7 +14,7 @@ public class Controller {
     private CommunicationHandler comm;
     private TransactionHandler thand;
     private static Controller c;
-    
+
     private long updateTimeMillis = 1000;
 
     public Controller() {
@@ -34,7 +34,7 @@ public class Controller {
             phy_aps.add(new AP("AP@1", InetAddress.getByName("127.0.0.1"), 8888, thand));
             updateLoop();
         } catch (UnknownHostException ex) {
-            System.err.println("Unknown IP format");
+            Log.print(Cmds.ERROR, "Unknown IP format");
         } catch (IOException ex) {
             Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -42,11 +42,11 @@ public class Controller {
 
     public void updateLoop() throws InterruptedException {
         while (true) {
-            System.out.println("RUNNING");
+            Log.print(Cmds.DEBUG_INFO, "Update loop is RUNNING");
             for (AP ap : phy_aps) {
                 ap.requestInterfaces();
                 ap.vAPUpdate();
-            }            
+            }
             Thread.sleep(updateTimeMillis);
         }
 //        for (AP phy_ap : phy_aps) {

@@ -45,9 +45,16 @@ public class VirtualAP implements Observer {
     }
 
     void update(TransactionHandler handler) {
-        handler.pushTransaction(new Transaction(this.vap_id, Cmds.REQ_STATUS_INFO, ctrl_iface));
-        if (num_sta == 1) {
-            handler.pushTransaction(new Transaction(this.vap_id, Cmds.REQ_ALL_STA_INFO, ctrl_iface));
+        if (!handler.isObserverRegistered(this)) {
+            handler.registerObserver(this);
+        }
+        if (!this.ctrl_iface.isCookieSet()) {
+            ctrl_iface.requestCookie(handler);
+        } else {
+            handler.pushTransaction(new Transaction(this.vap_id, Cmds.REQ_STATUS_INFO, this.ctrl_iface));
+            if (num_sta == 1) {
+                handler.pushTransaction(new Transaction(this.vap_id, Cmds.REQ_ALL_STA_INFO, ctrl_iface));
+            }
         }
     }
 
@@ -60,8 +67,9 @@ public class VirtualAP implements Observer {
         int errors = 0;
         int endOfPhyIfaceInfo = -1;
         int startOfVAPInfo = -1;
+        boolean foundInfo = false;
         for (int i = 0; i < lines.length; i++) {
-            if (startOfVAPInfo > 0 && endOfPhyIfaceInfo > 0) {
+            if (!foundInfo) {
                 if (lines[i].startsWith("bss[")) {
                     endOfPhyIfaceInfo = i;
                     String[] key_value = lines[i].split("=");
@@ -70,6 +78,9 @@ public class VirtualAP implements Observer {
                         errors += parseVAPInfo(lines, startOfVAPInfo);
                         errors += parsePhyIfaceInfo(lines, endOfPhyIfaceInfo);
                     }
+                }
+                if (startOfVAPInfo > 0 && endOfPhyIfaceInfo > 0) {
+                    foundInfo = true;
                 }
             }
         }
@@ -102,7 +113,7 @@ public class VirtualAP implements Observer {
             this.num_sta = sta_number;
             return 0;
         } else {
-            System.out.println("Error in virtual AP information filling.");
+            Log.print(Cmds.ERROR, "Error in virtual AP information filling.");
             return 1;
         }
     }
@@ -157,7 +168,7 @@ public class VirtualAP implements Observer {
                 String[] rates = lines[i].split("=")[1].split(" ");
                 supported_rates = new int[rates.length];
                 for (int j = 0; j < rates.length; j++) {
-                    supported_rates[j] = Integer.decode(rates[j]);
+                    supported_rates[j] = Integer.parseInt(rates[j], 16);
                 }
             } else if (lines[i].startsWith("max_txpower")) {
                 max_txpower = Integer.parseInt(lines[i].split("=")[1]);
@@ -178,7 +189,7 @@ public class VirtualAP implements Observer {
             }
             return 0;
         } else {
-            System.out.println("Error in physical interface information filling.");
+            Log.print(Cmds.ERROR, "Error in physical interface information filling.");
             return 1;
         }
     }
@@ -235,7 +246,7 @@ public class VirtualAP implements Observer {
                 String[] rates = line.split("=")[1].split(" ");
                 supported_rates = new int[rates.length];
                 for (int j = 0; j < rates.length; j++) {
-                    supported_rates[j] = Integer.decode(rates[j]);
+                    supported_rates[j] = Integer.parseInt(rates[j], 16);
                 }
             }
         }
