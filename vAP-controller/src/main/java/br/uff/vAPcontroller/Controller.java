@@ -5,12 +5,13 @@ import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Controller {
 
-    private ArrayList<AP> phy_aps;
+    private HashMap<String, AP> phy_aps;
     private CommunicationHandler comm;
     private TransactionHandler thand;
     private static Controller c;
@@ -18,7 +19,7 @@ public class Controller {
     private long updateTimeMillis = 1000;
 
     public Controller() {
-        this.phy_aps = new ArrayList<>();
+        this.phy_aps = new HashMap<>();
     }
 
     public static Controller getInstance() {
@@ -31,7 +32,8 @@ public class Controller {
     public void begin() throws InterruptedException {
         try {
             thand = new TransactionHandler();
-            phy_aps.add(new AP("AP@1", InetAddress.getByName("127.0.0.1"), 8888, thand));
+            phy_aps.put("AP@1", new AP("AP@1", InetAddress.getByName("127.0.0.1"), 8888, thand));
+            phy_aps.put("AP@2", new AP("AP@2", InetAddress.getByName("192.168.1.145"), 8888, thand));
             updateLoop();
         } catch (UnknownHostException ex) {
             Log.print(Cmds.ERROR, "Unknown IP format");
@@ -43,7 +45,7 @@ public class Controller {
     public void updateLoop() throws InterruptedException {
         while (true) {
             Log.print(Cmds.DEBUG_INFO, "Update loop is RUNNING");
-            for (AP ap : phy_aps) {
+            for (AP ap : phy_aps.values()) {
                 ap.requestInterfaces();
                 ap.vAPUpdate();
             }
@@ -54,13 +56,27 @@ public class Controller {
 //        }
     }
 
-    public void migrateVAP(AP source, AP dest, VirtualAP target) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-
+    public void migrateVAP(String src_ap_id, String dst_ap_id, String target_vap) {
+        
     }
 
     public String sendRequest() {
         return "GOT A REQUEST!!";
     }
 
+    public AP getAPById(String id) {
+        if (phy_aps.containsKey(id)) {
+            return phy_aps.get(id);
+        } else {
+            return null;
+        }
+    }
+
+    public ArrayList<AP> getAllAPs() {
+        if (phy_aps != null && phy_aps.size() > 0) {
+            return new ArrayList<>(phy_aps.values());
+        } else {
+            return null;
+        }
+    }
 }

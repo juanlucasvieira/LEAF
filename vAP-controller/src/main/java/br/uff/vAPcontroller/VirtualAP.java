@@ -13,7 +13,6 @@ public class VirtualAP implements Observer {
     private String v_iface_name;
     private String vap_id;
     private String bss_id;
-    private int ctrl_port;
     private String ssid;
     private Station sta;
     private short num_sta;
@@ -38,7 +37,7 @@ public class VirtualAP implements Observer {
             case Cmds.REQ_STATUS_INFO:
                 parseStatusInfo(t.getResponse());
                 break;
-            case Cmds.REQ_ALL_STA_INFO:
+            case Cmds.REQ_FIRST_STA_INFO:
                 parseStaInfo(t.getResponse());
                 break;
         }
@@ -53,7 +52,7 @@ public class VirtualAP implements Observer {
         } else {
             handler.pushTransaction(new Transaction(this.vap_id, Cmds.REQ_STATUS_INFO, this.ctrl_iface));
             if (num_sta == 1) {
-                handler.pushTransaction(new Transaction(this.vap_id, Cmds.REQ_ALL_STA_INFO, ctrl_iface));
+                handler.pushTransaction(new Transaction(this.vap_id, Cmds.REQ_FIRST_STA_INFO, ctrl_iface));
             }
         }
     }
@@ -223,6 +222,12 @@ public class VirtualAP implements Observer {
                 authorized = false, short_preamble = false;
         short aid = -1;
         int capability = -1, listen_interval = -1;
+        long rx_packets = -1, tx_packets = -1, rx_bytes = -1, tx_bytes = -1;
+        long inactive_msec = -1;
+        int signal = 0;
+        int rx_rate_info = 0;
+        int tx_rate_info = 0;
+        long connected_time= -1;
         int[] supported_rates = null;
         for (int i = 1; i < lines.length; i++) {
             String line = lines[i];
@@ -248,6 +253,24 @@ public class VirtualAP implements Observer {
                 for (int j = 0; j < rates.length; j++) {
                     supported_rates[j] = Integer.parseInt(rates[j], 16);
                 }
+            } else if (line.startsWith("rx_packets=")) {
+                rx_packets = Long.parseLong(line.split("=")[1]);
+            } else if (line.startsWith("tx_packets=")) {
+                tx_packets = Long.parseLong(line.split("=")[1]);
+            } else if (line.startsWith("rx_bytes=")) {
+                rx_bytes = Long.parseLong(line.split("=")[1]);
+            } else if (line.startsWith("tx_bytes=")) {
+                tx_bytes = Long.parseLong(line.split("=")[1]);
+            } else if (line.startsWith("inactive_msec=")) {
+                inactive_msec = Long.parseLong(line.split("=")[1]);
+            } else if (line.startsWith("signal=")) {
+                signal = Integer.parseInt(line.split("=")[1]);
+            } else if (line.startsWith("rx_rate_info=")) {
+                rx_rate_info = Integer.parseInt(line.split("=")[1]);
+            } else if (line.startsWith("tx_rate_info=")) {
+                tx_rate_info = Integer.parseInt(line.split("=")[1]);
+            } else if (line.startsWith("connected_time=")) {
+                connected_time = Long.parseLong(line.split("=")[1]);
             }
         }
         if ((supported_rates != null && supported_rates.length > 0)
@@ -261,8 +284,18 @@ public class VirtualAP implements Observer {
                 sta.setAuthenticated(auth);
                 sta.setAuthorized(authorized);
                 sta.setCapabilities(capability);
+                sta.setShort_preamble(short_preamble);
                 sta.setSupportedRates(supported_rates);
                 sta.setListenInterval(listen_interval);
+                sta.setRx_bytes(rx_bytes);
+                sta.setTx_bytes(tx_bytes);
+                sta.setRx_packets(rx_packets);
+                sta.setTx_packets(tx_packets);
+                sta.setInactive_msec(inactive_msec);
+                sta.setSignal(signal);
+                sta.setTx_rate_info(tx_rate_info);
+                sta.setRx_rate_info(rx_rate_info);
+                sta.setConnected_time(connected_time);
             } else {
                 System.out.println("Error while parsing STA information.");
             }
@@ -272,4 +305,42 @@ public class VirtualAP implements Observer {
     public void changePhyIface(PhyIface newIface) {
         this.phy = newIface;
     }
+
+    public CtrlInterface getCtrl_iface() {
+        return ctrl_iface;
+    }
+
+    public PhyIface getPhy() {
+        return phy;
+    }
+
+    public String getV_iface_name() {
+        return v_iface_name;
+    }
+
+    public String getVap_id() {
+        return vap_id;
+    }
+
+    public String getBss_id() {
+        return bss_id;
+    }
+
+    public String getSsid() {
+        return ssid;
+    }
+
+    public Station getSta() {
+        return sta;
+    }
+
+    public short getNum_sta() {
+        return num_sta;
+    }
+
+    public short getMax_sta_num() {
+        return max_sta_num;
+    }
+    
+    
 }

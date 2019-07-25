@@ -38,10 +38,18 @@ public class AP implements Observer {
         return gci.getIp().getHostAddress() + "#" + gci.getPort();
     }
 
+    public CtrlInterface getGci() {
+        return gci;
+    }
+
     public void vAPUpdate() {
         for (VirtualAP vap : vaps.values()) {
             vap.update(handler);
         }
+    }
+
+    public HashMap<String, VirtualAP> getVaps() {
+        return vaps;
     }
 
     public void requestInterfaces() {
