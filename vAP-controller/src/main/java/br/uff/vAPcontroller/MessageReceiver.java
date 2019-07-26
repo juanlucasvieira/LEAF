@@ -26,7 +26,7 @@ public class MessageReceiver extends Thread {
     public void run() {
         while (true) {
             try {
-                Log.print(Cmds.DEBUG_INFO, "Listening for messages...");
+                Log.print(Log.DEBUG_INFO, "Listening for messages...");
                 byte[] resp_buffer = new byte[2048];
                 DatagramPacket response = new DatagramPacket(resp_buffer, resp_buffer.length);
                 socket.receive(response);

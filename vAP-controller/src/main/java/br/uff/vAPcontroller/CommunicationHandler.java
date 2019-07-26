@@ -15,7 +15,8 @@ import java.util.logging.Logger;
 public class CommunicationHandler implements ReceiveCallback {
 
 //    DatagramSocket socket;
-    DatagramSocket recv_socket;
+    DatagramSocket asyncSocket;
+    DatagramSocket synchronousSocket;
 
     MessageReceiver receiver;
 
@@ -27,7 +28,9 @@ public class CommunicationHandler implements ReceiveCallback {
         try {
 //            this.socket = new DatagramSocket();
             this.handler = handler;
-            this.recv_socket = new DatagramSocket(null);
+            this.asyncSocket = new DatagramSocket(null);
+            this.synchronousSocket = new DatagramSocket(null);
+            this.synchronousSocket.bind(new InetSocketAddress(Cmds.SEND_LISTEN_PORT_SYNC));
         } catch (SocketException ex) {
             Logger.getLogger(CommunicationHandler.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -37,29 +40,24 @@ public class CommunicationHandler implements ReceiveCallback {
     public void listen() {
         if (!listening) {
             try {
-                recv_socket.bind(new InetSocketAddress(Cmds.SEND_LISTEN_PORT));
-                receiver = new MessageReceiver(recv_socket, this);
+                asyncSocket.bind(new InetSocketAddress(Cmds.SEND_LISTEN_PORT_ASYNC));
+                receiver = new MessageReceiver(asyncSocket, this);
                 receiver.start();
                 listening = true;
             } catch (SocketException ex) {
-                Log.print(Cmds.ERROR, "SocketException: " + ex.getMessage());
+                Log.print(Log.ERROR, "SocketException: " + ex.getMessage());
             }
         }
     }
 
-    public void sendRequest(String tid, String msg, CtrlInterface iface) {
+    public void sendAsyncRequest(String tid, String msg, CtrlInterface iface) {
         try {
-            if (iface.isCookieSet()) {
-                msg = "TID=" + tid + " " + iface.getCookie() + " " + msg;
-            } else if (msg.contains(Cmds.GET_COOKIE)) {
-                msg = "TID=" + tid + " " + msg;
-            }
-            byte[] msg_byte = msg.getBytes();
-            Log.print(Cmds.DEBUG_INFO, "Sending message to " + iface.toString() + " :\n" + msg);
-            DatagramPacket req_pckt = new DatagramPacket(msg_byte, msg_byte.length, iface.getIp(), iface.getPort());
-            recv_socket.send(req_pckt);
+            byte[] msgBytes = buildRequestStructure(tid, msg, iface);
+            Log.print(Log.DEBUG_INFO, "Sending message to " + iface.toString() + " :\n" + msg);
+            DatagramPacket req_pckt = new DatagramPacket(msgBytes, msgBytes.length, iface.getIp(), iface.getPort());
+            asyncSocket.send(req_pckt);
         } catch (IOException ex) {
-            Logger.getLogger(CommunicationHandler.class.getName()).log(Level.SEVERE, null, ex);
+            Log.print(Log.ERROR, "Error while sending message to " + iface.toString() + " :\n" + msg + "\n" + ex.getMessage());
         }
     }
 
@@ -70,7 +68,7 @@ public class CommunicationHandler implements ReceiveCallback {
     @Override
     public void receiveCallback(DatagramPacket dp) {
         //  TODO: Do something with received answer.
-        Log.print(Cmds.DEBUG_INFO, "Received message from "
+        Log.print(Log.DEBUG_INFO, "Received message from "
                 + dp.getAddress().getHostName() + ":" + dp.getPort() + ":\n"
                 + new String(dp.getData(), 0, dp.getLength()));
         handler.processMessage(new String(dp.getData(), 0, dp.getLength()));
@@ -78,5 +76,32 @@ public class CommunicationHandler implements ReceiveCallback {
 
 //        System.exit(0);
 //        receiver.run();
+    }
+
+    String sendSyncRequest(String tid, String request, CtrlInterface destination) {
+        try {
+            byte[] msgBytes = buildRequestStructure(tid, request, destination);
+            Log.print(Log.DEBUG_INFO, "Sending message to " + destination.toString() + " :\n" + request);
+            DatagramPacket req_pckt = new DatagramPacket(msgBytes, msgBytes.length, destination.getIp(), destination.getPort());
+            synchronousSocket.send(req_pckt);
+            byte[] resp_buffer = new byte[2048];
+            DatagramPacket response = new DatagramPacket(resp_buffer, resp_buffer.length);
+            synchronousSocket.receive(response);
+            return new String(response.getData(), 0, response.getLength());
+        } catch (IOException ex) {
+            Log.print(Log.ERROR, "Error while sending message to " + destination.toString() + " :\n" + request);
+            return null;
+        }
+    }
+
+    private byte[] buildRequestStructure(String tid, String msg, CtrlInterface iface) throws IOException {
+        if (iface.isCookieSet()) {
+            msg = "TID=" + tid + " " + iface.getCookie() + " " + msg;
+        } else if (msg.contains(Cmds.GET_COOKIE)) {
+            msg = "TID=" + tid + " " + msg;
+        } else {
+            throw new IOException("Message Cookie is not set (Only cookie requests messages can be sent without a cookie)");
+        }
+        return msg.getBytes();
     }
 }

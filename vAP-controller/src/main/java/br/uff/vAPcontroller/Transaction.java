@@ -4,18 +4,23 @@ import br.uff.vAPcontroller.CtrlInterface;
 import java.util.UUID;
 
 public class Transaction {
-    
+
     private String tid;
     private String claimant;
     private String request;
     private String response;
     private CtrlInterface destination;
-    
-    public Transaction(String claimant, String request, CtrlInterface destination){
+    private boolean synchronous;
+
+    public static final boolean SYNCHRONOUS = true;
+    public static final boolean ASYNC = false;
+
+    public Transaction(String claimant, String request, CtrlInterface destination, boolean synchronous) {
         this.claimant = claimant;
         this.tid = UUID.randomUUID().toString().replaceAll("-", "");
         this.request = request;
         this.destination = destination;
+        this.synchronous = synchronous;
     }
 
     public CtrlInterface getDestination() {
@@ -33,7 +38,7 @@ public class Transaction {
     public String getRequest() {
         return request;
     }
-    
+
     public String getResponse() {
         return response;
     }
@@ -41,18 +46,22 @@ public class Transaction {
     public void setResponse(String response) {
         this.response = response;
     }
-    
+
     @Override
-    public String toString(){
-        String s = "TID: "+tid+"\n";
-        s += "Claimant: " + claimant +"\n";
+    public String toString() {
+        String s = "TID: " + tid + "\n";
+        s += "Claimant: " + claimant + "\n";
         s += "Request: " + request + "\n";
-        if(response != null){
+        if (response != null) {
             s += "Response: " + response + "\n";
         }
-        if(destination != null){
-            s += destination.toString();
+        if (destination != null) {
+            s += "Destination: " + destination.toString();
         }
         return s;
+    }
+
+    public boolean isSynchronous() {
+        return synchronous;
     }
 }

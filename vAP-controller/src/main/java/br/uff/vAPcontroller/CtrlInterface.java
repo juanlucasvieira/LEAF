@@ -124,6 +124,6 @@ public class CtrlInterface implements Observer {
         if (!handler.isObserverRegistered(this)) {
             handler.registerObserver(this);
         }
-        handler.pushTransaction(new Transaction(this.id, Cmds.GET_COOKIE, this));
+        handler.pushAsyncTransaction(new Transaction(this.id, Cmds.GET_COOKIE, this, Transaction.ASYNC));
     }
 }

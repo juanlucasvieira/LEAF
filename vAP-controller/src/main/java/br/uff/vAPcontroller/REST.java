@@ -63,11 +63,11 @@ public class REST {
                                     @PathVariable("vap_id") String vap_id,
                                     @PathVariable("ap_dst_id") String ap_dst_id) {
 
-        AP ap = c.getAPById(id);
-        if (ap == null) {
+//        AP ap = c.getAPById(id);
+//        if (ap == null) {
             return ResponseEntity.notFound().build();
-        } else {
-            return ResponseEntity.ok().build();
-        }
+//        } else {
+//            return ResponseEntity.ok().build();
+//        }
     }
 }

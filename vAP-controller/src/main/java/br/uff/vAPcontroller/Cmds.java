@@ -19,9 +19,6 @@ public class Cmds {
     
     public static final boolean DEBUG_LOG_LEVEL = true;
     
-    public static int INFO = 1;
-    public static int DEBUG_INFO = 2;
-    public static int ERROR = 3;
-    
-    public static int SEND_LISTEN_PORT = 9999;
+    public static final int SEND_LISTEN_PORT_ASYNC = 9999;
+    public static final int SEND_LISTEN_PORT_SYNC = 9998;
 }

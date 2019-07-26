@@ -16,7 +16,7 @@ public class TransactionHandler {
 
     private CommunicationHandler comm;
     private HashMap<String, Observer> observers = new HashMap<>();
-    private HashMap<String, Transaction> transactions = new HashMap();
+    private HashMap<String, Transaction> asyncTransactions = new HashMap();
 
     public TransactionHandler() {
         this.comm = new CommunicationHandler(this);
@@ -31,27 +31,26 @@ public class TransactionHandler {
 
     public void registerObserver(Observer o) {
         observers.put(o.getId(), o);
-
     }
 
     public void processTransactionAnswer(String tid, String response) {
-        Transaction t = transactions.get(tid);
+        Transaction t = asyncTransactions.get(tid);
         t.setResponse(response);
         Observer o = observers.get(t.getClaimantID());
         if (t == null) {
-            Log.print(Cmds.ERROR, "Received answer: Transaction not found.");
+            Log.print(Log.ERROR, "Received answer: Transaction not found.");
             return;
         }
         if (o == null) {
-            Log.print(Cmds.ERROR, "Received answer: Claimant not found.");
+            Log.print(Log.ERROR, "Received answer: Claimant not found.");
             return;
         }
         o.notify(t);
-        transactions.remove(tid);
+        asyncTransactions.remove(tid);
     }
 
     public Transaction getTransByID(String TID) {
-        return transactions.get(TID);
+        return asyncTransactions.get(TID);
     }
 
     public boolean isObserverRegistered(Observer o) {
@@ -59,15 +58,22 @@ public class TransactionHandler {
         return observer != null;
     }
 
-    public boolean pushTransaction(Transaction t) {
+    public boolean pushAsyncTransaction(Transaction t) {
         if (observers.containsKey(t.getClaimantID())) {
-            transactions.put(t.getTID(), t);
-            Log.print(Cmds.DEBUG_INFO, "Sending Transaction: \n" + t.toString());
-            comm.sendRequest(t.getTID(), t.getRequest(), t.getDestination());
+            asyncTransactions.put(t.getTID(), t);
+            Log.print(Log.DEBUG_INFO, "Sending Transaction: \n" + t.toString());
+            comm.sendAsyncRequest(t.getTID(), t.getRequest(), t.getDestination());
             return true;
         } else {
-            Log.print(Cmds.ERROR, "Error: Push Transaction from unknown Claimant: \n" + t.toString());
+            Log.print(Log.ERROR, "Error: Push Transaction from unknown Claimant: \n" + t.toString());
             return false;
         }
+    }
+
+    public Transaction pushSynchronousTransaction(Transaction t) {
+        Log.print(Log.DEBUG_INFO, "Sending Synchronous Transaction: \n" + t.toString());
+        String answer = comm.sendSyncRequest(t.getTID(), t.getRequest(), t.getDestination());
+        t.setResponse(answer);
+        return t;
     }
 }

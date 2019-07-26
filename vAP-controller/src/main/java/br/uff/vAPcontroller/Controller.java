@@ -33,10 +33,10 @@ public class Controller {
         try {
             thand = new TransactionHandler();
             phy_aps.put("AP@1", new AP("AP@1", InetAddress.getByName("127.0.0.1"), 8888, thand));
-            phy_aps.put("AP@2", new AP("AP@2", InetAddress.getByName("192.168.1.145"), 8888, thand));
+//            phy_aps.put("AP@2", new AP("AP@2", InetAddress.getByName("192.168.1.145"), 8888, thand));
             updateLoop();
         } catch (UnknownHostException ex) {
-            Log.print(Cmds.ERROR, "Unknown IP format");
+            Log.print(Log.ERROR, "Unknown IP format");
         } catch (IOException ex) {
             Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -44,10 +44,9 @@ public class Controller {
 
     public void updateLoop() throws InterruptedException {
         while (true) {
-            Log.print(Cmds.DEBUG_INFO, "Update loop is RUNNING");
+            Log.print(Log.DEBUG_INFO, "Update loop is RUNNING");
             for (AP ap : phy_aps.values()) {
-                ap.requestInterfaces();
-                ap.vAPUpdate();
+                ap.requestInfo();
             }
             Thread.sleep(updateTimeMillis);
         }
@@ -56,9 +55,12 @@ public class Controller {
 //        }
     }
 
-    public void migrateVAP(String src_ap_id, String dst_ap_id, String target_vap) {
-        
-    }
+//    public int migrateVAP(String src_ap_id, String dst_ap_id, String target_vap) {
+//        AP src = phy_aps.get(src_ap_id);
+//        VirtualAP target = src.getVAPByID(target_vap);
+//        AP dst = phy_aps.get(dst_ap_id);
+//        
+//    }
 
     public String sendRequest() {
         return "GOT A REQUEST!!";
