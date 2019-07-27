@@ -16,6 +16,7 @@ public class Controller {
     private TransactionHandler thand;
     private static Controller c;
 
+    private boolean suspendUpdate = false;
     private long updateTimeMillis = 1000;
 
     public Controller() {
@@ -44,9 +45,11 @@ public class Controller {
 
     public void updateLoop() throws InterruptedException {
         while (true) {
-            Log.print(Log.DEBUG_INFO, "Update loop is RUNNING");
-            for (AP ap : phy_aps.values()) {
-                ap.requestInfo();
+            if (!suspendUpdate) {
+                Log.print(Log.DEBUG_INFO, "Update loop is RUNNING");
+                for (AP ap : phy_aps.values()) {
+                    ap.requestInfo();
+                }
             }
             Thread.sleep(updateTimeMillis);
         }
@@ -55,12 +58,62 @@ public class Controller {
 //        }
     }
 
-//    public int migrateVAP(String src_ap_id, String dst_ap_id, String target_vap) {
-//        AP src = phy_aps.get(src_ap_id);
-//        VirtualAP target = src.getVAPByID(target_vap);
-//        AP dst = phy_aps.get(dst_ap_id);
-//        
-//    }
+    public int migrateVAP(String src_ap_id, String dst_ap_id, String target_vap) {
+        AP src = getAPById(src_ap_id);
+        if (src == null) {
+            return -1;
+        }
+        PhyIface src_phy = src.getPhyByVAPId(target_vap);
+        if (src_phy == null) {
+            return -2; //Target not found in specified AP code.
+        }
+        VirtualAP target = src_phy.getVAPByID(target_vap);
+
+        AP dst = getAPById(dst_ap_id);
+        if (dst == null) {
+            return -3;
+        }
+        PhyIface dst_phy = dst.choosePhyIface(target); //Choose best physical interface??
+
+        suspendUpdate = true;
+
+        if (dst.VAPReceiveRequest(target, dst_phy)) {
+            Station movingSta = target.getSta();
+            if (target.getSta() != null) {
+                if (target.STAReceiveRequest(thand, movingSta)) { //Send STA injection request
+                    if (src_phy.channelEqualsTo(dst_phy)) { //Check fifferent channels
+                        if (target.sendCSARequest(thand, dst_phy.getFrequency(), Cmds.CSA_COUNT, true)) {
+                            return finishMigration(src, target);
+                        } else {
+                            return rollbackUnsuccessfulMigration(dst, target, Cmds.FAILED_TO_SEND_CSA);
+                        }
+                    } else {
+                        //TODO: Check connectivity before deleting?
+                        return finishMigration(src, target);
+                    }
+                } else {
+                    return rollbackUnsuccessfulMigration(dst, target, Cmds.STA_INJECTION_FAILED);
+                }
+            } else {
+                return finishMigration(src, target);
+            }
+        } else {
+            return rollbackUnsuccessfulMigration(dst, target, Cmds.VAP_INJECTION_FAILED);
+        }
+    }
+
+    //TODO: Verify correctness by request info update?
+    public int finishMigration(AP src_ap, VirtualAP target) {
+        int returnCode = (src_ap.deleteVAPRequest(target) ? Cmds.MIGRATION_SUCCESSFUL : Cmds.DEL_AP_FROM_OLD_VAP_FAILED);
+        suspendUpdate = false;
+        return returnCode;
+    }
+
+    public int rollbackUnsuccessfulMigration(AP dst, VirtualAP target, int errorCode) {
+        int returnCode = (dst.deleteVAPRequest(target) ? Cmds.MIGRATION_ROLLBACK_SUCCESSFUL * errorCode : Cmds.MIGRATION_ROLLBACK_FAILED * errorCode);
+        suspendUpdate = false;
+        return returnCode;
+    }
 
     public String sendRequest() {
         return "GOT A REQUEST!!";

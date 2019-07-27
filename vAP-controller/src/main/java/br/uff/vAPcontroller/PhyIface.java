@@ -64,15 +64,14 @@ public class PhyIface {
         }
         return null;
     }
-    
-    public void addVAP(VirtualAP vap){
+
+    public void addVAP(VirtualAP vap) {
         vaps.put(vap.getId(), vap);
     }
 
     public void setState(boolean state) {
         this.state = state;
     }
-    
 
     public int getFrequency() {
         return frequency;
@@ -107,9 +106,17 @@ public class PhyIface {
     }
 
     void update(TransactionHandler handler) {
-        for(VirtualAP vap : vaps.values()){
+        for (VirtualAP vap : vaps.values()) {
             vap.update(handler);
         }
+    }
+
+    public boolean channelEqualsTo(PhyIface other) {
+        return (this.channel == other.channel);
+    }
+
+    void removeVAP(String vapId) {
+        this.vaps.remove(vapId);
     }
 
 }

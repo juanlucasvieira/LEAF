@@ -23,7 +23,6 @@ public class VirtualAP implements Observer {
 //        this.num_sta = 0;
 //        this.max_sta_num = 1;
 //    }
-
     public VirtualAP(String id, String v_iface_name, String bss_id, CtrlInterface ctrl_iface, String ssid, short num_sta) {
         this.id = id;
         this.v_iface_name = v_iface_name;
@@ -62,6 +61,17 @@ public class VirtualAP implements Observer {
 
     public void checkConnectivityToSTA() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+    
+    //Fill with more options?
+    boolean sendCSARequest(TransactionHandler handler, int frequency, int count, boolean blocktx) {
+        Transaction t = handler.pushSynchronousTransaction(
+                new Transaction(this.getId(), Cmds.buildSendCSARequest(frequency, count, blocktx), this.getCtrl_iface(), Transaction.SYNCHRONOUS));
+        if (t.getResponse().equalsIgnoreCase("OK")) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     private void parseStaInfo(String response) {
@@ -181,8 +191,6 @@ public class VirtualAP implements Observer {
         this.num_sta = num_sta;
     }
 
-    
-
     public CtrlInterface getCtrl_iface() {
         return ctrl_iface;
     }
@@ -209,6 +217,16 @@ public class VirtualAP implements Observer {
 
     public short getMax_sta_num() {
         return max_sta_num;
+    }
+
+    public boolean STAReceiveRequest(TransactionHandler handler, Station movingSta) {
+        String request = Cmds.buildSTAReceiveRequest(movingSta);
+        Transaction t = handler.pushSynchronousTransaction(new Transaction(this.getId(), request, this.ctrl_iface, Transaction.SYNCHRONOUS));
+        if (t.getResponse().equalsIgnoreCase("OK")) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
 }

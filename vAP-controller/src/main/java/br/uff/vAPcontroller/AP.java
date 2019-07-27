@@ -123,8 +123,6 @@ public class AP implements Observer {
     public HashMap<String, CtrlInterface> getAvailableCtrlIfaces() {
         return availableCtrlIfaces;
     }
-    
-    
 
     private int parsePhyIfaceInfo(String[] lines, int endOfPhyIfaceInfo) {
         /*
@@ -206,6 +204,23 @@ public class AP implements Observer {
         }
     }
 
+    public VirtualAP getVAPById(String vap_id) {
+        for (PhyIface phy : phy_ifaces.values()) {
+            VirtualAP vap = phy.getVAPByID(vap_id);
+            if (vap != null) {
+                return vap;
+            } else {
+                Log.print(Log.ERROR, "VAP not found!");
+                return null;
+            }
+        }
+        return null;
+    }
+
+    public PhyIface getPhyByName(String phy_name) {
+        return phy_ifaces.get(phy_name);
+    }
+
     private void parseVAPsInfo(PhyIface phy, String[] lines, int startOfVAPInfo) {
         /*
         bss[0]=wlp9s0
@@ -252,4 +267,39 @@ public class AP implements Observer {
 //    private void parseVAPsInfo(PhyIface phy, String[] lines, int endOfPhyIfaceInfo) {
 //        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
 //    }
+    //TODO: Choose best physical iface
+    public PhyIface choosePhyIface(VirtualAP target) {
+        return phy_ifaces.entrySet().iterator().next().getValue();
+    }
+
+    public PhyIface getPhyByVAPId(String vap_id) {
+        for (PhyIface phy : phy_ifaces.values()) {
+            if (phy.getVAPByID(vap_id) != null) {
+                return phy;
+            } else {
+                Log.print(Log.ERROR, "Phy not found!");
+                return null;
+            }
+        }
+        return null;
+    }
+
+    //TODO: Check bssid duplication, ctrl_iface availability, etc.
+    boolean VAPReceiveRequest(VirtualAP target, PhyIface phy) {
+        String request = Cmds.buildVAPReceiveRequest(target, phy);
+        return sendSyncRequest(request);
+    }
+
+    boolean deleteVAPRequest(VirtualAP vap) {
+        return sendSyncRequest(Cmds.REMOVE_VAP + " " + vap.getV_iface_name());
+    }
+
+    private boolean sendSyncRequest(String request) {
+        Transaction t = handler.pushSynchronousTransaction(new Transaction(this.getId(), request, this.gci, Transaction.SYNCHRONOUS));
+        if (t.getResponse().equalsIgnoreCase("OK")) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }
