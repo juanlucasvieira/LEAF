@@ -13,6 +13,8 @@ public interface Observer {
     
     public String getId();
     
+    public CtrlInterface getCtrlIface();
+    
 //    public String sendRequest();
     
     public void notify(Transaction t);

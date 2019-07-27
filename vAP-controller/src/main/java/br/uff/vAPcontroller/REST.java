@@ -5,6 +5,8 @@
  */
 package br.uff.vAPcontroller;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 import org.springframework.http.ResponseEntity;
@@ -62,11 +64,17 @@ public class REST {
     public ResponseEntity migrateVAP(@PathVariable("ap_src_id") String ap_src_id,
             @PathVariable("vap_id") String vap_id,
             @PathVariable("ap_dst_id") String ap_dst_id) {
-
+        
+        Instant start = Instant.now();
         int returnCode = c.migrateVAP(ap_src_id, ap_dst_id, vap_id);
+        Instant finish = Instant.now();
+        long timeElapsed = Duration.between(start, finish).toMillis();  //in millis
+        System.out.println("MIGRATION TIME: "+ timeElapsed);
+        
         if (returnCode == 0) {
             return ResponseEntity.ok().build();
         } else {
+            Log.print(Log.ERROR, "Migration Return Code: " + returnCode);
             return ResponseEntity.notFound().build();
         }
     }

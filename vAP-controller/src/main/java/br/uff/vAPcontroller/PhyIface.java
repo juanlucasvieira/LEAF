@@ -117,6 +117,16 @@ public class PhyIface {
 
     void removeVAP(String vapId) {
         this.vaps.remove(vapId);
+        if (vaps.isEmpty()) {
+            state = false;
+        }
+    }
+
+    void removeVAP(VirtualAP vap) {
+        this.vaps.remove(vap.getId());
+        if (vaps.isEmpty()) {
+            state = false;
+        }
     }
 
 }

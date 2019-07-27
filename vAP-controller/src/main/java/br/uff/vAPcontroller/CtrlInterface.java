@@ -1,5 +1,6 @@
 package br.uff.vAPcontroller;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -124,6 +125,12 @@ public class CtrlInterface implements Observer {
         if (!handler.isObserverRegistered(this)) {
             handler.registerObserver(this);
         }
-        handler.pushAsyncTransaction(new Transaction(this.id, Cmds.GET_COOKIE, this, Transaction.ASYNC));
+        handler.pushAsyncTransaction(new Transaction(this.id, Cmds.GET_COOKIE, this));
+    }
+    
+    @JsonIgnore
+    @Override
+    public CtrlInterface getCtrlIface() {
+        return this;
     }
 }

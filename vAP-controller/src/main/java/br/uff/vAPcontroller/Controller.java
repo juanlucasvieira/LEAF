@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Level;
@@ -33,8 +35,8 @@ public class Controller {
     public void begin() throws InterruptedException {
         try {
             thand = new TransactionHandler();
-            phy_aps.put("AP@1", new AP("AP@1", InetAddress.getByName("127.0.0.1"), 8888, thand));
-//            phy_aps.put("AP@2", new AP("AP@2", InetAddress.getByName("192.168.1.145"), 8888, thand));
+            phy_aps.put("AP@1", new AP("AP@1", InetAddress.getByName("127.0.0.1"), 8000, thand));
+            phy_aps.put("AP@2", new AP("AP@2", InetAddress.getByName("192.168.1.145"), 8000, thand));
             updateLoop();
         } catch (UnknownHostException ex) {
             Log.print(Log.ERROR, "Unknown IP format");
@@ -59,6 +61,7 @@ public class Controller {
     }
 
     public int migrateVAP(String src_ap_id, String dst_ap_id, String target_vap) {
+
         AP src = getAPById(src_ap_id);
         if (src == null) {
             return -1;
@@ -77,42 +80,78 @@ public class Controller {
 
         suspendUpdate = true;
 
-        if (dst.VAPReceiveRequest(target, dst_phy)) {
+        int exitCode = 0;
+
+
+        exitCode = dst.vAPReceiveRequest(target, dst_phy);
+
+        if (exitCode == 0) {
             Station movingSta = target.getSta();
             if (target.getSta() != null) {
-                if (target.STAReceiveRequest(thand, movingSta)) { //Send STA injection request
-                    if (src_phy.channelEqualsTo(dst_phy)) { //Check fifferent channels
-                        if (target.sendCSARequest(thand, dst_phy.getFrequency(), Cmds.CSA_COUNT, true)) {
-                            return finishMigration(src, target);
+                exitCode = target.STAReceiveRequest(thand, movingSta); //Send STA injection request
+                if (exitCode == 0) {
+                    if (src_phy.channelEqualsTo(dst_phy)) { //Check different channels
+                        exitCode = target.sendCSARequest(thand, dst_phy.getFrequency(), Cmds.CSA_COUNT, true);
+                        if (exitCode == 0) {
+                            return finishMigration(src, dst, src_phy, dst_phy, target);
                         } else {
-                            return rollbackUnsuccessfulMigration(dst, target, Cmds.FAILED_TO_SEND_CSA);
+                            if (exitCode == Cmds.SYNC_REQUEST_TIMEOUT) {
+                                return rollbackUnsuccessfulMigration(dst, target, Cmds.SYNC_REQUEST_TIMEOUT);
+                            } else {
+                                return rollbackUnsuccessfulMigration(dst, target, Cmds.FAILED_TO_SEND_CSA);
+                            }
                         }
                     } else {
                         //TODO: Check connectivity before deleting?
-                        return finishMigration(src, target);
+                        return finishMigration(src, dst, src_phy, dst_phy, target);
                     }
                 } else {
-                    return rollbackUnsuccessfulMigration(dst, target, Cmds.STA_INJECTION_FAILED);
+                    if (exitCode == Cmds.SYNC_REQUEST_TIMEOUT) {
+                        return rollbackUnsuccessfulMigration(dst, target, Cmds.SYNC_REQUEST_TIMEOUT);
+                    } else {
+                        return rollbackUnsuccessfulMigration(dst, target, Cmds.STA_INJECTION_FAILED);
+                    }
                 }
             } else {
-                return finishMigration(src, target);
+                return finishMigration(src, dst, src_phy, dst_phy, target);
             }
         } else {
-            return rollbackUnsuccessfulMigration(dst, target, Cmds.VAP_INJECTION_FAILED);
+            if (exitCode == Cmds.SYNC_REQUEST_TIMEOUT) {
+//                suspendUpdate = false;
+                return Cmds.SYNC_REQUEST_TIMEOUT;
+            } else {
+                return Cmds.VAP_INJECTION_FAILED;
+            }
         }
     }
 
     //TODO: Verify correctness by request info update?
-    public int finishMigration(AP src_ap, VirtualAP target) {
-        int returnCode = (src_ap.deleteVAPRequest(target) ? Cmds.MIGRATION_SUCCESSFUL : Cmds.DEL_AP_FROM_OLD_VAP_FAILED);
-        suspendUpdate = false;
+    public int finishMigration(AP src_ap, AP dst_ap, PhyIface src, PhyIface dst, VirtualAP target) {
+        int returnCode = src_ap.deleteVAPRequest(target);
+        if (returnCode == Cmds.SYNC_REQUEST_OK) {
+            returnCode = Cmds.MIGRATION_SUCCESSFUL;
+            src.removeVAP(target);
+            dst.addVAP(target);
+        } else {
+            returnCode = Cmds.DEL_AP_FROM_OLD_VAP_FAILED;
+        }
+//        suspendUpdate = false;
         return returnCode;
     }
 
     public int rollbackUnsuccessfulMigration(AP dst, VirtualAP target, int errorCode) {
-        int returnCode = (dst.deleteVAPRequest(target) ? Cmds.MIGRATION_ROLLBACK_SUCCESSFUL * errorCode : Cmds.MIGRATION_ROLLBACK_FAILED * errorCode);
-        suspendUpdate = false;
+        int returnCode = dst.deleteVAPRequest(target);
+        if (returnCode == Cmds.SYNC_REQUEST_OK) {
+            returnCode = Cmds.MIGRATION_ROLLBACK_SUCCESSFUL * errorCode;
+        } else {
+            returnCode = Cmds.MIGRATION_ROLLBACK_FAILED * errorCode;
+        }
+//        suspendUpdate = false;
         return returnCode;
+    }
+
+    private boolean wasSuccessful(int code) {
+        return code == 0;
     }
 
     public String sendRequest() {

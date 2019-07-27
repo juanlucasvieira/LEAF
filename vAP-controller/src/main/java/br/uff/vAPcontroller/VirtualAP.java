@@ -1,6 +1,7 @@
 package br.uff.vAPcontroller;
 
 import java.net.InetAddress;
+import java.net.SocketTimeoutException;
 
 public class VirtualAP implements Observer {
 
@@ -54,7 +55,7 @@ public class VirtualAP implements Observer {
             ctrl_iface.requestCookie(handler);
         } else {
             if (num_sta == 1) {
-                handler.pushAsyncTransaction(new Transaction(this.id, Cmds.REQ_FIRST_STA_INFO, ctrl_iface, Transaction.ASYNC));
+                handler.pushAsyncTransaction(new Transaction(this.id, Cmds.REQ_FIRST_STA_INFO, ctrl_iface));
             }
         }
     }
@@ -62,16 +63,16 @@ public class VirtualAP implements Observer {
     public void checkConnectivityToSTA() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-    
+
+    public int STAReceiveRequest(TransactionHandler handler, Station movingSta) {
+        String request = Cmds.buildSTAReceiveRequest(movingSta);
+        return handler.sendSyncRequest(this, request);
+    }
+
     //Fill with more options?
-    boolean sendCSARequest(TransactionHandler handler, int frequency, int count, boolean blocktx) {
-        Transaction t = handler.pushSynchronousTransaction(
-                new Transaction(this.getId(), Cmds.buildSendCSARequest(frequency, count, blocktx), this.getCtrl_iface(), Transaction.SYNCHRONOUS));
-        if (t.getResponse().equalsIgnoreCase("OK")) {
-            return true;
-        } else {
-            return false;
-        }
+    public int sendCSARequest(TransactionHandler handler, int frequency, int count, boolean blocktx) {
+        String request = Cmds.buildSendCSARequest(frequency, count, blocktx);
+        return handler.sendSyncRequest(this, request);
     }
 
     private void parseStaInfo(String response) {
@@ -191,7 +192,7 @@ public class VirtualAP implements Observer {
         this.num_sta = num_sta;
     }
 
-    public CtrlInterface getCtrl_iface() {
+    public CtrlInterface getCtrlIface() {
         return ctrl_iface;
     }
 
@@ -217,16 +218,6 @@ public class VirtualAP implements Observer {
 
     public short getMax_sta_num() {
         return max_sta_num;
-    }
-
-    public boolean STAReceiveRequest(TransactionHandler handler, Station movingSta) {
-        String request = Cmds.buildSTAReceiveRequest(movingSta);
-        Transaction t = handler.pushSynchronousTransaction(new Transaction(this.getId(), request, this.ctrl_iface, Transaction.SYNCHRONOUS));
-        if (t.getResponse().equalsIgnoreCase("OK")) {
-            return true;
-        } else {
-            return false;
-        }
     }
 
 }

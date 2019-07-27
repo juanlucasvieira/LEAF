@@ -22,27 +22,34 @@ public class Cmds {
 
     public static final int SEND_LISTEN_PORT_ASYNC = 9999;
     public static final int SEND_LISTEN_PORT_SYNC = 9998;
-    
+
     //Error codes
     public static final int MIGRATION_SUCCESSFUL = 0;
     public static final int VAP_INJECTION_FAILED = 1;
     public static final int STA_INJECTION_FAILED = 2;
     public static final int FAILED_TO_SEND_CSA = 3;
     public static final int DEL_AP_FROM_OLD_VAP_FAILED = 4;
-    
+
+    public static final int SYNC_REQUEST_OK = 0;
+    public static final int SYNC_REQUEST_FAILED = 1;
+    public static final int SYNC_REQUEST_TIMEOUT = 9;
+
+    public static final String TIMEOUT = "TIMEOUT";
+
     public static final int MIGRATION_ROLLBACK_SUCCESSFUL = 1;
     public static final int MIGRATION_ROLLBACK_FAILED = -1;
 
     public static final int CSA_COUNT = 10;
 
-    public static String buildVAPReceiveRequest(VirtualAP target, PhyIface phy) {
-        return "ADD_BSS bss_config=" + phy.getIface_name()
-                + ":bss_params="
+    public static String buildVAPReceiveRequest(VirtualAP target, PhyIface dst_phy) {
+        return "ADD_BSS bss_config=" + dst_phy.getIface_name()
+                + ":bss_params=" + "\""
                 + "interface=" + target.getV_iface_name() + " "
                 + "ssid=" + target.getSsid() + " "
                 + "bssid=" + target.getBss_id() + " "
-                + "ctrl_interface=udp:" + target.getCtrl_iface().getPort() + " "
-                + "ctrl_interface_group=0";
+                + "ctrl_interface=udp:" + target.getCtrlIface().getPort() + " "
+                + "ctrl_interface_group=0" + " "
+                + "channel=" + dst_phy.getChannel() + "\"";
     }
 
     public static String buildSTAReceiveRequest(Station sta) {

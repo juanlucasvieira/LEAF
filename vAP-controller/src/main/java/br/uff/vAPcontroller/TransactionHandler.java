@@ -8,6 +8,9 @@ package br.uff.vAPcontroller;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.net.DatagramPacket;
+import java.net.SocketTimeoutException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @author juan
@@ -70,10 +73,33 @@ public class TransactionHandler {
         }
     }
 
-    public Transaction pushSynchronousTransaction(Transaction t) {
+    private Transaction pushSynchronousTransaction(Transaction t) {
         Log.print(Log.DEBUG_INFO, "Sending Synchronous Transaction: \n" + t.toString());
-        String answer = comm.sendSyncRequest(t.getTID(), t.getRequest(), t.getDestination());
-        t.setResponse(answer);
+        String reply;
+        try {
+            reply = comm.sendSyncRequest(t.getTID(), t.getRequest(), t.getDestination());
+            String tid = reply.substring(4, 36);
+            if (t.getTID().equals(tid)) {
+                String response = reply.substring(37, reply.length());
+                t.setResponse(response);
+            } else {
+                Log.print(Log.ERROR, "TID missmatch in synchronous transaction.");
+            }
+        } catch (SocketTimeoutException ex) {
+            t.setResponse(Cmds.TIMEOUT);
+        }
         return t;
     }
+
+    public int sendSyncRequest(Observer o, String request) {
+        Transaction t = pushSynchronousTransaction(new Transaction(o.getId(), request, o.getCtrlIface()));
+        if (t.getResponse() != null && t.getResponse().contains("OK")) {
+            return Cmds.SYNC_REQUEST_OK;
+        } else if (t.getResponse().equals(Cmds.TIMEOUT)) {
+            return Cmds.SYNC_REQUEST_TIMEOUT;
+        } else {
+            return Cmds.SYNC_REQUEST_FAILED;
+        }
+    }
+
 }

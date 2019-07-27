@@ -10,17 +10,12 @@ public class Transaction {
     private String request;
     private String response;
     private CtrlInterface destination;
-    private boolean synchronous;
 
-    public static final boolean SYNCHRONOUS = true;
-    public static final boolean ASYNC = false;
-
-    public Transaction(String claimant, String request, CtrlInterface destination, boolean synchronous) {
+    public Transaction(String claimant, String request, CtrlInterface destination) {
         this.claimant = claimant;
         this.tid = UUID.randomUUID().toString().replaceAll("-", "");
         this.request = request;
         this.destination = destination;
-        this.synchronous = synchronous;
     }
 
     public CtrlInterface getDestination() {
@@ -59,9 +54,5 @@ public class Transaction {
             s += "Destination: " + destination.toString();
         }
         return s;
-    }
-
-    public boolean isSynchronous() {
-        return synchronous;
     }
 }

@@ -6,6 +6,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -31,6 +32,7 @@ public class CommunicationHandler implements ReceiveCallback {
             this.asyncSocket = new DatagramSocket(null);
             this.synchronousSocket = new DatagramSocket(null);
             this.synchronousSocket.bind(new InetSocketAddress(Cmds.SEND_LISTEN_PORT_SYNC));
+            this.synchronousSocket.setSoTimeout(5000);
         } catch (SocketException ex) {
             Logger.getLogger(CommunicationHandler.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -78,7 +80,7 @@ public class CommunicationHandler implements ReceiveCallback {
 //        receiver.run();
     }
 
-    String sendSyncRequest(String tid, String request, CtrlInterface destination) {
+    String sendSyncRequest(String tid, String request, CtrlInterface destination) throws SocketTimeoutException {
         try {
             byte[] msgBytes = buildRequestStructure(tid, request, destination);
             Log.print(Log.DEBUG_INFO, "Sending message to " + destination.toString() + " :\n" + request);
@@ -87,9 +89,16 @@ public class CommunicationHandler implements ReceiveCallback {
             byte[] resp_buffer = new byte[2048];
             DatagramPacket response = new DatagramPacket(resp_buffer, resp_buffer.length);
             synchronousSocket.receive(response);
+            Log.print(Log.DEBUG_INFO, "Received message from "
+                    + response.getAddress().getHostName() + ":" + response.getPort() + ":\n"
+                    + new String(response.getData(), 0, response.getLength()));
             return new String(response.getData(), 0, response.getLength());
+        } catch (SocketTimeoutException timeout) {
+            throw timeout;
         } catch (IOException ex) {
-            Log.print(Log.ERROR, "Error while sending message to " + destination.toString() + " :\n" + request);
+            Log.print(Log.ERROR, "Error while sending message to " + destination.toString() + " :\n" + request
+                    + "\n");
+            ex.printStackTrace();
             return null;
         }
     }

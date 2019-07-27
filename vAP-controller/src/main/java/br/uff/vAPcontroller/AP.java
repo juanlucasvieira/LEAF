@@ -5,6 +5,7 @@ import br.uff.vAPcontroller.CtrlInterface;
 import br.uff.vAPcontroller.Observer;
 import br.uff.vAPcontroller.TransactionHandler;
 import java.net.InetAddress;
+import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,7 +42,8 @@ public class AP implements Observer {
         return gci.getIp().getHostAddress() + "#" + gci.getPort();
     }
 
-    public CtrlInterface getGci() {
+    @Override
+    public CtrlInterface getCtrlIface() {
         return gci;
     }
 
@@ -57,12 +59,12 @@ public class AP implements Observer {
         if (!gci.isCookieSet()) {
             gci.requestCookie(handler);
         } else {
-            handler.pushAsyncTransaction(new Transaction(this.ap_id, Cmds.GET_AP_IFACES, gci, Transaction.ASYNC));
+            handler.pushAsyncTransaction(new Transaction(this.ap_id, Cmds.GET_AP_IFACES, gci));
             for (CtrlInterface ctrl_iface : availableCtrlIfaces.values()) {
                 if (!ctrl_iface.isCookieSet()) {
                     ctrl_iface.requestCookie(handler);
                 } else {
-                    handler.pushAsyncTransaction(new Transaction(this.ap_id, Cmds.REQ_STATUS_INFO, ctrl_iface, Transaction.ASYNC));
+                    handler.pushAsyncTransaction(new Transaction(this.ap_id, Cmds.REQ_STATUS_INFO, ctrl_iface));
                 }
                 for (PhyIface phy : phy_ifaces.values()) {
                     phy.update(handler);
@@ -271,6 +273,17 @@ public class AP implements Observer {
     public PhyIface choosePhyIface(VirtualAP target) {
         return phy_ifaces.entrySet().iterator().next().getValue();
     }
+    
+    //TODO: Choose wisely the next available virtual iface name
+    public String getNextAvailableName(){
+        return UUID.randomUUID().toString().replaceAll("-", "");
+    }
+    
+    //TODO: Choose wisely the next available virtual iface name
+    public int getNextAvailableCtrlIfacePort(){
+        return 8000 + availableCtrlIfaces.size() + 1;
+    }
+   
 
     public PhyIface getPhyByVAPId(String vap_id) {
         for (PhyIface phy : phy_ifaces.values()) {
@@ -285,21 +298,13 @@ public class AP implements Observer {
     }
 
     //TODO: Check bssid duplication, ctrl_iface availability, etc.
-    boolean VAPReceiveRequest(VirtualAP target, PhyIface phy) {
+    int vAPReceiveRequest(VirtualAP target, PhyIface phy) {
         String request = Cmds.buildVAPReceiveRequest(target, phy);
-        return sendSyncRequest(request);
+        return handler.sendSyncRequest(this, request);
     }
 
-    boolean deleteVAPRequest(VirtualAP vap) {
-        return sendSyncRequest(Cmds.REMOVE_VAP + " " + vap.getV_iface_name());
-    }
-
-    private boolean sendSyncRequest(String request) {
-        Transaction t = handler.pushSynchronousTransaction(new Transaction(this.getId(), request, this.gci, Transaction.SYNCHRONOUS));
-        if (t.getResponse().equalsIgnoreCase("OK")) {
-            return true;
-        } else {
-            return false;
-        }
+    int deleteVAPRequest(VirtualAP vap) {
+        String request = Cmds.REMOVE_VAP + " " + vap.getV_iface_name();
+        return handler.sendSyncRequest(this, request);
     }
 }
