@@ -60,7 +60,7 @@ public class Controller {
 //        }
     }
 
-    public int migrateVAP(String src_ap_id, String dst_ap_id, String target_vap) {
+    public int migrateVAP(String src_ap_id, String dst_ap_id, String target_vap) throws InterruptedException {
 
         AP src = getAPById(src_ap_id);
         if (src == null) {
@@ -80,40 +80,45 @@ public class Controller {
 
         suspendUpdate = true;
 
-        int exitCode = 0;
+        int newPort = dst.getNextAvailableCtrlIfacePort();
 
-
-        exitCode = dst.vAPReceiveRequest(target, dst_phy);
+        int exitCode = dst.vAPReceiveRequest(target, dst_phy, newPort);
 
         if (exitCode == 0) {
-            Station movingSta = target.getSta();
-            if (target.getSta() != null) {
-                exitCode = target.STAReceiveRequest(thand, movingSta); //Send STA injection request
-                if (exitCode == 0) {
-                    if (src_phy.channelEqualsTo(dst_phy)) { //Check different channels
-                        exitCode = target.sendCSARequest(thand, dst_phy.getFrequency(), Cmds.CSA_COUNT, true);
-                        if (exitCode == 0) {
-                            return finishMigration(src, dst, src_phy, dst_phy, target);
-                        } else {
-                            if (exitCode == Cmds.SYNC_REQUEST_TIMEOUT) {
-                                return rollbackUnsuccessfulMigration(dst, target, Cmds.SYNC_REQUEST_TIMEOUT);
+            CtrlInterface newIface = new CtrlInterface(dst.getCtrlIface().getIp(), dst.getNextAvailableCtrlIfacePort());
+            if (newIface.requestCookieSync(thand) == 0) {
+                Station movingSta = target.getSta();
+                if (target.getSta() != null) {
+                    exitCode = dst.STAReceiveRequest(thand, movingSta, newIface); //Send STA injection request
+                    if (exitCode == 0) {
+                        if (!src_phy.channelEqualsTo(dst_phy)) { //Check different channels
+                            exitCode = target.sendCSARequest(thand, dst_phy.getFrequency(), Cmds.CSA_COUNT, true);
+                            if (exitCode == 0) {
+                                Thread.sleep(Cmds.CSA_COUNT * 100);
+                                return finishMigration(src, dst, src_phy, dst_phy, target, newIface);
                             } else {
-                                return rollbackUnsuccessfulMigration(dst, target, Cmds.FAILED_TO_SEND_CSA);
+                                if (exitCode == Cmds.SYNC_REQUEST_TIMEOUT) {
+                                    return rollbackUnsuccessfulMigration(dst, target, Cmds.SYNC_REQUEST_TIMEOUT);
+                                } else {
+                                    return rollbackUnsuccessfulMigration(dst, target, Cmds.FAILED_TO_SEND_CSA);
+                                }
                             }
+                        } else {
+                            //TODO: Check connectivity before deleting?
+                            return finishMigration(src, dst, src_phy, dst_phy, target, newIface);
                         }
                     } else {
-                        //TODO: Check connectivity before deleting?
-                        return finishMigration(src, dst, src_phy, dst_phy, target);
+                        if (exitCode == Cmds.SYNC_REQUEST_TIMEOUT) {
+                            return rollbackUnsuccessfulMigration(dst, target, Cmds.SYNC_REQUEST_TIMEOUT);
+                        } else {
+                            return rollbackUnsuccessfulMigration(dst, target, Cmds.STA_INJECTION_FAILED);
+                        }
                     }
                 } else {
-                    if (exitCode == Cmds.SYNC_REQUEST_TIMEOUT) {
-                        return rollbackUnsuccessfulMigration(dst, target, Cmds.SYNC_REQUEST_TIMEOUT);
-                    } else {
-                        return rollbackUnsuccessfulMigration(dst, target, Cmds.STA_INJECTION_FAILED);
-                    }
+                    return finishMigration(src, dst, src_phy, dst_phy, target, newIface);
                 }
             } else {
-                return finishMigration(src, dst, src_phy, dst_phy, target);
+                return rollbackUnsuccessfulMigration(dst, target, Cmds.STA_INJECTION_FAILED);
             }
         } else {
             if (exitCode == Cmds.SYNC_REQUEST_TIMEOUT) {
@@ -126,10 +131,11 @@ public class Controller {
     }
 
     //TODO: Verify correctness by request info update?
-    public int finishMigration(AP src_ap, AP dst_ap, PhyIface src, PhyIface dst, VirtualAP target) {
+    public int finishMigration(AP src_ap, AP dst_ap, PhyIface src, PhyIface dst, VirtualAP target, CtrlInterface newIface) {
         int returnCode = src_ap.deleteVAPRequest(target);
         if (returnCode == Cmds.SYNC_REQUEST_OK) {
             returnCode = Cmds.MIGRATION_SUCCESSFUL;
+            target.setCtrlIface(newIface);
             src.removeVAP(target);
             dst.addVAP(target);
         } else {

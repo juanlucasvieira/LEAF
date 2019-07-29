@@ -67,6 +67,9 @@ public class PhyIface {
 
     public void addVAP(VirtualAP vap) {
         vaps.put(vap.getId(), vap);
+        if (!vaps.isEmpty()) {
+            state = true;
+        }
     }
 
     public void setState(boolean state) {

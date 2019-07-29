@@ -63,7 +63,7 @@ public class REST {
     @PostMapping("/migrate/{vap_id}/from/{ap_src_id}/to/{ap_dst_id}")
     public ResponseEntity migrateVAP(@PathVariable("ap_src_id") String ap_src_id,
             @PathVariable("vap_id") String vap_id,
-            @PathVariable("ap_dst_id") String ap_dst_id) {
+            @PathVariable("ap_dst_id") String ap_dst_id) throws InterruptedException {
         
         Instant start = Instant.now();
         int returnCode = c.migrateVAP(ap_src_id, ap_dst_id, vap_id);

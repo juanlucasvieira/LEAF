@@ -128,6 +128,17 @@ public class CtrlInterface implements Observer {
         handler.pushAsyncTransaction(new Transaction(this.id, Cmds.GET_COOKIE, this));
     }
     
+    public int requestCookieSync(TransactionHandler handler) {
+        Transaction t = handler.pushSynchronousTransaction(new Transaction(this.id, Cmds.GET_COOKIE, this));
+        if(t.getResponse() != null && t.getResponse().contains("COOKIE=")){
+            this.setCookie(t.getResponse());
+            return Cmds.SYNC_REQUEST_OK;
+        } else if (t.getResponse().equals(Cmds.TIMEOUT)){
+            return Cmds.SYNC_REQUEST_TIMEOUT;
+        }
+        return Cmds.SYNC_REQUEST_FAILED;
+    }
+    
     @JsonIgnore
     @Override
     public CtrlInterface getCtrlIface() {

@@ -73,7 +73,7 @@ public class TransactionHandler {
         }
     }
 
-    private Transaction pushSynchronousTransaction(Transaction t) {
+    public Transaction pushSynchronousTransaction(Transaction t) {
         Log.print(Log.DEBUG_INFO, "Sending Synchronous Transaction: \n" + t.toString());
         String reply;
         try {
@@ -81,6 +81,7 @@ public class TransactionHandler {
             String tid = reply.substring(4, 36);
             if (t.getTID().equals(tid)) {
                 String response = reply.substring(37, reply.length());
+                Log.print(Log.DEBUG_INFO, "Sync Transaction Response:" + response);
                 t.setResponse(response);
             } else {
                 Log.print(Log.ERROR, "TID missmatch in synchronous transaction.");
@@ -91,8 +92,8 @@ public class TransactionHandler {
         return t;
     }
 
-    public int sendSyncRequest(Observer o, String request) {
-        Transaction t = pushSynchronousTransaction(new Transaction(o.getId(), request, o.getCtrlIface()));
+    public int sendSyncRequest(Observer o, String request, CtrlInterface iface) {
+        Transaction t = pushSynchronousTransaction(new Transaction(o.getId(), request, iface));
         if (t.getResponse() != null && t.getResponse().contains("OK")) {
             return Cmds.SYNC_REQUEST_OK;
         } else if (t.getResponse().equals(Cmds.TIMEOUT)) {
@@ -100,6 +101,10 @@ public class TransactionHandler {
         } else {
             return Cmds.SYNC_REQUEST_FAILED;
         }
+    }
+
+    public int sendSyncRequest(Observer o, String request) {
+        return sendSyncRequest(o, request, o.getCtrlIface());
     }
 
 }

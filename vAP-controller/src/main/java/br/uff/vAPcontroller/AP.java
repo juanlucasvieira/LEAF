@@ -52,6 +52,11 @@ public class AP implements Observer {
 //            vap.update(handler);
 //        }
 //    }
+    public int STAReceiveRequest(TransactionHandler handler, Station movingSta, CtrlInterface iface) {
+        String request = Cmds.buildSTAReceiveRequest(movingSta);
+        return handler.sendSyncRequest(this, request,iface);
+    }
+
     public void requestInfo() {
         if (!handler.isObserverRegistered(this)) {
             handler.registerObserver(this);
@@ -253,10 +258,12 @@ public class AP implements Observer {
             if (sta_number >= 0 && bss.length() > 0 && ssid.length() > 0) {
                 VirtualAP vap = phy.getVAPByName(v_iface_name);
                 if (vap == null) {
+                    String ctrlIfaceID = this.gci.getIp().getHostAddress() + ":" + port;
+                    CtrlInterface vapIface = availableCtrlIfaces.get(ctrlIfaceID);
                     phy.addVAP(new VirtualAP(UUID.randomUUID().toString().replaceAll("-", ""),
-                            v_iface_name, bss, new CtrlInterface(this.gci.getIp(), port), ssid, sta_number));
+                            v_iface_name, bss, vapIface, ssid, sta_number));
                 } else {
-                    vap.setNum_sta(sta_number);
+                    vap.setStaNumber(sta_number);
                     vap.setSsid(ssid);
                 }
             } else {
@@ -273,17 +280,16 @@ public class AP implements Observer {
     public PhyIface choosePhyIface(VirtualAP target) {
         return phy_ifaces.entrySet().iterator().next().getValue();
     }
-    
+
     //TODO: Choose wisely the next available virtual iface name
-    public String getNextAvailableName(){
+    public String getNextAvailableName() {
         return UUID.randomUUID().toString().replaceAll("-", "");
     }
-    
+
     //TODO: Choose wisely the next available virtual iface name
-    public int getNextAvailableCtrlIfacePort(){
+    public int getNextAvailableCtrlIfacePort() {
         return 8000 + availableCtrlIfaces.size() + 1;
     }
-   
 
     public PhyIface getPhyByVAPId(String vap_id) {
         for (PhyIface phy : phy_ifaces.values()) {
@@ -298,8 +304,8 @@ public class AP implements Observer {
     }
 
     //TODO: Check bssid duplication, ctrl_iface availability, etc.
-    int vAPReceiveRequest(VirtualAP target, PhyIface phy) {
-        String request = Cmds.buildVAPReceiveRequest(target, phy);
+    int vAPReceiveRequest(VirtualAP target, PhyIface phy, int newPort) {
+        String request = Cmds.buildVAPReceiveRequest(target, phy, newPort);
         return handler.sendSyncRequest(this, request);
     }
 

@@ -41,13 +41,13 @@ public class Cmds {
 
     public static final int CSA_COUNT = 10;
 
-    public static String buildVAPReceiveRequest(VirtualAP target, PhyIface dst_phy) {
+    public static String buildVAPReceiveRequest(VirtualAP target, PhyIface dst_phy, int port) {
         return "ADD_BSS bss_config=" + dst_phy.getIface_name()
                 + ":bss_params=" + "\""
                 + "interface=" + target.getV_iface_name() + " "
                 + "ssid=" + target.getSsid() + " "
                 + "bssid=" + target.getBss_id() + " "
-                + "ctrl_interface=udp:" + target.getCtrlIface().getPort() + " "
+                + "ctrl_interface=udp:" + port + " "
                 + "ctrl_interface_group=0" + " "
                 + "channel=" + dst_phy.getChannel() + "\"";
     }
@@ -55,14 +55,14 @@ public class Cmds {
     public static String buildSTAReceiveRequest(Station sta) {
 
         //add_sta_p b8:27:eb:b1:83:2d "aid=1 capability=33 supported_rates=130|132|11|22 listen_interval=10 flag_associated=1 flag_authenticated=1 flag_authorized=1"
-        return "ADD_STA_P " + sta.getMacAddress() + "\""
+        return "ADD_STA_P " + sta.getMacAddress() + " \""
                 + "aid=" + sta.getAid() + " "
                 + "capability=" + sta.getCapabilities() + " "
                 + "supported_rates=" + suppRatesToParam(sta.getSupportedRates()) + " "
                 + "listen_interval=" + sta.getListenInterval() + " "
                 + "flag_associated=" + (sta.isAssociated() ? 1 : 0) + " "
                 + "flag_authenticated=" + (sta.isAuthenticated() ? 1 : 0) + " "
-                + "flag_authorized=" + (sta.isAuthorized() ? 1 : 0);
+                + "flag_authorized=" + (sta.isAuthorized() ? 1 : 0) + "\"";
     }
 
     public static String suppRatesToParam(int[] supp_rates) {

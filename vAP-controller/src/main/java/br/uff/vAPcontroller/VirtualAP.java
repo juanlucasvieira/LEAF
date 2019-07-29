@@ -31,6 +31,7 @@ public class VirtualAP implements Observer {
         this.ctrl_iface = ctrl_iface;
         this.ssid = ssid;
         this.num_sta = num_sta;
+        this.max_sta_num = 1;
     }
 
     @Override
@@ -64,9 +65,8 @@ public class VirtualAP implements Observer {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    public int STAReceiveRequest(TransactionHandler handler, Station movingSta) {
-        String request = Cmds.buildSTAReceiveRequest(movingSta);
-        return handler.sendSyncRequest(this, request);
+    public void setCtrlIface(CtrlInterface c) {
+        this.ctrl_iface = c;
     }
 
     //Fill with more options?
@@ -116,11 +116,14 @@ public class VirtualAP implements Observer {
             if (line.startsWith("flags=")) {
                 if (line.contains("AUTHORIZED")) {
                     authorized = true;
-                } else if (line.contains("ASSOC")) {
+                }
+                if (line.contains("ASSOC")) {
                     assoc = true;
-                } else if (line.contains("AUTH")) {
+                }
+                if (line.contains("AUTH")) {
                     auth = true;
-                } else if (line.contains("SHORT_PREAMBLE")) {
+                }
+                if (line.contains("SHORT_PREAMBLE")) {
                     short_preamble = true;
                 }
             } else if (line.startsWith("aid=")) {
@@ -188,10 +191,14 @@ public class VirtualAP implements Observer {
         this.ssid = ssid;
     }
 
-    public void setNum_sta(short num_sta) {
+    public void setStaNumber(short num_sta) {
+        if (this.num_sta == 1 && num_sta == 0) {
+            removeSta();
+        }
         this.num_sta = num_sta;
     }
 
+    @Override
     public CtrlInterface getCtrlIface() {
         return ctrl_iface;
     }
@@ -218,6 +225,10 @@ public class VirtualAP implements Observer {
 
     public short getMax_sta_num() {
         return max_sta_num;
+    }
+
+    private void removeSta() {
+        this.sta = null;
     }
 
 }
