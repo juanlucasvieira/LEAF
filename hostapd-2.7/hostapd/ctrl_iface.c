@@ -1847,6 +1847,85 @@ static int hostapd_ctrl_iface_data_test_config(struct hostapd_data *hapd,
 }
 
 
+static int hostapd_send_frame(struct hostapd_data *hapd, char *cmd){
+	u8 dst[ETH_ALEN], src[ETH_ALEN];
+	char *pos;
+	char *aux_pos;
+	int used;
+	long int val;
+	u8 tos;
+	u8 buf[2 + HWSIM_PACKETLEN];
+	struct ether_header *eth;
+	struct iphdr *ip;
+	u8 *dpos;
+	unsigned int i;
+	const char *ifname;
+	struct l2_packet_data *packet_data;
+
+	/* format: <dst> <src> <ifname> */
+
+	pos = cmd;
+	used = hwaddr_aton2(pos, dst);
+	if (used < 0)
+		return -1;
+	pos += used;
+	while (*pos == ' ')
+		pos++;
+	used = hwaddr_aton2(pos, src);
+	if (used < 0)
+		return -1;
+	pos += used;
+
+	aux_pos = pos;
+	while (*aux_pos == ' ')
+		aux_pos++;
+
+	val = strtol(pos, NULL, 0);
+	if (val < 0 || val > 0xff)
+		return -1;
+	tos = val;
+
+	aux_pos = pos;
+	while (*aux_pos == ' ')
+		aux_pos++;
+
+	if (os_strncmp(aux_pos, "ifname=", 7) != 0) {
+		return -1;
+	}
+
+	aux_pos += 7;
+	ifname = aux_pos;
+
+	packet_data = l2_packet_init(ifname, hapd->own_addr,
+					ETHERTYPE_IP, hostapd_data_test_rx,
+					hapd, 1);
+
+	eth = (struct ether_header *) &buf[2];
+	os_memcpy(eth->ether_dhost, dst, ETH_ALEN);
+	os_memcpy(eth->ether_shost, src, ETH_ALEN);
+	eth->ether_type = htons(ETHERTYPE_IP);
+	ip = (struct iphdr *) (eth + 1);
+	os_memset(ip, 0, sizeof(*ip));
+	ip->ihl = 5;
+	ip->version = 4;
+	ip->ttl = 64;
+	ip->tos = tos;
+	ip->tot_len = htons(HWSIM_IP_LEN);
+	ip->protocol = 1;
+	ip->saddr = htonl(192U << 24 | 168 << 16 | 1 << 8 | 1);
+	ip->daddr = htonl(192U << 24 | 168 << 16 | 1 << 8 | 2);
+	ip->check = ipv4_hdr_checksum(ip, sizeof(*ip));
+	dpos = (u8 *) (ip + 1);
+	for (i = 0; i < HWSIM_IP_LEN - sizeof(*ip); i++)
+		*dpos++ = i;
+
+	if (l2_packet_send(packet_data, dst, ETHERTYPE_IP, &buf[2],
+			   HWSIM_PACKETLEN) < 0)
+		return -1;
+
+	return 0;
+}
+
 static int hostapd_ctrl_iface_data_test_tx(struct hostapd_data *hapd, char *cmd)
 {
 	u8 dst[ETH_ALEN], src[ETH_ALEN];
@@ -2954,6 +3033,9 @@ static int hostapd_ctrl_iface_receive_process(struct hostapd_data *hapd,
 	} else if (os_strncmp(buf, "ADD_STA_P ", 10) == 0) {
 		if (hostapd_ctrl_iface_add_sta(hapd, buf + 10, 0))
 			reply_len = -1;
+	} else if (os_strncmp(buf, "SEND_FRAME ", 11) == 0) {
+		if (hostapd_send_frame(hapd, buf + 11) < 0)
+			reply_len = -1;
 	} else if (os_strncmp(buf, "DEAUTHENTICATE ", 15) == 0) {
 		if (hostapd_ctrl_iface_deauthenticate(hapd, buf + 15))
 			reply_len = -1;
@@ -3429,6 +3511,7 @@ done:
 		reply_len = (reply_len + 4 + TID_LEN + 1);
 		reply = reply_tid;
 
+		//reply[reply_len - 1] = '\0'; //See if this resolves printing bug at log
 		wpa_printf(MSG_INFO, ">DEBUG: Reply Size %d",reply_len);
 		wpa_printf(MSG_INFO, ">DEBUG: REPLY: %s", reply);
 		tid_set = 0;

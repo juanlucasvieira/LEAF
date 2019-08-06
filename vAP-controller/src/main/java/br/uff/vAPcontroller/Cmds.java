@@ -45,6 +45,7 @@ public class Cmds {
         return "ADD_BSS bss_config=" + dst_phy.getIface_name()
                 + ":bss_params=" + "\""
                 + "interface=" + target.getV_iface_name() + " "
+                + "bridge=" + "vapbridge" + " "
                 + "ssid=" + target.getSsid() + " "
                 + "bssid=" + target.getBss_id() + " "
                 + "ctrl_interface=udp:" + port + " "
@@ -82,5 +83,11 @@ public class Cmds {
             s += " blocktx";
         }
         return s;
+    }
+
+    public static String buildSendFrameRequest(Station sta) {
+        // SEND_FRAME <dst> <src> <ifname>
+        return "SEND_FRAME ff:ff:ff:ff:ff:ff " + sta.getMacAddress() + " "
+                + "ifname=vapbridge";
     }
 }

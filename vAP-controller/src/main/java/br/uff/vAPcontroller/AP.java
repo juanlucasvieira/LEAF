@@ -20,6 +20,7 @@ public class AP implements Observer {
     private HashMap<String, CtrlInterface> availableCtrlIfaces;
     private String ap_id;
     private TransactionHandler handler;
+//    private String ether_ifname;
 
     public AP(String id, InetAddress ip, int port) {
 
@@ -31,6 +32,7 @@ public class AP implements Observer {
         this.handler = handler;
         this.availableCtrlIfaces = new HashMap<>();
         this.phy_ifaces = new HashMap<>();
+//        this.ether_ifname = ether_ifname;
     }
 
     @Override
@@ -54,7 +56,12 @@ public class AP implements Observer {
 //    }
     public int STAReceiveRequest(TransactionHandler handler, Station movingSta, CtrlInterface iface) {
         String request = Cmds.buildSTAReceiveRequest(movingSta);
-        return handler.sendSyncRequest(this, request,iface);
+        return handler.sendSyncRequest(this, request, iface);
+    }
+    
+    public int sendSTAFrameRequest(TransactionHandler handler, Station movingSta, CtrlInterface iface) {
+        String request = Cmds.buildSendFrameRequest(movingSta);
+        return handler.sendSyncRequest(this, request, iface);
     }
 
     public void requestInfo() {
@@ -280,6 +287,10 @@ public class AP implements Observer {
     public PhyIface choosePhyIface(VirtualAP target) {
         return phy_ifaces.entrySet().iterator().next().getValue();
     }
+    
+    public boolean isPhyIfacesEmpty(){
+        return phy_ifaces.isEmpty();
+    }
 
     //TODO: Choose wisely the next available virtual iface name
     public String getNextAvailableName() {
@@ -288,7 +299,7 @@ public class AP implements Observer {
 
     //TODO: Choose wisely the next available virtual iface name
     public int getNextAvailableCtrlIfacePort() {
-        return 8000 + availableCtrlIfaces.size() + 1;
+        return 9000 + availableCtrlIfaces.size() + 1;
     }
 
     public PhyIface getPhyByVAPId(String vap_id) {

@@ -35,8 +35,8 @@ public class Controller {
     public void begin() throws InterruptedException {
         try {
             thand = new TransactionHandler();
-            phy_aps.put("AP@1", new AP("AP@1", InetAddress.getByName("127.0.0.1"), 8000, thand));
-            phy_aps.put("AP@2", new AP("AP@2", InetAddress.getByName("192.168.1.145"), 8000, thand));
+            phy_aps.put("AP@1", new AP("AP@1", InetAddress.getByName("127.0.0.1"), 9000, thand));
+            phy_aps.put("AP@2", new AP("AP@2", InetAddress.getByName("192.168.1.142"), 9000, thand));
             updateLoop();
         } catch (UnknownHostException ex) {
             Log.print(Log.ERROR, "Unknown IP format");
@@ -62,6 +62,8 @@ public class Controller {
 
     public int migrateVAP(String src_ap_id, String dst_ap_id, String target_vap) throws InterruptedException {
 
+        Instant start = Instant.now();
+
         AP src = getAPById(src_ap_id);
         if (src == null) {
             return -1;
@@ -76,6 +78,10 @@ public class Controller {
         if (dst == null) {
             return -3;
         }
+        if(dst.isPhyIfacesEmpty()){
+            return -1;
+        }
+        
         PhyIface dst_phy = dst.choosePhyIface(target); //Choose best physical interface??
 
         suspendUpdate = true;
@@ -94,6 +100,11 @@ public class Controller {
                         if (!src_phy.channelEqualsTo(dst_phy)) { //Check different channels
                             exitCode = target.sendCSARequest(thand, dst_phy.getFrequency(), Cmds.CSA_COUNT, true);
                             if (exitCode == 0) {
+                                exitCode = dst.sendSTAFrameRequest(thand, movingSta, newIface);
+                                Log.print(Log.DEBUG_INFO, "sendSTAFrameRequest() exitCode: " + exitCode);
+                                Instant finish = Instant.now();
+                                long timeElapsed = Duration.between(start, finish).toMillis();  //in millis
+                                System.out.println("MIGRATION TIME W/O WAITING: " + timeElapsed);
                                 Thread.sleep(Cmds.CSA_COUNT * 100);
                                 return finishMigration(src, dst, src_phy, dst_phy, target, newIface);
                             } else {
