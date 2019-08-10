@@ -3436,6 +3436,8 @@ static void hostapd_ctrl_iface_receive(int sock, void *eloop_ctx,
 		return;
 	}
 
+	wpa_printf(MSG_INFO, ">DEBUG: Ctrl_iface command: %s", buf);
+
 #ifdef CONFIG_CTRL_IFACE_UDP
 	/* TID STUFF */
 	// Records the transaction ID in a variable
@@ -3466,8 +3468,12 @@ static void hostapd_ctrl_iface_receive(int sock, void *eloop_ctx,
 	if (os_memcmp(cookie, lcookie, COOKIE_LEN) != 0) {
 		wpa_printf(MSG_DEBUG,
 			   "CTRL: Invalid cookie in the request - drop request");
-		os_free(reply);
-		return;
+		// os_free(reply);
+		// return;
+		reply_len = 15;
+		os_memcpy(reply, "INVALID COOKIE", 14);
+		reply[reply_len - 1] = '\0';
+		goto done;
 	}
 
 	pos += 7 + (2 * COOKIE_LEN);
@@ -3511,17 +3517,20 @@ done:
 		reply_len = (reply_len + 4 + TID_LEN + 1);
 		reply = reply_tid;
 
-		//reply[reply_len - 1] = '\0'; //See if this resolves printing bug at log
-		wpa_printf(MSG_INFO, ">DEBUG: Reply Size %d",reply_len);
-		wpa_printf(MSG_INFO, ">DEBUG: REPLY: %s", reply);
 		tid_set = 0;
 	}
 #endif /* CONFIG_CTRL_IFACE_UDP */
+
 	if (sendto(sock, reply, reply_len, 0, (struct sockaddr *) &from,
 		   fromlen) < 0) {
 		wpa_printf(MSG_DEBUG, "CTRL: sendto failed: %s",
 			   strerror(errno));
 	}
+
+	reply[reply_len] = '\0'; //See if this resolves printing bug at log
+	wpa_printf(MSG_INFO, ">DEBUG: Reply Size %d",reply_len);
+	wpa_printf(MSG_INFO, ">DEBUG: REPLY: %s", reply);
+
 	os_free(reply);
 }
 
@@ -4236,8 +4245,10 @@ static void hostapd_global_ctrl_iface_receive(int sock, void *eloop_ctx,
 	if (os_memcmp(gcookie, lcookie, COOKIE_LEN) != 0) {
 		wpa_printf(MSG_DEBUG,
 			   "CTRL: Invalid cookie in the request - drop request");
-		os_free(reply);
-		return;
+		reply_len = 15;
+		os_memcpy(reply, "INVALID COOKIE", 14);
+		reply[reply_len - 1] = '\0';
+		goto send_reply;
 	}
 
 	buf += 7 + 2 * COOKIE_LEN;
@@ -4355,8 +4366,8 @@ send_reply:
 		reply_len = (reply_len + 4 + TID_LEN + 1);
 		reply = reply_tid;
 
-		wpa_printf(MSG_INFO, ">DEBUG: Reply Size %d",reply_len);
-		wpa_printf(MSG_INFO, ">DEBUG: REPLY: %s", reply);
+		
+
 		tid_set = 0;
 	}
 	#endif //CONFIG_CTRL_IFACE_UDP
@@ -4366,6 +4377,11 @@ send_reply:
 		wpa_printf(MSG_DEBUG, "CTRL: sendto failed: %s",
 			   strerror(errno));
 	}
+
+	reply[reply_len - 1] = '\0'; //See if this resolves printing bug at log
+	wpa_printf(MSG_INFO, ">DEBUG: Reply Size %d",reply_len);
+	wpa_printf(MSG_INFO, ">DEBUG: REPLY: %s", reply);
+
 	os_free(reply);
 	#ifdef CONFIG_CTRL_IFACE_UDP
 	if(tid_set){

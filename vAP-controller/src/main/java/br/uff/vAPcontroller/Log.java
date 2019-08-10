@@ -18,6 +18,8 @@ public class Log {
     public static void print(int messageType, String msg) {
         if (messageType == DEBUG_INFO && Cmds.DEBUG_LOG_LEVEL) {
             System.out.println(" > " + msg);
+        } else if (messageType == ERROR) {
+            System.out.println("!!ERROR!! : " + msg);
         } else {
             System.out.println(" > " + msg);
         }

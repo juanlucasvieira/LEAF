@@ -40,7 +40,7 @@ public class PhyIface {
         this.iface_name = iface_name;
     }
 
-    public boolean isState() {
+    public boolean isEnabled() {
         return state;
     }
 

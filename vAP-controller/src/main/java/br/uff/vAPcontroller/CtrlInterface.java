@@ -6,6 +6,9 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -18,11 +21,14 @@ public class CtrlInterface implements Observer {
     private String id;
     DatagramPacket request;
     DatagramPacket response;
+    private AtomicBoolean attached;
 
     public CtrlInterface(InetAddress ip, int port) {
         this.ip = ip;
         this.port = port;
         id = ip.getHostAddress() + ":" + port;
+        this.attached = new AtomicBoolean();
+        this.attached.set(false);
     }
 
 //    public void bind() {
@@ -57,58 +63,25 @@ public class CtrlInterface implements Observer {
         return null;
     }
 
+    public boolean isAttached() {
+        return attached.get();
+    }
+
     public boolean isCookieSet() {
         return (cookie != null && cookie.length() > 0);
+    }
+
+    public void invalidate() {
+        cookie = null;
     }
 
     private void setCookie(String c) {
         if (c.startsWith("COOKIE=")) {
             c.replaceFirst("COOKIE=", "").trim();
+            this.cookie = c;
         }
-        this.cookie = c;
     }
 
-//    public Transaction buildCookieRequest(){
-//        
-//    }
-//    public void cookieRequest(){
-//        try {
-//            byte[] msg = "GET_COOKIE".getBytes();
-//            request = new DatagramPacket(msg, msg.length, ip, port);
-//            udp_socket.send(request);
-//            byte[] buffer = new byte[512];
-//            response = new DatagramPacket(buffer, buffer.length);
-//            udp_socket.receive(response);
-//            String answer = new String(buffer, 0, response.getLength());
-//            if (sendReceive("GET_COOKIE").contains("COOKIE=")){
-//                cookie = answer;
-//            }
-//        } catch (SocketException e) {
-//            System.err.println(e);
-//        } catch (IOException ex) {
-//            Logger.getLogger(CtrlInterface.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-//    }
-//    public String sendReceive(String command){
-//        try {
-//            command = cookie + " " + command;
-//            byte[] msg = command.getBytes();
-//            request = new DatagramPacket(msg, msg.length, ip, port);
-//            udp_socket.send(request);
-//            byte[] buffer = new byte[512];
-//            response = new DatagramPacket(buffer, buffer.length);
-//            udp_socket.receive(response);
-//            return new String(buffer, 0, response.getLength());
-//        } catch (SocketException e) {
-//            System.err.println(e);
-//        } catch (IOException ex) {
-//            Logger.getLogger(CtrlInterface.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-//        return null;
-//    }
-//    public boolean checkConnectivity(){
-//        return sendReceive("PING").equals("PONG");
-//    }
     @Override
     public String getId() {
         return id;
@@ -118,7 +91,29 @@ public class CtrlInterface implements Observer {
     public void notify(Transaction t) {
         if (t.getRequest().equals(Cmds.GET_COOKIE)) {
             setCookie(t.getResponse());
+        } else if (t.getRequest().equals(Cmds.ATTACH)) {
+            if (t.getResponse().startsWith("OK")) {
+                attached.set(true);
+            }
+        } else if (t.getRequest().equals(Cmds.DETACH)) {
+            if (t.getResponse().startsWith("OK")) {
+                attached.set(false);
+            }
         }
+    }
+
+    public void attach(TransactionHandler handler) {
+        if (!handler.isObserverRegistered(this)) {
+            handler.registerObserver(this);
+        }
+        handler.pushAsyncTransaction(new Transaction(this.id, Cmds.ATTACH, this));
+    }
+
+    public void detach(TransactionHandler handler) {
+        if (!handler.isObserverRegistered(this)) {
+            handler.registerObserver(this);
+        }
+        handler.pushAsyncTransaction(new Transaction(this.id, Cmds.DETACH, this));
     }
 
     public void requestCookie(TransactionHandler handler) {
@@ -127,18 +122,36 @@ public class CtrlInterface implements Observer {
         }
         handler.pushAsyncTransaction(new Transaction(this.id, Cmds.GET_COOKIE, this));
     }
-    
+
+    public int attachSync(TransactionHandler handler) {
+        if (!handler.isObserverRegistered(this)) {
+            handler.registerObserver(this);
+        }
+        handler.pushAsyncTransaction(new Transaction(this.id, Cmds.ATTACH, this));
+
+        long elapsedTime = 0;
+        Instant start = Instant.now();
+
+        while (!(elapsedTime > Cmds.SYNC_TIMEOUT_MILLIS)) {
+            if (this.attached.get()) {
+                return Cmds.SYNC_REQUEST_OK;
+            }
+            elapsedTime = Duration.between(start, Instant.now()).toMillis();
+        }
+        return Cmds.SYNC_REQUEST_TIMEOUT;
+    }
+
     public int requestCookieSync(TransactionHandler handler) {
         Transaction t = handler.pushSynchronousTransaction(new Transaction(this.id, Cmds.GET_COOKIE, this));
-        if(t.getResponse() != null && t.getResponse().contains("COOKIE=")){
+        if (t.getResponse() != null && t.getResponse().contains("COOKIE=")) {
             this.setCookie(t.getResponse());
             return Cmds.SYNC_REQUEST_OK;
-        } else if (t.getResponse().equals(Cmds.TIMEOUT)){
+        } else if (t.getResponse().equals(Cmds.TIMEOUT)) {
             return Cmds.SYNC_REQUEST_TIMEOUT;
         }
         return Cmds.SYNC_REQUEST_FAILED;
     }
-    
+
     @JsonIgnore
     @Override
     public CtrlInterface getCtrlIface() {

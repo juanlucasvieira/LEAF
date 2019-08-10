@@ -11,12 +11,15 @@ package br.uff.vAPcontroller;
  */
 public class Cmds {
 
+    //Commands
     public static final String REQ_STATUS_INFO = "STATUS";
     public static final String REQ_STA_INFO = "STA";
     public static final String REQ_FIRST_STA_INFO = "STA-FIRST";
     public static final String GET_AP_IFACES = "INTERFACES ctrl";
     public static final String GET_COOKIE = "GET_COOKIE";
     public static final String REMOVE_VAP = "REMOVE";
+    public static final String ATTACH = "ATTACH";
+    public static final String DETACH = "DETACH";
 
     public static final boolean DEBUG_LOG_LEVEL = true;
 
@@ -34,17 +37,22 @@ public class Cmds {
     public static final int SYNC_REQUEST_FAILED = 1;
     public static final int SYNC_REQUEST_TIMEOUT = 9;
 
+    public static final String INVALID_COOKIE = "INVALID COOKIE";
     public static final String TIMEOUT = "TIMEOUT";
+    public static final int SYNC_TIMEOUT_MILLIS = 5000;
+    public static final int POLL_STA_TIMEOUT_MILLIS = 5000;
 
     public static final int MIGRATION_ROLLBACK_SUCCESSFUL = 1;
     public static final int MIGRATION_ROLLBACK_FAILED = -1;
 
-    public static final int CSA_COUNT = 10;
+    public static final int CSA_COUNT = 1;
+    public static final long CSA_WAITING_TIME_MILLIS = 1000;
 
-    public static String buildVAPReceiveRequest(VirtualAP target, PhyIface dst_phy, int port) {
+    public static String buildVAPReceiveRequest(VirtualAP target, PhyIface dst_phy, int port, String iface_name) {
+
         return "ADD_BSS bss_config=" + dst_phy.getIface_name()
                 + ":bss_params=" + "\""
-                + "interface=" + target.getV_iface_name() + " "
+                + "interface=" + iface_name + " "
                 + "bridge=" + "vapbridge" + " "
                 + "ssid=" + target.getSsid() + " "
                 + "bssid=" + target.getBss_id() + " "
@@ -89,5 +97,22 @@ public class Cmds {
         // SEND_FRAME <dst> <src> <ifname>
         return "SEND_FRAME ff:ff:ff:ff:ff:ff " + sta.getMacAddress() + " "
                 + "ifname=vapbridge";
+    }
+
+    public static String buildPollStaRequest(Station sta) {
+        //POLL_STA a8:db:03:9e:03:03
+        return "POLL_STA " + sta.getMacAddress();
+    }
+
+    static String buildVAPDeleteRequest(String iface) {
+        return Cmds.REMOVE_VAP + " " + iface;
+    }
+
+    public static String getNewIfaceName(VirtualAP target, PhyIface dst_phy) {
+        if (dst_phy.isEnabled()) {
+            return "wl" + target.getBss_id().replace(":", "");
+        } else {
+            return dst_phy.getIface_name();
+        }
     }
 }

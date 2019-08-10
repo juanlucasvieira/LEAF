@@ -7,8 +7,11 @@ import br.uff.vAPcontroller.TransactionHandler;
 import java.net.InetAddress;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -20,16 +23,18 @@ public class AP implements Observer {
     private HashMap<String, CtrlInterface> availableCtrlIfaces;
     private String ap_id;
     private TransactionHandler handler;
+    private EventHandler eHandler;
 //    private String ether_ifname;
 
     public AP(String id, InetAddress ip, int port) {
 
     }
 
-    AP(String id, InetAddress ip, int port, TransactionHandler handler) {
+    AP(String id, InetAddress ip, int port, TransactionHandler handler, EventHandler eHandler) {
         this.ap_id = id;
         this.gci = new CtrlInterface(ip, port);
         this.handler = handler;
+        this.eHandler = eHandler;
         this.availableCtrlIfaces = new HashMap<>();
         this.phy_ifaces = new HashMap<>();
 //        this.ether_ifname = ether_ifname;
@@ -54,14 +59,35 @@ public class AP implements Observer {
 //            vap.update(handler);
 //        }
 //    }
+    //The parameter handler is not necessary!
     public int STAReceiveRequest(TransactionHandler handler, Station movingSta, CtrlInterface iface) {
         String request = Cmds.buildSTAReceiveRequest(movingSta);
         return handler.sendSyncRequest(this, request, iface);
     }
-    
+
+    //The parameter handler is not necessary!
     public int sendSTAFrameRequest(TransactionHandler handler, Station movingSta, CtrlInterface iface) {
         String request = Cmds.buildSendFrameRequest(movingSta);
         return handler.sendSyncRequest(this, request, iface);
+    }
+
+    public int pollSTA(Station sta, CtrlInterface iface) {
+        String request = Cmds.buildPollStaRequest(sta);
+
+        long elapsedTime = 0;
+        Instant start = Instant.now();
+        eHandler.registerWaitIface(iface);
+        while (!(elapsedTime > Cmds.POLL_STA_TIMEOUT_MILLIS)) {
+            if (handler.sendSyncRequest(this, request, iface) != Cmds.SYNC_REQUEST_OK) {
+                return Cmds.SYNC_REQUEST_FAILED;
+            }
+            String s = eHandler.waitEvent(Event.AP_STA_POLL_OK, iface, 100);
+            if (s != null && s.contains(sta.getMacAddress())) {
+                return Cmds.SYNC_REQUEST_OK;
+            }
+            elapsedTime = Duration.between(start, Instant.now()).toMillis();
+        }
+        return Cmds.SYNC_REQUEST_TIMEOUT;
     }
 
     public void requestInfo() {
@@ -128,6 +154,24 @@ public class AP implements Observer {
             }
         }
 
+    }
+
+    public void setPhyIfaceState(String ctrl_iface_id, boolean state) {
+        PhyIface disabled = getPhyByCtrlIfaceId(ctrl_iface_id);
+        if (disabled != null) {
+            disabled.setState(false);
+        } else {
+            Log.print(Log.ERROR, "Could not set phy enabled / disabled!!");
+        }
+    }
+
+    private PhyIface getPhyByCtrlIfaceId(String ctrl_iface_id) {
+        for (Map.Entry<String, CtrlInterface> set : availableCtrlIfaces.entrySet()) {
+            if (set.getValue().getId().equals(ctrl_iface_id)) {
+                return getPhyByName(set.getKey());
+            }
+        }
+        return null;
     }
 
     public HashMap<String, PhyIface> getPhy_ifaces() {
@@ -270,6 +314,7 @@ public class AP implements Observer {
                     phy.addVAP(new VirtualAP(UUID.randomUUID().toString().replaceAll("-", ""),
                             v_iface_name, bss, vapIface, ssid, sta_number));
                 } else {
+                    vap.setvIfaceName(v_iface_name);
                     vap.setStaNumber(sta_number);
                     vap.setSsid(ssid);
                 }
@@ -287,8 +332,8 @@ public class AP implements Observer {
     public PhyIface choosePhyIface(VirtualAP target) {
         return phy_ifaces.entrySet().iterator().next().getValue();
     }
-    
-    public boolean isPhyIfacesEmpty(){
+
+    public boolean isPhyIfacesEmpty() {
         return phy_ifaces.isEmpty();
     }
 
@@ -315,13 +360,13 @@ public class AP implements Observer {
     }
 
     //TODO: Check bssid duplication, ctrl_iface availability, etc.
-    int vAPReceiveRequest(VirtualAP target, PhyIface phy, int newPort) {
-        String request = Cmds.buildVAPReceiveRequest(target, phy, newPort);
+    int vAPReceiveRequest(VirtualAP target, PhyIface phy, int newPort, String new_iface_name) {
+        String request = Cmds.buildVAPReceiveRequest(target, phy, newPort, new_iface_name);
         return handler.sendSyncRequest(this, request);
     }
 
-    int deleteVAPRequest(VirtualAP vap) {
-        String request = Cmds.REMOVE_VAP + " " + vap.getV_iface_name();
+    int deleteVAPRequest(String iface_name) {
+        String request = Cmds.buildVAPDeleteRequest(iface_name);
         return handler.sendSyncRequest(this, request);
     }
 }

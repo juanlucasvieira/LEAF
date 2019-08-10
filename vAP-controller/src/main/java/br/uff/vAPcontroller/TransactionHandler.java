@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.net.DatagramPacket;
 import java.net.SocketTimeoutException;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -19,11 +20,10 @@ public class TransactionHandler {
 
     private CommunicationHandler comm;
     private HashMap<String, Observer> observers = new HashMap<>();
-    private HashMap<String, Transaction> asyncTransactions = new HashMap();
+    private ConcurrentHashMap<String, Transaction> asyncTransactions = new ConcurrentHashMap();
 
     public TransactionHandler() {
-        this.comm = new CommunicationHandler(this);
-        this.comm.listen();
+
     }
 
     public void processMessage(String pcktData) {
@@ -36,20 +36,25 @@ public class TransactionHandler {
         observers.put(o.getId(), o);
     }
 
-    public void processTransactionAnswer(String tid, String response) {
+    public boolean processTransactionAnswer(String tid, String response) {
         Transaction t = asyncTransactions.get(tid);
         t.setResponse(response);
         Observer o = observers.get(t.getClaimantID());
         if (t == null) {
             Log.print(Log.ERROR, "Received answer: Transaction not found.");
-            return;
+            return false;
         }
         if (o == null) {
             Log.print(Log.ERROR, "Received answer: Claimant not found.");
-            return;
+            return false;
         }
-        o.notify(t);
+        if (response.contains(Cmds.INVALID_COOKIE)) {
+            t.getDestination().invalidate();
+        } else {
+            o.notify(t);
+        }
         asyncTransactions.remove(tid);
+        return true;
     }
 
     public Transaction getTransByID(String TID) {
@@ -78,13 +83,13 @@ public class TransactionHandler {
         String reply;
         try {
             reply = comm.sendSyncRequest(t.getTID(), t.getRequest(), t.getDestination());
+            Log.print(Log.DEBUG_INFO, "Sync Transaction Response:\n" + reply);
             String tid = reply.substring(4, 36);
             if (t.getTID().equals(tid)) {
                 String response = reply.substring(37, reply.length());
-                Log.print(Log.DEBUG_INFO, "Sync Transaction Response:" + response);
                 t.setResponse(response);
             } else {
-                Log.print(Log.ERROR, "TID missmatch in synchronous transaction.");
+                Log.print(Log.ERROR, "TID mismatch in synchronous transaction.");
             }
         } catch (SocketTimeoutException ex) {
             t.setResponse(Cmds.TIMEOUT);
@@ -105,6 +110,12 @@ public class TransactionHandler {
 
     public int sendSyncRequest(Observer o, String request) {
         return sendSyncRequest(o, request, o.getCtrlIface());
+    }
+
+    void setCommunicationHandler(CommunicationHandler comm) {
+        if (this.comm == null) {
+            this.comm = comm;
+        }
     }
 
 }

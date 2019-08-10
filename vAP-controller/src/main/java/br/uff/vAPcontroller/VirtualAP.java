@@ -52,6 +52,9 @@ public class VirtualAP implements Observer {
         if (!handler.isObserverRegistered(this)) {
             handler.registerObserver(this);
         }
+        if (!this.ctrl_iface.isAttached()) {
+            ctrl_iface.attach(handler);
+        }
         if (!this.ctrl_iface.isCookieSet()) {
             ctrl_iface.requestCookie(handler);
         } else {
@@ -59,6 +62,12 @@ public class VirtualAP implements Observer {
                 handler.pushAsyncTransaction(new Transaction(this.id, Cmds.REQ_FIRST_STA_INFO, ctrl_iface));
             }
         }
+    }
+
+
+
+    public void setvIfaceName(String name) {
+        this.v_iface_name = name;
     }
 
     public void checkConnectivityToSTA() {

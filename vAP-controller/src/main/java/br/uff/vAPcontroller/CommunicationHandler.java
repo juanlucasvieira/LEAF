@@ -21,18 +21,20 @@ public class CommunicationHandler implements ReceiveCallback {
 
     MessageReceiver receiver;
 
-    TransactionHandler handler;
+    TransactionHandler tHandler;
+    EventHandler eHandler;
 
     boolean listening = false;
 
-    public CommunicationHandler(TransactionHandler handler) {
+    public CommunicationHandler(TransactionHandler tranHandler, EventHandler eventHandler) {
         try {
 //            this.socket = new DatagramSocket();
-            this.handler = handler;
+            this.eHandler = eventHandler;
+            this.tHandler = tranHandler;
             this.asyncSocket = new DatagramSocket(null);
             this.synchronousSocket = new DatagramSocket(null);
             this.synchronousSocket.bind(new InetSocketAddress(Cmds.SEND_LISTEN_PORT_SYNC));
-            this.synchronousSocket.setSoTimeout(5000);
+            this.synchronousSocket.setSoTimeout(Cmds.SYNC_TIMEOUT_MILLIS);
         } catch (SocketException ex) {
             Logger.getLogger(CommunicationHandler.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -63,21 +65,19 @@ public class CommunicationHandler implements ReceiveCallback {
         }
     }
 
-//    public void sendReq(String req, String req_id) {
-//        SendMsgRequest smr = new SendMsgRequest(socket, req, req_id, this);
-//        smr.run();
-//    }
     @Override
     public void receiveCallback(DatagramPacket dp) {
-        //  TODO: Do something with received answer.
-        Log.print(Log.DEBUG_INFO, "Received message from "
-                + dp.getAddress().getHostName() + ":" + dp.getPort() + ":\n"
-                + new String(dp.getData(), 0, dp.getLength()));
-        handler.processMessage(new String(dp.getData(), 0, dp.getLength()));
-        //Send it to the correspondent CtrlInterface
 
-//        System.exit(0);
-//        receiver.run();
+        String packetData = new String(dp.getData(), 0, dp.getLength());
+        String sender = dp.getAddress().getHostAddress() + ":" + dp.getPort();
+        Log.print(Log.DEBUG_INFO, "Received message from " + sender + ":\n" + packetData);
+
+        if (packetData.startsWith("TID=")) {
+            tHandler.processMessage(new String(dp.getData(), 0, dp.getLength()));
+        } else {
+            eHandler.receiveEvent(sender, packetData);
+        }
+
     }
 
     String sendSyncRequest(String tid, String request, CtrlInterface destination) throws SocketTimeoutException {
