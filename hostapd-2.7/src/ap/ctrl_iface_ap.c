@@ -643,6 +643,7 @@ int hostapd_ctrl_iface_status(struct hostapd_data *hapd, char *buf,
 {
 	struct hostapd_iface *iface = hapd->iface;
 	struct hostapd_hw_modes *mode = iface->current_mode;
+	struct wpa_driver_capa capa;
 	int len = 0, ret, j;
 	size_t i;
 
@@ -698,6 +699,16 @@ int hostapd_ctrl_iface_status(struct hostapd_data *hapd, char *buf,
 	if (os_snprintf_error(buflen - len, ret))
 		return len;
 	len += ret;
+
+	if (!(!hapd->driver || !hapd->driver->get_capa || !hapd->drv_priv)){
+		hapd->driver->get_capa(hapd->drv_priv, &capa);
+		ret = os_snprintf(buf + len, buflen - len,
+			"max_ap_num=%d\n",
+			capa.max_ap_num_supported);
+		if (os_snprintf_error(buflen - len, ret))
+			return len;
+		len += ret;
+	}
 
 	ret = os_snprintf(buf + len, buflen - len,
 			  "channel=%u\n"

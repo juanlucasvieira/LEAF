@@ -19,15 +19,16 @@ public class PhyIface {
     private int channel;
     private int[] supported_rates;
     private int max_txpower;
-    private int max_bss;
+    private int max_vap_num;
     private HashMap<String, VirtualAP> vaps;
 
-    public PhyIface(String iface_name, int frequency, int channel, boolean state, int[] supported_rates, int max_txpower) {
+    public PhyIface(String iface_name, int frequency, int channel, boolean state, int[] supported_rates, int max_txpower, int max_vap_num) {
         this.iface_name = iface_name;
         this.frequency = frequency;
         this.channel = channel;
         this.supported_rates = supported_rates;
         this.max_txpower = max_txpower;
+        this.max_vap_num = max_vap_num;
         this.state = state;
         this.vaps = new HashMap<>();
     }
@@ -58,7 +59,7 @@ public class PhyIface {
 
     public VirtualAP getVAPByName(String vap_name) {
         for (VirtualAP vap : vaps.values()) {
-            if (vap.getV_iface_name().equals(vap_name)) {
+            if (vap.getVirtualIfaceName().equals(vap_name)) {
                 return vap;
             }
         }
@@ -108,6 +109,33 @@ public class PhyIface {
         this.max_txpower = max_txpower;
     }
 
+    public int getMaxVapNum() {
+        return max_vap_num;
+    }
+
+    public void setMaxVapNum(int max_vap_num) {
+        this.max_vap_num = max_vap_num;
+    }
+
+    public int getNumberOfVAPs() {
+        return vaps.size();
+    }
+    
+    public boolean isFilled(){
+        return max_vap_num == vaps.size();
+    }
+
+    public HexAddress getNextAvailableBSSID() {
+        HexAddress greater = vaps.values().iterator().next().getBssId();
+        for (VirtualAP vap : vaps.values()) {
+            HexAddress actual = vap.getBssId();
+            if (greater.compareTo(actual) < 0) {
+                greater = actual;
+            }
+        }
+        return HexAddress.getNextAddr(greater);
+    }
+
     void update(TransactionHandler handler) {
         for (VirtualAP vap : vaps.values()) {
             vap.update(handler);
@@ -132,4 +160,12 @@ public class PhyIface {
         }
     }
 
+    public boolean isVAPsFilledWithSTAs() {
+        for (VirtualAP vap : vaps.values()) {
+            if (!vap.reachedMaximum()) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

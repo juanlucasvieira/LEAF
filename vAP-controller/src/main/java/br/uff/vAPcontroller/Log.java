@@ -16,7 +16,7 @@ public class Log {
     public static final int ERROR = 3;
 
     public static void print(int messageType, String msg) {
-        if (messageType == DEBUG_INFO && Cmds.DEBUG_LOG_LEVEL) {
+        if (messageType == DEBUG_INFO && Csts.DEBUG_LOG_LEVEL) {
             System.out.println(" > " + msg);
         } else if (messageType == ERROR) {
             System.out.println("!!ERROR!! : " + msg);

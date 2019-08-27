@@ -1,7 +1,7 @@
 package br.uff.vAPcontroller;
 
 public class Station {
-    private final String mac_address;
+    private final HexAddress mac_address;
     private short aid;
     private int capabilities;
     private int[] supported_rates;
@@ -22,8 +22,8 @@ public class Station {
     private int tx_rate_info;
     private long connected_time;
 
-    public Station(String mac_address, short aid, int capabilities, int[] supported_rates, int listen_interval, boolean associated, boolean authenticated, boolean authorized) {
-        this.mac_address = mac_address;
+    public Station(HexAddress mac, short aid, int capabilities, int[] supported_rates, int listen_interval, boolean associated, boolean authenticated, boolean authorized) {
+        this.mac_address = mac;
         this.aid = aid;
         this.capabilities = capabilities;
         this.supported_rates = supported_rates;
@@ -61,27 +61,27 @@ public class Station {
         this.authorized = authorized;
     }
 
-    public void setShort_preamble(boolean short_preamble) {
+    public void setShortPreamble(boolean short_preamble) {
         this.short_preamble = short_preamble;
     }
 
-    public void setRx_packets(long rx_packets) {
+    public void setRxPackets(long rx_packets) {
         this.rx_packets = rx_packets;
     }
 
-    public void setTx_packets(long tx_packets) {
+    public void setTxPackets(long tx_packets) {
         this.tx_packets = tx_packets;
     }
 
-    public void setRx_bytes(long rx_bytes) {
+    public void setRxBytes(long rx_bytes) {
         this.rx_bytes = rx_bytes;
     }
 
-    public void setTx_bytes(long tx_bytes) {
+    public void setTxBytes(long tx_bytes) {
         this.tx_bytes = tx_bytes;
     }
 
-    public void setInactive_msec(long inactive_msec) {
+    public void setInactiveMillis(long inactive_msec) {
         this.inactive_msec = inactive_msec;
     }
 
@@ -89,19 +89,19 @@ public class Station {
         this.signal = signal;
     }
 
-    public void setRx_rate_info(int rx_rate_info) {
+    public void setRxRateInfo(int rx_rate_info) {
         this.rx_rate_info = rx_rate_info;
     }
 
-    public void setTx_rate_info(int tx_rate_info) {
+    public void setTxRateInfo(int tx_rate_info) {
         this.tx_rate_info = tx_rate_info;
     }
 
-    public void setConnected_time(long connected_time) {
+    public void setConnectedTime(long connected_time) {
         this.connected_time = connected_time;
     }
   
-    public String getMacAddress() {
+    public HexAddress getMacAddress() {
         return mac_address;
     }
 
@@ -121,27 +121,27 @@ public class Station {
         return listen_interval;
     }
 
-    public boolean isShort_preamble() {
+    public boolean isShortPreamble() {
         return short_preamble;
     }
 
-    public long getRx_packets() {
+    public long getRxPackets() {
         return rx_packets;
     }
 
-    public long getTx_packets() {
+    public long getTxPackets() {
         return tx_packets;
     }
 
-    public long getRx_bytes() {
+    public long getRxBytes() {
         return rx_bytes;
     }
 
-    public long getTx_bytes() {
+    public long getTxBytes() {
         return tx_bytes;
     }
 
-    public long getInactive_msec() {
+    public long getInactiveMillis() {
         return inactive_msec;
     }
 
@@ -149,15 +149,15 @@ public class Station {
         return signal;
     }
 
-    public int getRx_rate_info() {
+    public int getRxRateInfo() {
         return rx_rate_info;
     }
 
-    public int getTx_rate_info() {
+    public int getTxRateInfo() {
         return tx_rate_info;
     }
 
-    public long getConnected_time() {
+    public long getConnectedTime() {
         return connected_time;
     }
 

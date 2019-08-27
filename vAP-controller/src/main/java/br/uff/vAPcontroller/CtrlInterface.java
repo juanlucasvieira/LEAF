@@ -89,13 +89,13 @@ public class CtrlInterface implements Observer {
 
     @Override
     public void notify(Transaction t) {
-        if (t.getRequest().equals(Cmds.GET_COOKIE)) {
+        if (t.getRequest().equals(Csts.GET_COOKIE)) {
             setCookie(t.getResponse());
-        } else if (t.getRequest().equals(Cmds.ATTACH)) {
+        } else if (t.getRequest().equals(Csts.ATTACH)) {
             if (t.getResponse().startsWith("OK")) {
                 attached.set(true);
             }
-        } else if (t.getRequest().equals(Cmds.DETACH)) {
+        } else if (t.getRequest().equals(Csts.DETACH)) {
             if (t.getResponse().startsWith("OK")) {
                 attached.set(false);
             }
@@ -106,50 +106,50 @@ public class CtrlInterface implements Observer {
         if (!handler.isObserverRegistered(this)) {
             handler.registerObserver(this);
         }
-        handler.pushAsyncTransaction(new Transaction(this.id, Cmds.ATTACH, this));
+        handler.pushAsyncTransaction(new Transaction(this.id, Csts.ATTACH, this));
     }
 
     public void detach(TransactionHandler handler) {
         if (!handler.isObserverRegistered(this)) {
             handler.registerObserver(this);
         }
-        handler.pushAsyncTransaction(new Transaction(this.id, Cmds.DETACH, this));
+        handler.pushAsyncTransaction(new Transaction(this.id, Csts.DETACH, this));
     }
 
     public void requestCookie(TransactionHandler handler) {
         if (!handler.isObserverRegistered(this)) {
             handler.registerObserver(this);
         }
-        handler.pushAsyncTransaction(new Transaction(this.id, Cmds.GET_COOKIE, this));
+        handler.pushAsyncTransaction(new Transaction(this.id, Csts.GET_COOKIE, this));
     }
 
     public int attachSync(TransactionHandler handler) {
         if (!handler.isObserverRegistered(this)) {
             handler.registerObserver(this);
         }
-        handler.pushAsyncTransaction(new Transaction(this.id, Cmds.ATTACH, this));
+        handler.pushAsyncTransaction(new Transaction(this.id, Csts.ATTACH, this));
 
         long elapsedTime = 0;
         Instant start = Instant.now();
 
-        while (!(elapsedTime > Cmds.SYNC_TIMEOUT_MILLIS)) {
+        while (!(elapsedTime > Csts.SYNC_TIMEOUT_MILLIS)) {
             if (this.attached.get()) {
-                return Cmds.SYNC_REQUEST_OK;
+                return Csts.SYNC_REQUEST_OK;
             }
             elapsedTime = Duration.between(start, Instant.now()).toMillis();
         }
-        return Cmds.SYNC_REQUEST_TIMEOUT;
+        return Csts.SYNC_REQUEST_TIMEOUT;
     }
 
     public int requestCookieSync(TransactionHandler handler) {
-        Transaction t = handler.pushSynchronousTransaction(new Transaction(this.id, Cmds.GET_COOKIE, this));
+        Transaction t = handler.pushSynchronousTransaction(new Transaction(this.id, Csts.GET_COOKIE, this));
         if (t.getResponse() != null && t.getResponse().contains("COOKIE=")) {
             this.setCookie(t.getResponse());
-            return Cmds.SYNC_REQUEST_OK;
-        } else if (t.getResponse().equals(Cmds.TIMEOUT)) {
-            return Cmds.SYNC_REQUEST_TIMEOUT;
+            return Csts.SYNC_REQUEST_OK;
+        } else if (t.getResponse().equals(Csts.TIMEOUT)) {
+            return Csts.SYNC_REQUEST_TIMEOUT;
         }
-        return Cmds.SYNC_REQUEST_FAILED;
+        return Csts.SYNC_REQUEST_FAILED;
     }
 
     @JsonIgnore

@@ -1,6 +1,6 @@
 package br.uff.vAPcontroller;
 
-import br.uff.vAPcontroller.Cmds;
+import br.uff.vAPcontroller.Csts;
 import br.uff.vAPcontroller.CtrlInterface;
 import br.uff.vAPcontroller.Observer;
 import br.uff.vAPcontroller.TransactionHandler;
@@ -61,64 +61,66 @@ public class AP implements Observer {
 //    }
     //The parameter handler is not necessary!
     public int STAReceiveRequest(TransactionHandler handler, Station movingSta, CtrlInterface iface) {
-        String request = Cmds.buildSTAReceiveRequest(movingSta);
+        String request = Csts.buildSTAReceiveRequest(movingSta);
         return handler.sendSyncRequest(this, request, iface);
     }
 
     //The parameter handler is not necessary!
     public int sendSTAFrameRequest(TransactionHandler handler, Station movingSta, CtrlInterface iface) {
-        String request = Cmds.buildSendFrameRequest(movingSta);
+        String request = Csts.buildSendFrameRequest(movingSta);
         return handler.sendSyncRequest(this, request, iface);
     }
 
     public int pollSTA(Station sta, CtrlInterface iface) {
-        String request = Cmds.buildPollStaRequest(sta);
+        String request = Csts.buildPollStaRequest(sta);
 
         long elapsedTime = 0;
         Instant start = Instant.now();
         eHandler.registerWaitIface(iface);
-        while (!(elapsedTime > Cmds.POLL_STA_TIMEOUT_MILLIS)) {
-            if (handler.sendSyncRequest(this, request, iface) != Cmds.SYNC_REQUEST_OK) {
-                return Cmds.SYNC_REQUEST_FAILED;
+        while (!(elapsedTime > Csts.POLL_STA_TIMEOUT_MILLIS)) {
+            if (handler.sendSyncRequest(this, request, iface) != Csts.SYNC_REQUEST_OK) {
+                return Csts.SYNC_REQUEST_FAILED;
             }
             String s = eHandler.waitEvent(Event.AP_STA_POLL_OK, iface, 100);
-            if (s != null && s.contains(sta.getMacAddress())) {
-                return Cmds.SYNC_REQUEST_OK;
+            if (s != null && s.contains(sta.getMacAddress().toString())) {
+                return Csts.SYNC_REQUEST_OK;
             }
             elapsedTime = Duration.between(start, Instant.now()).toMillis();
         }
-        return Cmds.SYNC_REQUEST_TIMEOUT;
+        return Csts.SYNC_REQUEST_TIMEOUT;
     }
 
-    public void requestInfo() {
+    public void loop() {
         if (!handler.isObserverRegistered(this)) {
             handler.registerObserver(this);
         }
         if (!gci.isCookieSet()) {
             gci.requestCookie(handler);
         } else {
-            handler.pushAsyncTransaction(new Transaction(this.ap_id, Cmds.GET_AP_IFACES, gci));
+            handler.pushAsyncTransaction(new Transaction(this.ap_id, Csts.GET_AP_IFACES, gci));
             for (CtrlInterface ctrl_iface : availableCtrlIfaces.values()) {
                 if (!ctrl_iface.isCookieSet()) {
                     ctrl_iface.requestCookie(handler);
                 } else {
-                    handler.pushAsyncTransaction(new Transaction(this.ap_id, Cmds.REQ_STATUS_INFO, ctrl_iface));
+                    handler.pushAsyncTransaction(new Transaction(this.ap_id, Csts.REQ_STATUS_INFO, ctrl_iface));
                 }
                 for (PhyIface phy : phy_ifaces.values()) {
                     phy.update(handler);
                 }
             }
-
+            if (Csts.CREATE_NEW_VAP_AUTOMATICALLY && isAPFilledWithSTAs() && !isAPFilledWithVAPs()) {
+                createNewVAP();
+            }
         }
     }
 
     @Override
     public void notify(Transaction t) {
         switch (t.getRequest()) {
-            case Cmds.GET_AP_IFACES:
+            case Csts.GET_AP_IFACES:
                 discoverCtrlIfaces(t.getResponse(), t.getDestination());
                 break;
-            case Cmds.REQ_STATUS_INFO:
+            case Csts.REQ_STATUS_INFO:
                 discoverPhysicalAndVirtualIfaces(t.getResponse());
                 break;
         }
@@ -214,6 +216,7 @@ public class AP implements Observer {
         int channel = -1;
         int[] supported_rates = null;
         int max_txpower = -1;
+        int max_vap_num = -1;
 
         for (int i = 0; i < endOfPhyIfaceInfo; i++) {
             if (lines[i].startsWith("state")) {
@@ -228,6 +231,8 @@ public class AP implements Observer {
                 frequency = Integer.parseInt(lines[i].split("=")[1]);
             } else if (lines[i].startsWith("channel")) {
                 channel = Integer.parseInt(lines[i].split("=")[1]);
+            } else if (lines[i].startsWith("max_ap_num=")) {
+                max_vap_num = Integer.parseInt(lines[i].split("=")[1]);
             } else if (lines[i].startsWith("supported_rates")) {
                 String[] rates = lines[i].split("=")[1].split(" ");
                 supported_rates = new int[rates.length];
@@ -243,7 +248,7 @@ public class AP implements Observer {
                 && (supported_rates != null && supported_rates.length > 0)) {
             PhyIface phy;
             if (!phy_ifaces.containsKey(phy_iface_name)) {
-                phy = new PhyIface(phy_iface_name, frequency, channel, state, supported_rates, max_txpower);
+                phy = new PhyIface(phy_iface_name, frequency, channel, state, supported_rates, max_txpower, max_vap_num);
                 phy_ifaces.put(phy.getIface_name(), phy);
             } else {
                 phy = phy_ifaces.get(phy_iface_name);
@@ -253,6 +258,7 @@ public class AP implements Observer {
                 phy.setState(state);
                 phy.setSupported_rates(supported_rates);
                 phy.setMax_txpower(max_txpower);
+                phy.setMaxVapNum(max_vap_num);
             }
             parseVAPsInfo(phy, lines, endOfPhyIfaceInfo);
             return 0;
@@ -311,8 +317,8 @@ public class AP implements Observer {
                 if (vap == null) {
                     String ctrlIfaceID = this.gci.getIp().getHostAddress() + ":" + port;
                     CtrlInterface vapIface = availableCtrlIfaces.get(ctrlIfaceID);
-                    phy.addVAP(new VirtualAP(UUID.randomUUID().toString().replaceAll("-", ""),
-                            v_iface_name, bss, vapIface, ssid, sta_number));
+                    phy.addVAP(new VirtualAP(Csts.generateRandomUUID(),
+                            v_iface_name, new HexAddress(bss), vapIface, ssid, sta_number));
                 } else {
                     vap.setvIfaceName(v_iface_name);
                     vap.setStaNumber(sta_number);
@@ -325,26 +331,36 @@ public class AP implements Observer {
         }
     }
 
-//    private void parseVAPsInfo(PhyIface phy, String[] lines, int endOfPhyIfaceInfo) {
-//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-//    }
     //TODO: Choose best physical iface
-    public PhyIface choosePhyIface(VirtualAP target) {
-        return phy_ifaces.entrySet().iterator().next().getValue();
+    public PhyIface getBestPhyIface(VirtualAP target) {
+        return getNextAvailableIface();
+    }
+
+    //TODO: Algoritmo de escolha? Escolher interface mais vazia.
+    public PhyIface getNextAvailableIface() {
+        PhyIface chosen = null;
+        for (PhyIface phy : phy_ifaces.values()) {
+            if (!phy.isFilled()) {
+                if (chosen == null || chosen.getNumberOfVAPs() > phy.getNumberOfVAPs()) {
+                    chosen = phy;
+                }
+            }
+        }
+        return chosen;
     }
 
     public boolean isPhyIfacesEmpty() {
         return phy_ifaces.isEmpty();
     }
 
-    //TODO: Choose wisely the next available virtual iface name
-    public String getNextAvailableName() {
-        return UUID.randomUUID().toString().replaceAll("-", "");
-    }
-
-    //TODO: Choose wisely the next available virtual iface name
     public int getNextAvailableCtrlIfacePort() {
-        return 9000 + availableCtrlIfaces.size() + 1;
+        int greater = 0;
+        for (CtrlInterface c : availableCtrlIfaces.values()) {
+            if (c.getPort() > greater) {
+                greater = c.getPort();
+            }
+        }
+        return greater + 1;
     }
 
     public PhyIface getPhyByVAPId(String vap_id) {
@@ -359,14 +375,49 @@ public class AP implements Observer {
         return null;
     }
 
-    //TODO: Check bssid duplication, ctrl_iface availability, etc.
     int vAPReceiveRequest(VirtualAP target, PhyIface phy, int newPort, String new_iface_name) {
-        String request = Cmds.buildVAPReceiveRequest(target, phy, newPort, new_iface_name);
+        String request = Csts.buildVAPReceiveRequest(target, phy, newPort, new_iface_name);
         return handler.sendSyncRequest(this, request);
     }
 
     int deleteVAPRequest(String iface_name) {
-        String request = Cmds.buildVAPDeleteRequest(iface_name);
+        String request = Csts.buildVAPDeleteRequest(iface_name);
         return handler.sendSyncRequest(this, request);
+    }
+
+    int createNewVAP() {
+        PhyIface phy = getNextAvailableIface();
+        Log.print(Log.INFO, "Creating new VAP automatically. All current vAPs have an STA.");
+        return createNewVAP(phy);
+    }
+
+    int createNewVAP(PhyIface phy) {
+        if(phy.isFilled()){
+            Log.print(Log.ERROR, "The specified physical interface cannot handle more vAPs!");
+            return Csts.SYNC_REQUEST_FAILED;
+        }
+        HexAddress bssid = phy.getNextAvailableBSSID();
+        CtrlInterface ctrl = new CtrlInterface(this.gci.getIp(), getNextAvailableCtrlIfacePort());
+        String vIfaceName = Csts.getNewIfaceName(bssid, phy);
+        VirtualAP newVAP = new VirtualAP(Csts.generateRandomUUID(), vIfaceName, bssid, ctrl, Csts.defaultNewSSID(bssid), (short) 0);
+        String request = Csts.buildNewVAPRequest(newVAP, phy);
+        int response = handler.sendSyncRequest(this, request);
+        if (response == Csts.SYNC_REQUEST_OK) {
+            phy.addVAP(newVAP);
+        }
+        return response;
+    }
+
+    public boolean isAPFilledWithSTAs() {
+        for (PhyIface phy : phy_ifaces.values()) {
+            if (!phy.isVAPsFilledWithSTAs()) {
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    public boolean isAPFilledWithVAPs(){
+        return getNextAvailableIface() == null;
     }
 }

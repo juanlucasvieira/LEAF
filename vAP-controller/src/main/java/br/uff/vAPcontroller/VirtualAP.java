@@ -8,7 +8,7 @@ public class VirtualAP implements Observer {
     private String id;
 
     private String v_iface_name;
-    private String bss_id;
+    private HexAddress bssid;
     private CtrlInterface ctrl_iface;
     private String ssid;
     private short num_sta;
@@ -24,10 +24,10 @@ public class VirtualAP implements Observer {
 //        this.num_sta = 0;
 //        this.max_sta_num = 1;
 //    }
-    public VirtualAP(String id, String v_iface_name, String bss_id, CtrlInterface ctrl_iface, String ssid, short num_sta) {
+    public VirtualAP(String id, String v_iface_name, HexAddress bss_id, CtrlInterface ctrl_iface, String ssid, short num_sta) {
         this.id = id;
         this.v_iface_name = v_iface_name;
-        this.bss_id = bss_id;
+        this.bssid = bss_id;
         this.ctrl_iface = ctrl_iface;
         this.ssid = ssid;
         this.num_sta = num_sta;
@@ -42,7 +42,7 @@ public class VirtualAP implements Observer {
     @Override
     public void notify(Transaction t) {
         switch (t.getRequest()) {
-            case Cmds.REQ_FIRST_STA_INFO:
+            case Csts.REQ_FIRST_STA_INFO:
                 parseStaInfo(t.getResponse());
                 break;
         }
@@ -59,28 +59,27 @@ public class VirtualAP implements Observer {
             ctrl_iface.requestCookie(handler);
         } else {
             if (num_sta == 1) {
-                handler.pushAsyncTransaction(new Transaction(this.id, Cmds.REQ_FIRST_STA_INFO, ctrl_iface));
+                handler.pushAsyncTransaction(new Transaction(this.id, Csts.REQ_FIRST_STA_INFO, ctrl_iface));
             }
         }
     }
-
-
 
     public void setvIfaceName(String name) {
         this.v_iface_name = name;
     }
 
-    public void checkConnectivityToSTA() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
 
     public void setCtrlIface(CtrlInterface c) {
         this.ctrl_iface = c;
     }
+    
+    public boolean reachedMaximum(){
+        return this.num_sta == this.max_sta_num;
+    }
 
     //Fill with more options?
     public int sendCSARequest(TransactionHandler handler, int frequency, int count, boolean blocktx) {
-        String request = Cmds.buildSendCSARequest(frequency, count, blocktx);
+        String request = Csts.buildSendCSARequest(frequency, count, blocktx);
         return handler.sendSyncRequest(this, request);
     }
 
@@ -170,7 +169,7 @@ public class VirtualAP implements Observer {
         if ((supported_rates != null && supported_rates.length > 0)
                 && aid >= 0 && capability >= 0 && listen_interval >= 0) {
             if (sta == null) {
-                sta = new Station(mac, aid, capability, supported_rates,
+                sta = new Station(new HexAddress(mac), aid, capability, supported_rates,
                         listen_interval, assoc, auth, authorized);
             } else if (sta.getMacAddress().equals(mac)) {
                 sta.setAid(aid);
@@ -178,18 +177,18 @@ public class VirtualAP implements Observer {
                 sta.setAuthenticated(auth);
                 sta.setAuthorized(authorized);
                 sta.setCapabilities(capability);
-                sta.setShort_preamble(short_preamble);
+                sta.setShortPreamble(short_preamble);
                 sta.setSupportedRates(supported_rates);
                 sta.setListenInterval(listen_interval);
-                sta.setRx_bytes(rx_bytes);
-                sta.setTx_bytes(tx_bytes);
-                sta.setRx_packets(rx_packets);
-                sta.setTx_packets(tx_packets);
-                sta.setInactive_msec(inactive_msec);
+                sta.setRxBytes(rx_bytes);
+                sta.setTxBytes(tx_bytes);
+                sta.setRxPackets(rx_packets);
+                sta.setTxPackets(tx_packets);
+                sta.setInactiveMillis(inactive_msec);
                 sta.setSignal(signal);
-                sta.setTx_rate_info(tx_rate_info);
-                sta.setRx_rate_info(rx_rate_info);
-                sta.setConnected_time(connected_time);
+                sta.setTxRateInfo(tx_rate_info);
+                sta.setRxRateInfo(rx_rate_info);
+                sta.setConnectedTime(connected_time);
             } else {
                 System.out.println("Error while parsing STA information.");
             }
@@ -212,12 +211,12 @@ public class VirtualAP implements Observer {
         return ctrl_iface;
     }
 
-    public String getV_iface_name() {
+    public String getVirtualIfaceName() {
         return v_iface_name;
     }
 
-    public String getBss_id() {
-        return bss_id;
+    public HexAddress getBssId() {
+        return bssid;
     }
 
     public String getSsid() {
@@ -228,11 +227,11 @@ public class VirtualAP implements Observer {
         return sta;
     }
 
-    public short getNum_sta() {
+    public short getNumOfSTA() {
         return num_sta;
     }
 
-    public short getMax_sta_num() {
+    public short getMaxSTANum() {
         return max_sta_num;
     }
 

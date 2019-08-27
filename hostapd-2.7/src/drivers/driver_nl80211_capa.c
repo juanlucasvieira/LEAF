@@ -153,7 +153,7 @@ static int wiphy_info_iface_comb_process(struct wiphy_info_data *info,
 		[NL80211_IFACE_LIMIT_TYPES] = { .type = NLA_NESTED },
 		[NL80211_IFACE_LIMIT_MAX] = { .type = NLA_U32 },
 	};
-
+	wpa_printf(MSG_INFO, "wiphy_info_iface_comb_process() called!");
 	err = nla_parse_nested(tb_comb, MAX_NL80211_IFACE_COMB,
 			       nl_combi, iface_combination_policy);
 	if (err || !tb_comb[NL80211_IFACE_COMB_LIMITS] ||
@@ -175,14 +175,23 @@ static int wiphy_info_iface_comb_process(struct wiphy_info_data *info,
 				    tb_limit[NL80211_IFACE_LIMIT_TYPES],
 				    rem_mode) {
 			int ift = nla_type(nl_mode);
+			if (ift == NL80211_IFTYPE_AP){
+				unsigned int max_ap = nla_get_u32(tb_limit[NL80211_IFACE_LIMIT_MAX]);
+				wpa_printf(MSG_INFO, ">DEBUG: NL80211_IFTYPE_AP supported!");
+				wpa_printf(MSG_INFO, ">DEBUG: MAX AP NUMBER IS %d", max_ap);
+				info->capa->max_ap_num_supported = max_ap;
+			}
 			if (ift == NL80211_IFTYPE_P2P_GO ||
 			    ift == NL80211_IFTYPE_P2P_CLIENT)
 				combination_has_p2p = 1;
 			if (ift == NL80211_IFTYPE_STATION)
 				combination_has_mgd = 1;
 		}
-		if (combination_has_p2p && combination_has_mgd)
-			break;
+
+		// This was removed so it continue looking for the maximum number of supported APs
+		// if (combination_has_p2p && combination_has_mgd) 
+		// 	break;
+
 	}
 
 	if (combination_has_p2p && combination_has_mgd) {

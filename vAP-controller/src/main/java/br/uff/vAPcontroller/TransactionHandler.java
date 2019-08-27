@@ -48,7 +48,7 @@ public class TransactionHandler {
             Log.print(Log.ERROR, "Received answer: Claimant not found.");
             return false;
         }
-        if (response.contains(Cmds.INVALID_COOKIE)) {
+        if (response.contains(Csts.INVALID_COOKIE)) {
             t.getDestination().invalidate();
         } else {
             o.notify(t);
@@ -92,7 +92,7 @@ public class TransactionHandler {
                 Log.print(Log.ERROR, "TID mismatch in synchronous transaction.");
             }
         } catch (SocketTimeoutException ex) {
-            t.setResponse(Cmds.TIMEOUT);
+            t.setResponse(Csts.TIMEOUT);
         }
         return t;
     }
@@ -100,11 +100,11 @@ public class TransactionHandler {
     public int sendSyncRequest(Observer o, String request, CtrlInterface iface) {
         Transaction t = pushSynchronousTransaction(new Transaction(o.getId(), request, iface));
         if (t.getResponse() != null && t.getResponse().contains("OK")) {
-            return Cmds.SYNC_REQUEST_OK;
-        } else if (t.getResponse().equals(Cmds.TIMEOUT)) {
-            return Cmds.SYNC_REQUEST_TIMEOUT;
+            return Csts.SYNC_REQUEST_OK;
+        } else if (t.getResponse().equals(Csts.TIMEOUT)) {
+            return Csts.SYNC_REQUEST_TIMEOUT;
         } else {
-            return Cmds.SYNC_REQUEST_FAILED;
+            return Csts.SYNC_REQUEST_FAILED;
         }
     }
 

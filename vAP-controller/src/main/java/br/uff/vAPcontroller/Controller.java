@@ -57,7 +57,7 @@ public class Controller {
             if (!suspendUpdate) {
                 Log.print(Log.DEBUG_INFO, "Update loop is RUNNING");
                 for (AP ap : phy_aps.values()) {
-                    ap.requestInfo();
+                    ap.loop();
                 }
             }
             Thread.sleep(updateTimeMillis);
@@ -73,29 +73,29 @@ public class Controller {
 
         AP src = getAPById(src_ap_id);
         if (src == null) {
-            return -1;
+            return Csts.SOURCE_AP_NOT_FOUND;
         }
         PhyIface src_phy = src.getPhyByVAPId(target_vap);
         if (src_phy == null) {
-            return -2; //Target not found in specified AP code.
+            return Csts.VAP_NOT_FOUND; //Target not found in specified AP code.
         }
         VirtualAP target = src_phy.getVAPByID(target_vap);
 
         AP dst = getAPById(dst_ap_id);
         if (dst == null) {
-            return -3;
+            return Csts.DST_AP_NOT_FOUND;
         }
         if (dst.isPhyIfacesEmpty()) {
-            return -1;
+            return Csts.UNAVAILABLE_PHY_IFACE;
         }
 
-        PhyIface dst_phy = dst.choosePhyIface(target); //Choose best physical interface??
+        PhyIface dst_phy = dst.getBestPhyIface(target); //Choose best physical interface??
 
         suspendUpdate = true;
 
         int newPort = dst.getNextAvailableCtrlIfacePort();
-        
-        String newVIfaceName = Cmds.getNewIfaceName(target, dst_phy);
+
+        String newVIfaceName = Csts.getNewIfaceName(target.getBssId(), dst_phy);
 
         int exitCode = dst.vAPReceiveRequest(target, dst_phy, newPort, newVIfaceName);
 
@@ -107,19 +107,19 @@ public class Controller {
                     exitCode = dst.STAReceiveRequest(thand, movingSta, newIface); //Send STA injection request
                     if (exitCode == 0) {
                         if (!src_phy.channelEqualsTo(dst_phy)) { //Check different channels
-                            exitCode = target.sendCSARequest(thand, dst_phy.getFrequency(), Cmds.CSA_COUNT, true);
+                            exitCode = target.sendCSARequest(thand, dst_phy.getFrequency(), Csts.CSA_COUNT, true);
                             if (exitCode == 0) {
                                 Log.print(Log.DEBUG_INFO, "sendSTAFrameRequest() exitCode: " + exitCode);
                                 Instant finish = Instant.now();
                                 long timeElapsed = Duration.between(start, finish).toMillis();  //in millis
                                 System.out.println("MIGRATION TIME W/O WAITING: " + timeElapsed);
-                                Thread.sleep(Cmds.CSA_WAITING_TIME_MILLIS);
+                                Thread.sleep(Csts.CSA_WAITING_TIME_MILLIS);
                                 return finishMigration(src, dst, src_phy, dst_phy, target, newIface, newVIfaceName);
                             } else {
-                                if (exitCode == Cmds.SYNC_REQUEST_TIMEOUT) {
-                                    return rollbackUnsuccessfulMigration(dst, newVIfaceName, target, Cmds.SYNC_REQUEST_TIMEOUT);
+                                if (exitCode == Csts.SYNC_REQUEST_TIMEOUT) {
+                                    return rollbackUnsuccessfulMigration(dst, newVIfaceName, target, Csts.SYNC_REQUEST_TIMEOUT);
                                 } else {
-                                    return rollbackUnsuccessfulMigration(dst, newVIfaceName, target, Cmds.FAILED_TO_SEND_CSA);
+                                    return rollbackUnsuccessfulMigration(dst, newVIfaceName, target, Csts.FAILED_TO_SEND_CSA);
                                 }
                             }
                         } else {
@@ -127,51 +127,57 @@ public class Controller {
                             return finishMigration(src, dst, src_phy, dst_phy, target, newIface, newVIfaceName);
                         }
                     } else {
-                        if (exitCode == Cmds.SYNC_REQUEST_TIMEOUT) {
-                            return rollbackUnsuccessfulMigration(dst, newVIfaceName, target, Cmds.SYNC_REQUEST_TIMEOUT);
+                        if (exitCode == Csts.SYNC_REQUEST_TIMEOUT) {
+                            return rollbackUnsuccessfulMigration(dst, newVIfaceName, target, Csts.SYNC_REQUEST_TIMEOUT);
                         } else {
-                            return rollbackUnsuccessfulMigration(dst, newVIfaceName, target, Cmds.STA_INJECTION_FAILED);
+                            return rollbackUnsuccessfulMigration(dst, newVIfaceName, target, Csts.STA_INJECTION_FAILED);
                         }
                     }
                 } else {
                     return finishMigration(src, dst, src_phy, dst_phy, target, newIface, newVIfaceName);
                 }
             } else {
-                return rollbackUnsuccessfulMigration(dst, newVIfaceName, target, Cmds.STA_INJECTION_FAILED);
+                return rollbackUnsuccessfulMigration(dst, newVIfaceName, target, Csts.STA_INJECTION_FAILED);
             }
         } else {
-            if (exitCode == Cmds.SYNC_REQUEST_TIMEOUT) {
+            if (exitCode == Csts.SYNC_REQUEST_TIMEOUT) {
 //                suspendUpdate = false;
-                return Cmds.SYNC_REQUEST_TIMEOUT;
+                return Csts.SYNC_REQUEST_TIMEOUT;
             } else {
-                return Cmds.VAP_INJECTION_FAILED;
+                return Csts.VAP_INJECTION_FAILED;
             }
         }
     }
 
-    //TODO: Verify correctness by request info update?
     public int finishMigration(AP src_ap, AP dst_ap, PhyIface src, PhyIface dst, VirtualAP target, CtrlInterface newIface, String newVIfaceName) {
         int returnCode;
         Station s = target.getSta();
+        boolean pool_sta_ok = false;
         if (s != null) {
             if (dst_ap.pollSTA(s, newIface) != 0) {
                 Log.print(Log.ERROR, "Poll STA failed!");
+                pool_sta_ok = false;
             } else {
                 Log.print(Log.INFO, "Poll STA successful!");
+                pool_sta_ok = true;
             }
             if (dst_ap.sendSTAFrameRequest(thand, s, newIface) != 0) {
                 Log.print(Log.ERROR, "Send STA frame failed!");
             }
         }
-        returnCode = src_ap.deleteVAPRequest(target.getV_iface_name());
-        if (returnCode == Cmds.SYNC_REQUEST_OK) {
-            returnCode = Cmds.MIGRATION_SUCCESSFUL;
+        returnCode = src_ap.deleteVAPRequest(target.getVirtualIfaceName());
+        if (returnCode == Csts.SYNC_REQUEST_OK) {
+            if (pool_sta_ok) {
+                returnCode = Csts.MIGRATION_SUCCESSFUL_STA_DETECTED;
+            } else {
+                returnCode = Csts.MIGRATION_SUCCESSFUL;
+            }
             target.setCtrlIface(newIface);
             target.setvIfaceName(newVIfaceName);
             src.removeVAP(target);
             dst.addVAP(target);
         } else {
-            returnCode = Cmds.DEL_AP_FROM_OLD_VAP_FAILED;
+            returnCode = Csts.DEL_AP_FROM_OLD_VAP_FAILED;
         }
 //        suspendUpdate = false;
         return returnCode;
@@ -179,10 +185,10 @@ public class Controller {
 
     public int rollbackUnsuccessfulMigration(AP dst_ap, String newVIfaceName, VirtualAP target, int errorCode) {
         int returnCode = dst_ap.deleteVAPRequest(newVIfaceName);
-        if (returnCode == Cmds.SYNC_REQUEST_OK) {
-            returnCode = Cmds.MIGRATION_ROLLBACK_SUCCESSFUL * errorCode;
+        if (returnCode == Csts.SYNC_REQUEST_OK) {
+            returnCode = Csts.MIGRATION_ROLLBACK_SUCCESSFUL * errorCode;
         } else {
-            returnCode = Cmds.MIGRATION_ROLLBACK_FAILED * errorCode;
+            returnCode = Csts.MIGRATION_ROLLBACK_FAILED * errorCode;
         }
 //        suspendUpdate = false;
         return returnCode;

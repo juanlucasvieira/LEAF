@@ -1626,6 +1626,12 @@ struct wpa_driver_capa {
 	unsigned int max_stations;
 
 	/**
+	 * max_stations - Maximum number of concurrent APs supported in
+	 * AP mode
+	 */
+	unsigned int max_ap_num_supported;
+
+	/**
 	 * probe_resp_offloads - Bitmap of supported protocols by the driver
 	 * for Probe Response offloading.
 	 */

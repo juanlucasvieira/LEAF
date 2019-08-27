@@ -33,8 +33,8 @@ public class CommunicationHandler implements ReceiveCallback {
             this.tHandler = tranHandler;
             this.asyncSocket = new DatagramSocket(null);
             this.synchronousSocket = new DatagramSocket(null);
-            this.synchronousSocket.bind(new InetSocketAddress(Cmds.SEND_LISTEN_PORT_SYNC));
-            this.synchronousSocket.setSoTimeout(Cmds.SYNC_TIMEOUT_MILLIS);
+            this.synchronousSocket.bind(new InetSocketAddress(Csts.SEND_LISTEN_PORT_SYNC));
+            this.synchronousSocket.setSoTimeout(Csts.SYNC_TIMEOUT_MILLIS);
         } catch (SocketException ex) {
             Logger.getLogger(CommunicationHandler.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -44,7 +44,7 @@ public class CommunicationHandler implements ReceiveCallback {
     public void listen() {
         if (!listening) {
             try {
-                asyncSocket.bind(new InetSocketAddress(Cmds.SEND_LISTEN_PORT_ASYNC));
+                asyncSocket.bind(new InetSocketAddress(Csts.SEND_LISTEN_PORT_ASYNC));
                 receiver = new MessageReceiver(asyncSocket, this);
                 receiver.start();
                 listening = true;
@@ -106,7 +106,7 @@ public class CommunicationHandler implements ReceiveCallback {
     private byte[] buildRequestStructure(String tid, String msg, CtrlInterface iface) throws IOException {
         if (iface.isCookieSet()) {
             msg = "TID=" + tid + " " + iface.getCookie() + " " + msg;
-        } else if (msg.contains(Cmds.GET_COOKIE)) {
+        } else if (msg.contains(Csts.GET_COOKIE)) {
             msg = "TID=" + tid + " " + msg;
         } else {
             throw new IOException("Message Cookie is not set (Only cookie requests messages can be sent without a cookie)");

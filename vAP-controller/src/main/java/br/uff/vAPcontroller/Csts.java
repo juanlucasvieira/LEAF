@@ -5,11 +5,26 @@
  */
 package br.uff.vAPcontroller;
 
+import java.util.UUID;
+
 /**
  *
  * @author juan
  */
-public class Cmds {
+public class Csts {
+
+    //Configuration
+    public static final boolean DEBUG_LOG_LEVEL = true;
+    public static final boolean CREATE_NEW_VAP_AUTOMATICALLY = true; //Creates a new vAP when all vAPs of an AP have a station associated.
+
+    public static final int SEND_LISTEN_PORT_ASYNC = 9999;
+    public static final int SEND_LISTEN_PORT_SYNC = 9998;
+
+    public static final int CSA_COUNT = 1;
+    public static final long CSA_WAITING_TIME_MILLIS = 1000;
+
+    public static final int SYNC_TIMEOUT_MILLIS = 5000;
+    public static final int POLL_STA_TIMEOUT_MILLIS = 5000;
 
     //Commands
     public static final String REQ_STATUS_INFO = "STATUS";
@@ -21,32 +36,29 @@ public class Cmds {
     public static final String ATTACH = "ATTACH";
     public static final String DETACH = "DETACH";
 
-    public static final boolean DEBUG_LOG_LEVEL = true;
-
-    public static final int SEND_LISTEN_PORT_ASYNC = 9999;
-    public static final int SEND_LISTEN_PORT_SYNC = 9998;
+    //Success Codes
+    public static final int MIGRATION_SUCCESSFUL_STA_DETECTED = 0;
+    public static final int MIGRATION_SUCCESSFUL = 1;
 
     //Error codes
-    public static final int MIGRATION_SUCCESSFUL = 0;
-    public static final int VAP_INJECTION_FAILED = 1;
-    public static final int STA_INJECTION_FAILED = 2;
-    public static final int FAILED_TO_SEND_CSA = 3;
-    public static final int DEL_AP_FROM_OLD_VAP_FAILED = 4;
+    public static final int VAP_INJECTION_FAILED = 2;
+    public static final int STA_INJECTION_FAILED = 3;
+    public static final int FAILED_TO_SEND_CSA = 4;
+    public static final int DEL_AP_FROM_OLD_VAP_FAILED = 5;
+    public static final int SOURCE_AP_NOT_FOUND = 6;
+    public static final int VAP_NOT_FOUND = 7;
+    public static final int DST_AP_NOT_FOUND = 8;
+    public static final int UNAVAILABLE_PHY_IFACE = 9;
 
     public static final int SYNC_REQUEST_OK = 0;
     public static final int SYNC_REQUEST_FAILED = 1;
-    public static final int SYNC_REQUEST_TIMEOUT = 9;
+    public static final int SYNC_REQUEST_TIMEOUT = 10;
 
     public static final String INVALID_COOKIE = "INVALID COOKIE";
     public static final String TIMEOUT = "TIMEOUT";
-    public static final int SYNC_TIMEOUT_MILLIS = 5000;
-    public static final int POLL_STA_TIMEOUT_MILLIS = 5000;
 
     public static final int MIGRATION_ROLLBACK_SUCCESSFUL = 1;
     public static final int MIGRATION_ROLLBACK_FAILED = -1;
-
-    public static final int CSA_COUNT = 1;
-    public static final long CSA_WAITING_TIME_MILLIS = 1000;
 
     public static String buildVAPReceiveRequest(VirtualAP target, PhyIface dst_phy, int port, String iface_name) {
 
@@ -55,7 +67,7 @@ public class Cmds {
                 + "interface=" + iface_name + " "
                 + "bridge=" + "vapbridge" + " "
                 + "ssid=" + target.getSsid() + " "
-                + "bssid=" + target.getBss_id() + " "
+                + "bssid=" + target.getBssId() + " "
                 + "ctrl_interface=udp:" + port + " "
                 + "ctrl_interface_group=0" + " "
                 + "channel=" + dst_phy.getChannel() + "\"";
@@ -105,14 +117,27 @@ public class Cmds {
     }
 
     static String buildVAPDeleteRequest(String iface) {
-        return Cmds.REMOVE_VAP + " " + iface;
+        return Csts.REMOVE_VAP + " " + iface;
     }
 
-    public static String getNewIfaceName(VirtualAP target, PhyIface dst_phy) {
+    public static String getNewIfaceName(HexAddress bssid, PhyIface dst_phy) {
         if (dst_phy.isEnabled()) {
-            return "wl" + target.getBss_id().replace(":", "");
+            return "wl" + bssid.toString().replaceAll(":", "");
         } else {
             return dst_phy.getIface_name();
         }
     }
+
+    public static String generateRandomUUID() {
+        return UUID.randomUUID().toString().replaceAll("-", "");
+    }
+
+    public static String defaultNewSSID(HexAddress bssid) {
+        return "vAP-" + bssid.toString().replaceAll(":", "");
+    }
+
+    public static String buildNewVAPRequest(VirtualAP newVAP, PhyIface phy) {
+        return buildVAPReceiveRequest(newVAP, phy, newVAP.getCtrlIface().getPort(), newVAP.getVirtualIfaceName());
+    }
+
 }
