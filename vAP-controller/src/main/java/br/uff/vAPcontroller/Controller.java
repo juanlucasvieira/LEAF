@@ -8,12 +8,13 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Controller {
 
-    private HashMap<String, AP> phy_aps;
+    private ConcurrentHashMap<String, AP> phy_aps;
 
     private CommunicationHandler comm;
     private TransactionHandler thand;
@@ -25,7 +26,7 @@ public class Controller {
     private long updateTimeMillis = 1000;
 
     public Controller() {
-        this.phy_aps = new HashMap<>();
+        this.phy_aps = new ConcurrentHashMap<>();
     }
 
     public static Controller getInstance() {
@@ -43,7 +44,7 @@ public class Controller {
             thand.setCommunicationHandler(comm);
             comm.listen();
             phy_aps.put("AP@1", new AP("AP@1", InetAddress.getByName("127.0.0.1"), 9000, thand, ehand));
-            phy_aps.put("AP@2", new AP("AP@2", InetAddress.getByName("192.168.1.142"), 9000, thand, ehand));
+            phy_aps.put("AP@2", new AP("AP@2", InetAddress.getByName("192.168.1.143"), 9000, thand, ehand));
             updateLoop();
         } catch (UnknownHostException ex) {
             Log.print(Log.ERROR, "Unknown IP format");

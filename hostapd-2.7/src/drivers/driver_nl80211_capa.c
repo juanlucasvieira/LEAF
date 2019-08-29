@@ -177,9 +177,12 @@ static int wiphy_info_iface_comb_process(struct wiphy_info_data *info,
 			int ift = nla_type(nl_mode);
 			if (ift == NL80211_IFTYPE_AP){
 				unsigned int max_ap = nla_get_u32(tb_limit[NL80211_IFACE_LIMIT_MAX]);
-				wpa_printf(MSG_INFO, ">DEBUG: NL80211_IFTYPE_AP supported!");
-				wpa_printf(MSG_INFO, ">DEBUG: MAX AP NUMBER IS %d", max_ap);
-				info->capa->max_ap_num_supported = max_ap;
+				// Get always the maximum value. This might be changed later.
+				if(max_ap > info->capa->max_ap_num_supported){
+					wpa_printf(MSG_INFO, ">DEBUG: NL80211_IFTYPE_AP supported!");
+					wpa_printf(MSG_INFO, ">DEBUG: MAX AP NUMBER IS %d", max_ap);
+					info->capa->max_ap_num_supported = max_ap;
+				}
 			}
 			if (ift == NL80211_IFTYPE_P2P_GO ||
 			    ift == NL80211_IFTYPE_P2P_CLIENT)

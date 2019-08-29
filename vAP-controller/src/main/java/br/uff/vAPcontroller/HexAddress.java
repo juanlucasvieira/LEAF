@@ -15,19 +15,19 @@ import java.util.Arrays;
  */
 public class HexAddress implements Comparable<HexAddress> {
 
-    private int[] mac;
+    private int[] macAddr;
 
     public HexAddress(String mac) {
-        this.mac = stringToMACAddress(mac);
+        this.macAddr = stringToMACAddress(mac);
     }
 
     public HexAddress(int[] mac) {
-        this.mac = mac;
+        this.macAddr = mac;
     }
 
     public static int[] stringToMACAddress(String mac) {
-        String[] macAddr = mac.split(":");
-        return stringHexToInt(macAddr);
+        String[] sAddr = mac.split(":");
+        return stringHexToInt(sAddr);
     }
 
     public static int[] stringHexToInt(String[] s) {
@@ -42,10 +42,10 @@ public class HexAddress implements Comparable<HexAddress> {
     @Override
     public String toString() {
         String s = "";
-        for (int i = 0; i < mac.length; i++) {
-            String aux = Integer.toHexString(mac[i]);
+        for (int i = 0; i < macAddr.length; i++) {
+            String aux = Integer.toHexString(macAddr[i]);
             s += (aux.length() % 2 == 0 ? "" : "0") + aux;
-            if (i < mac.length - 1) {
+            if (i < macAddr.length - 1) {
                 s += ":";
             }
         }
@@ -54,11 +54,12 @@ public class HexAddress implements Comparable<HexAddress> {
 
     @JsonIgnore
     public int[] getMac() {
-        return mac;
+        return macAddr;
     }
 
+    @JsonIgnore
     public static HexAddress getNextAddr(HexAddress mac) {
-        int[] aux = mac.getMac();
+        int[] aux = mac.getMac().clone();
         boolean done = false;
         for (int i = aux.length - 1; i > 0; i--) {
             if (!done && aux[i] < 255) {
@@ -79,11 +80,11 @@ public class HexAddress implements Comparable<HexAddress> {
 
     @Override
     public int compareTo(HexAddress t) {
-        return Arrays.compare(this.mac, t.getMac());
+        return Arrays.compare(this.macAddr, t.getMac());
     }
 
     public boolean equals(HexAddress t) {
-        return Arrays.equals(this.mac, t.getMac());
+        return Arrays.equals(this.macAddr, t.getMac());
     }
 
 }

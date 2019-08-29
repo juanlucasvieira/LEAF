@@ -6,6 +6,7 @@
 package br.uff.vAPcontroller;
 
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  *
@@ -20,7 +21,7 @@ public class PhyIface {
     private int[] supported_rates;
     private int max_txpower;
     private int max_vap_num;
-    private HashMap<String, VirtualAP> vaps;
+    private ConcurrentHashMap<String, VirtualAP> vaps;
 
     public PhyIface(String iface_name, int frequency, int channel, boolean state, int[] supported_rates, int max_txpower, int max_vap_num) {
         this.iface_name = iface_name;
@@ -30,7 +31,7 @@ public class PhyIface {
         this.max_txpower = max_txpower;
         this.max_vap_num = max_vap_num;
         this.state = state;
-        this.vaps = new HashMap<>();
+        this.vaps = new ConcurrentHashMap<>();
     }
 
     public String getIface_name() {
@@ -45,7 +46,7 @@ public class PhyIface {
         return state;
     }
 
-    public HashMap<String, VirtualAP> getVaps() {
+    public ConcurrentHashMap<String, VirtualAP> getVaps() {
         return vaps;
     }
 

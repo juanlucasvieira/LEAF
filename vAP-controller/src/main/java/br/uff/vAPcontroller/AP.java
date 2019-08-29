@@ -13,14 +13,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class AP implements Observer {
 
     private CtrlInterface gci;
-    private HashMap<String, PhyIface> phy_ifaces;
-    private HashMap<String, CtrlInterface> availableCtrlIfaces;
+    private ConcurrentHashMap<String, PhyIface> phy_ifaces;
+    private ConcurrentHashMap<String, CtrlInterface> availableCtrlIfaces;
     private String ap_id;
     private TransactionHandler handler;
     private EventHandler eHandler;
@@ -35,8 +36,8 @@ public class AP implements Observer {
         this.gci = new CtrlInterface(ip, port);
         this.handler = handler;
         this.eHandler = eHandler;
-        this.availableCtrlIfaces = new HashMap<>();
-        this.phy_ifaces = new HashMap<>();
+        this.availableCtrlIfaces = new ConcurrentHashMap<>();
+        this.phy_ifaces = new ConcurrentHashMap<>();
 //        this.ether_ifname = ether_ifname;
     }
 
@@ -176,11 +177,11 @@ public class AP implements Observer {
         return null;
     }
 
-    public HashMap<String, PhyIface> getPhy_ifaces() {
+    public ConcurrentHashMap<String, PhyIface> getPhy_ifaces() {
         return phy_ifaces;
     }
 
-    public HashMap<String, CtrlInterface> getAvailableCtrlIfaces() {
+    public ConcurrentHashMap<String, CtrlInterface> getAvailableCtrlIfaces() {
         return availableCtrlIfaces;
     }
 

@@ -19,8 +19,8 @@ import java.util.logging.Logger;
 public class TransactionHandler {
 
     private CommunicationHandler comm;
-    private HashMap<String, Observer> observers = new HashMap<>();
-    private ConcurrentHashMap<String, Transaction> asyncTransactions = new ConcurrentHashMap();
+    private ConcurrentHashMap<String, Observer> observers = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<String, Transaction> asyncTransactions = new ConcurrentHashMap<>();
 
     public TransactionHandler() {
 

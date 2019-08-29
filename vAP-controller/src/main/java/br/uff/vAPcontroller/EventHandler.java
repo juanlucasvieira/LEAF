@@ -21,7 +21,7 @@ public class EventHandler {
 
     public EventHandler(Controller c) {
         this.c = c;
-        waitEvents = new ConcurrentHashMap();
+        waitEvents = new ConcurrentHashMap<>();
     }
 
     public void receiveEvent(String senderId, String pcktData) {

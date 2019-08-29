@@ -171,7 +171,7 @@ public class VirtualAP implements Observer {
             if (sta == null) {
                 sta = new Station(new HexAddress(mac), aid, capability, supported_rates,
                         listen_interval, assoc, auth, authorized);
-            } else if (sta.getMacAddress().equals(mac)) {
+            } else if (sta.getMacAddress().toString().equals(mac)) {
                 sta.setAid(aid);
                 sta.setAssociated(assoc);
                 sta.setAuthenticated(auth);
