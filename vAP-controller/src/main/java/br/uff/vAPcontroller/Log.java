@@ -12,15 +12,15 @@ package br.uff.vAPcontroller;
 public class Log {
 
     public static final int INFO = 1;
-    public static final int DEBUG_INFO = 2;
+    public static final int DEBUG = 2;
     public static final int ERROR = 3;
 
     public static void print(int messageType, String msg) {
-        if (messageType == DEBUG_INFO && Csts.DEBUG_LOG_LEVEL) {
+        if (messageType == DEBUG && Csts.DEBUG_LOG_LEVEL) {
             System.out.println(" > " + msg);
         } else if (messageType == ERROR) {
             System.out.println("!!ERROR!! : " + msg);
-        } else {
+        } else if (messageType == Log.INFO){
             System.out.println(" > " + msg);
         }
     }

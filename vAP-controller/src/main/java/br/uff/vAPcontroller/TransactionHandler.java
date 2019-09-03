@@ -69,7 +69,7 @@ public class TransactionHandler {
     public boolean pushAsyncTransaction(Transaction t) {
         if (observers.containsKey(t.getClaimantID())) {
             asyncTransactions.put(t.getTID(), t);
-            Log.print(Log.DEBUG_INFO, "Sending Transaction: \n" + t.toString());
+            Log.print(Log.DEBUG, "Sending Transaction: \n" + t.toString());
             comm.sendAsyncRequest(t.getTID(), t.getRequest(), t.getDestination());
             return true;
         } else {
@@ -79,11 +79,11 @@ public class TransactionHandler {
     }
 
     public Transaction pushSynchronousTransaction(Transaction t) {
-        Log.print(Log.DEBUG_INFO, "Sending Synchronous Transaction: \n" + t.toString());
+        Log.print(Log.DEBUG, "Sending Synchronous Transaction: \n" + t.toString());
         String reply;
         try {
             reply = comm.sendSyncRequest(t.getTID(), t.getRequest(), t.getDestination());
-            Log.print(Log.DEBUG_INFO, "Sync Transaction Response:\n" + reply);
+            Log.print(Log.DEBUG, "Sync Transaction Response:\n" + reply);
             String tid = reply.substring(4, 36);
             if (t.getTID().equals(tid)) {
                 String response = reply.substring(37, reply.length());

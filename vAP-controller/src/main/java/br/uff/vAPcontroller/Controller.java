@@ -36,27 +36,32 @@ public class Controller {
         return c;
     }
 
-    public void begin() throws InterruptedException {
-        try {
-            ehand = new EventHandler(this);
-            thand = new TransactionHandler();
-            comm = new CommunicationHandler(thand, ehand);
-            thand.setCommunicationHandler(comm);
-            comm.listen();
-            phy_aps.put("AP@1", new AP("AP@1", InetAddress.getByName("127.0.0.1"), 9000, thand, ehand));
-            phy_aps.put("AP@2", new AP("AP@2", InetAddress.getByName("192.168.1.143"), 9000, thand, ehand));
-            updateLoop();
-        } catch (UnknownHostException ex) {
-            Log.print(Log.ERROR, "Unknown IP format");
-        } catch (IOException ex) {
-            Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, null, ex);
+    public void begin(ConcurrentHashMap<String, AP> ap_list) throws InterruptedException {
+//        try {
+        ehand = new EventHandler(this);
+        thand = new TransactionHandler();
+        comm = new CommunicationHandler(thand, ehand);
+        thand.setCommunicationHandler(comm);
+        comm.listen();
+
+        for (AP ap : ap_list.values()) {
+            phy_aps.put(ap.getId(), new AP(ap.getId(), ap.getCtrlIface().getIp(), ap.getCtrlIface().getPort(), thand, ehand));
+            Log.print(Log.INFO, "Registered AP: " + ap.getId() + " " + ap.getStringAddress());
         }
+//            phy_aps.put("AP@1", new AP("AP@1", InetAddress.getByName("127.0.0.1"), 9000, thand, ehand));
+//            phy_aps.put("AP@2", new AP("AP@2", InetAddress.getByName("192.168.1.143"), 9000, thand, ehand));
+        updateLoop();
+//        } catch (UnknownHostException ex) {
+//            Log.print(Log.ERROR, "Unknown IP format");
+//        } catch (IOException ex) {
+//            Logger.getLogger(Controller.class.getName()).log(Level.SEVERE, null, ex);
+//        }
     }
 
     public void updateLoop() throws InterruptedException {
         while (true) {
             if (!suspendUpdate) {
-                Log.print(Log.DEBUG_INFO, "Update loop is RUNNING");
+                Log.print(Log.DEBUG, "Update loop is RUNNING");
                 for (AP ap : phy_aps.values()) {
                     ap.loop();
                 }
@@ -68,7 +73,31 @@ public class Controller {
 //        }
     }
 
-    public int migrateVAP(String src_ap_id, String dst_ap_id, String target_vap) throws InterruptedException {
+    public int addAP(String ap_id, InetAddress ip, int port) {
+        for (AP ap : phy_aps.values()) {
+            if ((ap.getCtrlIface().getIp().getHostAddress().equals(ip.getHostAddress())
+                    && ap.getCtrlIface().getPort() == port)) {
+                return -2;
+            }
+        }
+        if (!phy_aps.containsKey(ap_id)) {
+            phy_aps.put(ap_id, new AP(ap_id, ip, port, thand, ehand));
+            return 0;
+        } else {
+            return -1;
+        }
+    }
+
+    public int deleteAP(String ap_id) {
+        if (phy_aps.containsKey(ap_id)) {
+            phy_aps.remove(ap_id);
+            return 0;
+        } else {
+            return -1;
+        }
+    }
+
+    public int migrateVAPCommand(String src_ap_id, String dst_ap_id, String target_vap, String dst_phy_s) throws InterruptedException {
 
         Instant start = Instant.now();
 
@@ -90,8 +119,20 @@ public class Controller {
             return Csts.UNAVAILABLE_PHY_IFACE;
         }
 
-        PhyIface dst_phy = dst.getBestPhyIface(target); //Choose best physical interface??
+        PhyIface dst_phy;
+        if (dst_phy_s == null) {
+            dst_phy = dst.getBestPhyIface(target); //Choose best physical interface??
+        } else {
+            dst_phy = dst.getPhyByName(dst_phy_s);
+            if (dst_phy == null) {
+                return Csts.SPECIFIED_PHY_NOT_FOUND;
+            }
+        }
 
+        return migrateVAP(src, dst, src_phy, dst_phy, target);
+    }
+
+    public int migrateVAP(AP src, AP dst, PhyIface src_phy, PhyIface dst_phy, VirtualAP target) throws InterruptedException {
         suspendUpdate = true;
 
         int newPort = dst.getNextAvailableCtrlIfacePort();
@@ -110,10 +151,7 @@ public class Controller {
                         if (!src_phy.channelEqualsTo(dst_phy)) { //Check different channels
                             exitCode = target.sendCSARequest(thand, dst_phy.getFrequency(), Csts.CSA_COUNT, true);
                             if (exitCode == 0) {
-                                Log.print(Log.DEBUG_INFO, "sendSTAFrameRequest() exitCode: " + exitCode);
-                                Instant finish = Instant.now();
-                                long timeElapsed = Duration.between(start, finish).toMillis();  //in millis
-                                System.out.println("MIGRATION TIME W/O WAITING: " + timeElapsed);
+                                Log.print(Log.DEBUG, "sendSTAFrameRequest() exitCode: " + exitCode);
                                 Thread.sleep(Csts.CSA_WAITING_TIME_MILLIS);
                                 return finishMigration(src, dst, src_phy, dst_phy, target, newIface, newVIfaceName);
                             } else {
@@ -166,7 +204,7 @@ public class Controller {
                 Log.print(Log.ERROR, "Send STA frame failed!");
             }
         }
-        returnCode = src_ap.deleteVAPRequest(target.getVirtualIfaceName());
+        returnCode = src_ap.deleteVAPRequest(src, target);
         if (returnCode == Csts.SYNC_REQUEST_OK) {
             if (pool_sta_ok) {
                 returnCode = Csts.MIGRATION_SUCCESSFUL_STA_DETECTED;
@@ -175,7 +213,6 @@ public class Controller {
             }
             target.setCtrlIface(newIface);
             target.setvIfaceName(newVIfaceName);
-            src.removeVAP(target);
             dst.addVAP(target);
         } else {
             returnCode = Csts.DEL_AP_FROM_OLD_VAP_FAILED;
@@ -185,7 +222,7 @@ public class Controller {
     }
 
     public int rollbackUnsuccessfulMigration(AP dst_ap, String newVIfaceName, VirtualAP target, int errorCode) {
-        int returnCode = dst_ap.deleteVAPRequest(newVIfaceName);
+        int returnCode = dst_ap.rollbackVAPRemove(newVIfaceName);
         if (returnCode == Csts.SYNC_REQUEST_OK) {
             returnCode = Csts.MIGRATION_ROLLBACK_SUCCESSFUL * errorCode;
         } else {
@@ -199,16 +236,21 @@ public class Controller {
         return code == 0;
     }
 
-    public String sendRequest() {
-        return "GOT A REQUEST!!";
-    }
-
     public AP getAPById(String id) {
         if (phy_aps.containsKey(id)) {
             return phy_aps.get(id);
         } else {
             return null;
         }
+    }
+
+    public int removeVAPRESTCmd(String vap_id) {
+        VirtualAP vap = getVAPById(vap_id);
+        if (vap != null) {
+            AP ap = getAPByVAPId(vap.getId());
+            return ap.deleteVAPRequest(vap);
+        }
+        return -1;
     }
 
     public AP getAPByCtrlIfaceId(String ctrl_iface_id) {
@@ -228,6 +270,26 @@ public class Controller {
         }
     }
 
+    public VirtualAP getVAPById(String id) {
+        for (AP ap : phy_aps.values()) {
+            VirtualAP vap = ap.getVAPById(id);
+            if (vap != null) {
+                return vap;
+            }
+        }
+        return null;
+    }
+
+    public AP getAPByVAPId(String id) {
+        for (AP ap : phy_aps.values()) {
+            VirtualAP vap = ap.getVAPById(id);
+            if (vap != null) {
+                return ap;
+            }
+        }
+        return null;
+    }
+
     public void phyIfaceEnabledEvent(String ctrl_iface_id) {
         AP ap = getAPByCtrlIfaceId(ctrl_iface_id);
         ap.setPhyIfaceState(ctrl_iface_id, true);
@@ -236,5 +298,11 @@ public class Controller {
     public void phyIfaceDisabledEvent(String ctrl_iface_id) {
         AP ap = getAPByCtrlIfaceId(ctrl_iface_id);
         ap.setPhyIfaceState(ctrl_iface_id, false);
+    }
+
+    int createDefaultVAPRESTCmd(String ap_id, String phy_name) {
+        AP ap = phy_aps.get(ap_id);
+        PhyIface phy = ap.getPhyByName(phy_name);
+        return ap.createNewVAP(phy);
     }
 }

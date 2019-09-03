@@ -28,7 +28,8 @@ public class AP implements Observer {
 //    private String ether_ifname;
 
     public AP(String id, InetAddress ip, int port) {
-
+        this.ap_id = id;
+        this.gci = new CtrlInterface(ip, port);
     }
 
     AP(String id, InetAddress ip, int port, TransactionHandler handler, EventHandler eHandler) {
@@ -46,8 +47,8 @@ public class AP implements Observer {
         return ap_id;
     }
 
-    public String getAddress() {
-        return gci.getIp().getHostAddress() + "#" + gci.getPort();
+    public String getStringAddress() {
+        return gci.getIp().getHostAddress() + ":" + gci.getPort();
     }
 
     @Override
@@ -109,7 +110,7 @@ public class AP implements Observer {
                     phy.update(handler);
                 }
             }
-            if (Csts.CREATE_NEW_VAP_AUTOMATICALLY && isAPFilledWithSTAs() && !isAPFilledWithVAPs()) {
+            if (Csts.CREATE_VAP_AUTOMATICALLY && isAPFilledWithSTAs() && !isAPFilledWithVAPs()) {
                 createNewVAP();
             }
         }
@@ -275,7 +276,7 @@ public class AP implements Observer {
             if (vap != null) {
                 return vap;
             } else {
-                Log.print(Log.ERROR, "VAP not found!");
+//                Log.print(Log.ERROR, "VAP not found!");
                 return null;
             }
         }
@@ -381,9 +382,26 @@ public class AP implements Observer {
         return handler.sendSyncRequest(this, request);
     }
 
-    int deleteVAPRequest(String iface_name) {
-        String request = Csts.buildVAPDeleteRequest(iface_name);
+    int deleteVAPRequest(PhyIface phy, VirtualAP vap) {
+        String request = Csts.buildVAPDeleteRequest(vap.getVirtualIfaceName());
+        int replyCode = handler.sendSyncRequest(this, request);
+        if(replyCode == 0){
+            phy.removeVAP(vap.getId());
+            if(phy.getNumberOfVAPs() == 0 && Csts.CREATE_VAP_AUTOMATICALLY){
+                createNewVAP(phy);
+            }
+        }
+        return replyCode;
+    }
+    
+    int rollbackVAPRemove(String v_iface_name) {
+        String request = Csts.buildVAPDeleteRequest(v_iface_name);
         return handler.sendSyncRequest(this, request);
+    }
+    
+    int deleteVAPRequest(VirtualAP vap) {
+        PhyIface phy = getPhyByVAPId(vap.getId());
+        return deleteVAPRequest(phy, vap);
     }
 
     int createNewVAP() {
@@ -393,7 +411,7 @@ public class AP implements Observer {
     }
 
     int createNewVAP(PhyIface phy) {
-        if(phy.isFilled()){
+        if (phy.isFilled()) {
             Log.print(Log.ERROR, "The specified physical interface cannot handle more vAPs!");
             return Csts.SYNC_REQUEST_FAILED;
         }
@@ -417,8 +435,8 @@ public class AP implements Observer {
         }
         return true;
     }
-    
-    public boolean isAPFilledWithVAPs(){
+
+    public boolean isAPFilledWithVAPs() {
         return getNextAvailableIface() == null;
     }
 }

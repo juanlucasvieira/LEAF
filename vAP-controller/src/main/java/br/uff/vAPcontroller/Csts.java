@@ -14,8 +14,11 @@ import java.util.UUID;
 public class Csts {
 
     //Configuration
-    public static final boolean DEBUG_LOG_LEVEL = true;
-    public static final boolean CREATE_NEW_VAP_AUTOMATICALLY = true; //Creates a new vAP when all vAPs of an AP have a station associated.
+    public static boolean DEBUG_LOG_LEVEL = false;
+    
+    /*Creates a new vAP when all vAPs of an AP have a station associated or
+     when a physical interface reaches zero APs.*/
+    public static boolean CREATE_VAP_AUTOMATICALLY = true;
 
     public static final int SEND_LISTEN_PORT_ASYNC = 9999;
     public static final int SEND_LISTEN_PORT_SYNC = 9998;
@@ -49,6 +52,7 @@ public class Csts {
     public static final int VAP_NOT_FOUND = 7;
     public static final int DST_AP_NOT_FOUND = 8;
     public static final int UNAVAILABLE_PHY_IFACE = 9;
+    public static final int SPECIFIED_PHY_NOT_FOUND = 11;
 
     public static final int SYNC_REQUEST_OK = 0;
     public static final int SYNC_REQUEST_FAILED = 1;

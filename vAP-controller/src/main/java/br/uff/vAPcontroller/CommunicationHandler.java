@@ -57,7 +57,7 @@ public class CommunicationHandler implements ReceiveCallback {
     public void sendAsyncRequest(String tid, String msg, CtrlInterface iface) {
         try {
             byte[] msgBytes = buildRequestStructure(tid, msg, iface);
-            Log.print(Log.DEBUG_INFO, "Sending message to " + iface.toString() + " :\n" + msg);
+            Log.print(Log.DEBUG, "Sending message to " + iface.toString() + " :\n" + msg);
             DatagramPacket req_pckt = new DatagramPacket(msgBytes, msgBytes.length, iface.getIp(), iface.getPort());
             asyncSocket.send(req_pckt);
         } catch (IOException ex) {
@@ -70,7 +70,7 @@ public class CommunicationHandler implements ReceiveCallback {
 
         String packetData = new String(dp.getData(), 0, dp.getLength());
         String sender = dp.getAddress().getHostAddress() + ":" + dp.getPort();
-        Log.print(Log.DEBUG_INFO, "Received message from " + sender + ":\n" + packetData);
+        Log.print(Log.DEBUG, "Received message from " + sender + ":\n" + packetData);
 
         if (packetData.startsWith("TID=")) {
             tHandler.processMessage(new String(dp.getData(), 0, dp.getLength()));
@@ -83,13 +83,13 @@ public class CommunicationHandler implements ReceiveCallback {
     String sendSyncRequest(String tid, String request, CtrlInterface destination) throws SocketTimeoutException {
         try {
             byte[] msgBytes = buildRequestStructure(tid, request, destination);
-            Log.print(Log.DEBUG_INFO, "Sending message to " + destination.toString() + " :\n" + request);
+            Log.print(Log.DEBUG, "Sending message to " + destination.toString() + " :\n" + request);
             DatagramPacket req_pckt = new DatagramPacket(msgBytes, msgBytes.length, destination.getIp(), destination.getPort());
             synchronousSocket.send(req_pckt);
             byte[] resp_buffer = new byte[2048];
             DatagramPacket response = new DatagramPacket(resp_buffer, resp_buffer.length);
             synchronousSocket.receive(response);
-            Log.print(Log.DEBUG_INFO, "Received message from "
+            Log.print(Log.DEBUG, "Received message from "
                     + response.getAddress().getHostName() + ":" + response.getPort() + ":\n"
                     + new String(response.getData(), 0, response.getLength()));
             return new String(response.getData(), 0, response.getLength());
