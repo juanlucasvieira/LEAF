@@ -19,8 +19,8 @@ public class CtrlInterface implements Observer {
     private int port;
     private InetAddress ip;
     private String id;
-    DatagramPacket request;
-    DatagramPacket response;
+//    DatagramPacket request;
+//    DatagramPacket response;
     private AtomicBoolean attached;
 
     public CtrlInterface(InetAddress ip, int port) {
@@ -156,5 +156,11 @@ public class CtrlInterface implements Observer {
     @Override
     public CtrlInterface getCtrlIface() {
         return this;
+    }
+
+    public void deinit(TransactionHandler handler) {
+        if (handler.isObserverRegistered(this)) {
+            handler.removeObserver(this);
+        }
     }
 }

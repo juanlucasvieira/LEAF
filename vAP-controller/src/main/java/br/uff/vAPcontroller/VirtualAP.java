@@ -68,12 +68,11 @@ public class VirtualAP implements Observer {
         this.v_iface_name = name;
     }
 
-
     public void setCtrlIface(CtrlInterface c) {
         this.ctrl_iface = c;
     }
-    
-    public boolean reachedMaximum(){
+
+    public boolean reachedMaximum() {
         return this.num_sta == this.max_sta_num;
     }
 
@@ -237,6 +236,12 @@ public class VirtualAP implements Observer {
 
     private void removeSta() {
         this.sta = null;
+    }
+
+    void deinit(TransactionHandler handler) {
+        if (handler.isObserverRegistered(this)) {
+            handler.removeObserver(this);
+        }
     }
 
 }

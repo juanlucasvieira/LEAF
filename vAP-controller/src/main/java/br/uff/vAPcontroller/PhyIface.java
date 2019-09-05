@@ -121,8 +121,8 @@ public class PhyIface {
     public int getNumberOfVAPs() {
         return vaps.size();
     }
-    
-    public boolean isFilled(){
+
+    public boolean isFilled() {
         return max_vap_num == vaps.size();
     }
 
@@ -168,5 +168,11 @@ public class PhyIface {
             }
         }
         return true;
+    }
+
+    void deinit(TransactionHandler handler) {
+        for (VirtualAP vap : vaps.values()) {
+            vap.deinit(handler);
+        }
     }
 }

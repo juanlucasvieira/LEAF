@@ -35,6 +35,10 @@ public class TransactionHandler {
     public void registerObserver(Observer o) {
         observers.put(o.getId(), o);
     }
+    
+    public void removeObserver(Observer o) {
+        observers.remove(o.getId());
+    }
 
     public boolean processTransactionAnswer(String tid, String response) {
         Transaction t = asyncTransactions.get(tid);
@@ -50,7 +54,7 @@ public class TransactionHandler {
         }
         if (response.contains(Csts.INVALID_COOKIE)) {
             t.getDestination().invalidate();
-        } else {
+        } else if (t.getResponse() != null && t.getResponse().length() > 0) {
             o.notify(t);
         }
         asyncTransactions.remove(tid);

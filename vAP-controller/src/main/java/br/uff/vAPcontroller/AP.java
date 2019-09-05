@@ -385,20 +385,20 @@ public class AP implements Observer {
     int deleteVAPRequest(PhyIface phy, VirtualAP vap) {
         String request = Csts.buildVAPDeleteRequest(vap.getVirtualIfaceName());
         int replyCode = handler.sendSyncRequest(this, request);
-        if(replyCode == 0){
+        if (replyCode == 0) {
             phy.removeVAP(vap.getId());
-            if(phy.getNumberOfVAPs() == 0 && Csts.CREATE_VAP_AUTOMATICALLY){
+            if (phy.getNumberOfVAPs() == 0 && Csts.CREATE_VAP_AUTOMATICALLY) {
                 createNewVAP(phy);
             }
         }
         return replyCode;
     }
-    
+
     int rollbackVAPRemove(String v_iface_name) {
         String request = Csts.buildVAPDeleteRequest(v_iface_name);
         return handler.sendSyncRequest(this, request);
     }
-    
+
     int deleteVAPRequest(VirtualAP vap) {
         PhyIface phy = getPhyByVAPId(vap.getId());
         return deleteVAPRequest(phy, vap);
@@ -438,5 +438,18 @@ public class AP implements Observer {
 
     public boolean isAPFilledWithVAPs() {
         return getNextAvailableIface() == null;
+    }
+
+    void deinitialize() {
+        for (CtrlInterface c : availableCtrlIfaces.values()) {
+            c.deinit(handler); 
+        }
+        for (PhyIface phy : phy_ifaces.values()) {
+            phy.deinit(handler);
+        }
+        gci.deinit(handler);
+        if (handler.isObserverRegistered(this)) {
+            handler.removeObserver(this);
+        }
     }
 }

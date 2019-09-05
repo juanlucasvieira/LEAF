@@ -90,6 +90,7 @@ public class Controller {
 
     public int deleteAP(String ap_id) {
         if (phy_aps.containsKey(ap_id)) {
+            phy_aps.get(ap_id).deinitialize();
             phy_aps.remove(ap_id);
             return 0;
         } else {

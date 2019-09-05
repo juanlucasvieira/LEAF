@@ -50,7 +50,7 @@ public class REST {
     public ResponseEntity getAllAP() {
         ArrayList<AP> aps = c.getAllAPs();
         if (aps == null) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.badRequest().body("No AP registered in controller.");
         } else {
             return ResponseEntity.ok(aps);
         }
@@ -66,8 +66,8 @@ public class REST {
             return ResponseEntity.ok(vap);
         }
     }
-    
-    @PostMapping("/create/vap/at/{ap}/{phy}/")
+
+    @PostMapping("/create/vap/at/{ap}/{phy}")
     public ResponseEntity createEmptyVAP(@PathVariable("ap") String ap_id, @PathVariable("phy") String phy_id) {
         int returnCode = c.createDefaultVAPRESTCmd(ap_id, phy_id);
         switch (returnCode) {
@@ -98,8 +98,20 @@ public class REST {
         }
         return ResponseEntity.notFound().build();
     }
+    
+    @DeleteMapping("/ap/{id}")
+    public ResponseEntity deleteAP(@PathVariable("id") String ap_id) {
+        int returnCode = c.deleteAP(ap_id);
+        switch (returnCode) {
+            case 0:
+                return ResponseEntity.ok().build();
+            case -1:
+                return ResponseEntity.badRequest().body("AP not found!");
+        }
+        return ResponseEntity.notFound().build();
+    }
 
-    @ResponseBody
+//    @ResponseBody
     @PostMapping("/register/ap/{ap_id}/{ap_ip}/{ap_gci_port}")
     public ResponseEntity registerAP(@PathVariable("ap_id") String ap_id,
             @PathVariable("ap_ip") String ap_ip,
@@ -123,6 +135,8 @@ public class REST {
 
         } catch (UnknownHostException ex) {
             return ResponseEntity.badRequest().body("Wrong IP parameter!");
+        } catch (NumberFormatException e) {
+            return ResponseEntity.badRequest().body("Wrong Port parameter!");
         }
         return ResponseEntity.badRequest().build();
     }
