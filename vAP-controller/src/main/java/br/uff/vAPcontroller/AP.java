@@ -92,7 +92,7 @@ public class AP implements Observer {
         return Csts.SYNC_REQUEST_TIMEOUT;
     }
 
-    public void loop() {
+    public synchronized void loop() {
         if (!handler.isObserverRegistered(this)) {
             handler.registerObserver(this);
         }
@@ -111,7 +111,11 @@ public class AP implements Observer {
                 }
             }
             if (Csts.CREATE_VAP_AUTOMATICALLY && isAPFilledWithSTAs() && !isAPFilledWithVAPs()) {
-                createNewVAP();
+                PhyIface phy = getNextAvailableIface();
+                if (phy != null && phy.getNextAvailableBSSID() != null) {
+                    Log.print(Log.INFO, "Creating new VAP automatically. All current vAPs have an STA.");
+                    createNewVAP(phy, phy.getNextAvailableBSSID());
+                }
             }
         }
     }
@@ -386,9 +390,11 @@ public class AP implements Observer {
         String request = Csts.buildVAPDeleteRequest(vap.getVirtualIfaceName());
         int replyCode = handler.sendSyncRequest(this, request);
         if (replyCode == 0) {
+            HexAddress latestBSSID = vap.getBssId();
             phy.removeVAP(vap.getId());
             if (phy.getNumberOfVAPs() == 0 && Csts.CREATE_VAP_AUTOMATICALLY) {
-                createNewVAP(phy);
+                Log.print(Log.INFO, "Phy has no VAPs. Creating new VAP automatically. ");
+                createNewVAP(phy, latestBSSID);
             }
         }
         return replyCode;
@@ -404,18 +410,11 @@ public class AP implements Observer {
         return deleteVAPRequest(phy, vap);
     }
 
-    int createNewVAP() {
-        PhyIface phy = getNextAvailableIface();
-        Log.print(Log.INFO, "Creating new VAP automatically. All current vAPs have an STA.");
-        return createNewVAP(phy);
-    }
-
-    int createNewVAP(PhyIface phy) {
+    public int createNewVAP(PhyIface phy, HexAddress bssid) {
         if (phy.isFilled()) {
             Log.print(Log.ERROR, "The specified physical interface cannot handle more vAPs!");
             return Csts.SYNC_REQUEST_FAILED;
         }
-        HexAddress bssid = phy.getNextAvailableBSSID();
         CtrlInterface ctrl = new CtrlInterface(this.gci.getIp(), getNextAvailableCtrlIfacePort());
         String vIfaceName = Csts.getNewIfaceName(bssid, phy);
         VirtualAP newVAP = new VirtualAP(Csts.generateRandomUUID(), vIfaceName, bssid, ctrl, Csts.defaultNewSSID(bssid), (short) 0);
@@ -428,6 +427,10 @@ public class AP implements Observer {
     }
 
     public boolean isAPFilledWithSTAs() {
+        System.out.println("PhyIfaces size:: " + phy_ifaces.size());
+        if (phy_ifaces.isEmpty()) {
+            return false;
+        }
         for (PhyIface phy : phy_ifaces.values()) {
             if (!phy.isVAPsFilledWithSTAs()) {
                 return false;
@@ -442,7 +445,7 @@ public class AP implements Observer {
 
     void deinitialize() {
         for (CtrlInterface c : availableCtrlIfaces.values()) {
-            c.deinit(handler); 
+            c.deinit(handler);
         }
         for (PhyIface phy : phy_ifaces.values()) {
             phy.deinit(handler);

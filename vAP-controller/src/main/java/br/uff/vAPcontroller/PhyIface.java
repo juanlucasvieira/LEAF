@@ -127,14 +127,17 @@ public class PhyIface {
     }
 
     public HexAddress getNextAvailableBSSID() {
-        HexAddress greater = vaps.values().iterator().next().getBssId();
-        for (VirtualAP vap : vaps.values()) {
-            HexAddress actual = vap.getBssId();
-            if (greater.compareTo(actual) < 0) {
-                greater = actual;
+        if (vaps.size() > 0) {
+            HexAddress greater = vaps.values().iterator().next().getBssId();
+            for (VirtualAP vap : vaps.values()) {
+                HexAddress actual = vap.getBssId();
+                if (greater.compareTo(actual) < 0) {
+                    greater = actual;
+                }
             }
+            return HexAddress.getNextAddr(greater);
         }
-        return HexAddress.getNextAddr(greater);
+        return null;
     }
 
     void update(TransactionHandler handler) {

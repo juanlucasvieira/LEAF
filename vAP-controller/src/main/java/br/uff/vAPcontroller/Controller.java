@@ -304,6 +304,11 @@ public class Controller {
     int createDefaultVAPRESTCmd(String ap_id, String phy_name) {
         AP ap = phy_aps.get(ap_id);
         PhyIface phy = ap.getPhyByName(phy_name);
-        return ap.createNewVAP(phy);
+        HexAddress bssid = phy.getNextAvailableBSSID();
+        if(bssid != null){
+            return ap.createNewVAP(phy,bssid);
+        } else {
+            return Csts.SYNC_REQUEST_FAILED;
+        }
     }
 }

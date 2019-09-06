@@ -68,7 +68,7 @@ public class REST {
     }
 
     @PostMapping("/create/vap/at/{ap}/{phy}")
-    public ResponseEntity createEmptyVAP(@PathVariable("ap") String ap_id, @PathVariable("phy") String phy_id) {
+    public ResponseEntity createDefaultVAP(@PathVariable("ap") String ap_id, @PathVariable("phy") String phy_id) {
         int returnCode = c.createDefaultVAPRESTCmd(ap_id, phy_id);
         switch (returnCode) {
             case 0:
