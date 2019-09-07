@@ -2650,6 +2650,8 @@ struct wpa_driver_ops {
 	 */
 	void (*hapd_deinit)(void *priv);
 
+	int (*hapd_switch)(struct hostapd_data *hd, int idx);
+
 	/**
 	 * set_ieee8021x - Enable/disable IEEE 802.1X support (AP only)
 	 * @priv: Private driver interface data

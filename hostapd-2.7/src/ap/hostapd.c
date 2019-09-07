@@ -1047,7 +1047,7 @@ static int hostapd_setup_bss(struct hostapd_data *hapd, int first)
 		return -1;
 	}
 	hapd->started = 1;
-
+	hapd->interface_added = 1;
 	if (!first || first == -1) {
 		u8 *addr = hapd->own_addr;
 
@@ -1072,7 +1072,7 @@ static int hostapd_setup_bss(struct hostapd_data *hapd, int first)
 			} while (mac_in_conf(hapd->iconf, hapd->own_addr));
 		}
 
-		hapd->interface_added = 1;
+//		hapd->interface_added = 1;
 		if (hostapd_if_add(hapd->iface->bss[0], WPA_IF_AP_BSS,
 				   conf->iface, addr, hapd,
 				   &hapd->drv_priv, force_ifname, if_addr,
@@ -3181,28 +3181,44 @@ static int hostapd_remove_bss(struct hostapd_iface *iface, unsigned int idx)
 
 int hostapd_remove_iface(struct hapd_interfaces *interfaces, char *buf)
 {
+	const struct wpa_driver_ops *driver;
 	struct hostapd_iface *hapd_iface;
 	size_t i, j, k = 0;
+	int ret;
 
 	for (i = 0; i < interfaces->count; i++) {
 		hapd_iface = interfaces->iface[i];
 		if (hapd_iface == NULL)
 			return -1;
 		if (!os_strcmp(hapd_iface->conf->bss[0]->iface, buf)) {
-			wpa_printf(MSG_INFO, "Remove interface '%s'", buf);
-			hapd_iface->driver_ap_teardown =
-				!!(hapd_iface->drv_flags &
-				   WPA_DRIVER_FLAGS_AP_TEARDOWN_SUPPORT);
+			if (hapd_iface->conf->num_bss == 1) {
+				wpa_printf(MSG_INFO, "Remove interface '%s'",
+					   buf);
+				hapd_iface->driver_ap_teardown =
+					!!(hapd_iface->drv_flags &
+					   WPA_DRIVER_FLAGS_AP_TEARDOWN_SUPPORT);
 
-			hostapd_interface_deinit_free(hapd_iface);
-			k = i;
-			while (k < (interfaces->count - 1)) {
-				interfaces->iface[k] =
-					interfaces->iface[k + 1];
-				k++;
+				hostapd_interface_deinit_free(hapd_iface);
+				k = i;
+				while (k < (interfaces->count - 1)) {
+					interfaces->iface[k] =
+						interfaces->iface[k + 1];
+					k++;
+				}
+				interfaces->count--;
+				return 0;
+			} else {
+				wpa_printf(MSG_INFO, "Switch interface to %s",
+					   hapd_iface->bss[1]->conf->iface);
+
+				driver = hapd_iface->bss[0]->driver;
+				ret = driver->hapd_switch(hapd_iface->bss[1], 1);
+				if (ret < 0) {
+					wpa_printf(MSG_ERROR, "Interface switch"
+						   " error");
+					return ret;
+				}
 			}
-			interfaces->count--;
-			return 0;
 		}
 
 		for (j = 0; j < hapd_iface->conf->num_bss; j++) {
