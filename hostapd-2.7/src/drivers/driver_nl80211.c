@@ -7118,7 +7118,7 @@ static int wpa_driver_nl80211_if_add(void *priv, enum wpa_driver_if_type type,
 		ifidx = nl80211_create_iface(drv, ifname, nlmode, addr,
 					     0, NULL, NULL, use_existing);
 		if (use_existing && ifidx == -ENFILE) {
-			added = 0;
+//			added = 0;
 			ifidx = if_nametoindex(ifname);
 		} else if (ifidx < 0) {
 			return -1;
