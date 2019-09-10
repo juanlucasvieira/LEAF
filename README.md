@@ -8,7 +8,7 @@
 - [ ] Forjar RSSI para evitar desassociação do cliente
 - [X] Utilizar socket para receber comandos
 - [X] Rejeitar associação de uma estação no BSS que já contém uma STA associada.
-- [ ] Criar protótipo de uma entidade central de controle
+- [X] Criar protótipo de uma entidade central de controle
 
 **Configuraçoes para usar uma interface sem fio no HostAPD**
 - Setar MAC da placa como nao gerenciado em /etc/NetworkManager/NetworkManager.conf
@@ -123,10 +123,10 @@
   ``` raw ADD bss_config=wlp9s0:/home/juan/Documents/vAP-SDN/hostapd-2.7/hostapd/ap_config/bss1.conf ```
 
   - Com parâmetros:
-  ``` raw ADD_BSS bss_config=wlp9s0:bss_params="<bss_params_separated_by_space> ```
+  ``` raw ADD_BSS bss_config=wlp9s0:bss_params="<bss_params_separated_by_space>" ```
 
   Exemplo:
-  ``` raw ADD_BSS bss_config=wlp9s0:bss_params="interface=wlan1 ssid=BSS_B1 bssid=2c:d0:5a:42:73:21 ctrl_interface=udp:8882 ctrl_interface_group=0 ```
+  ``` raw ADD_BSS bss_config=wlp9s0:bss_params="interface=wlan1 ssid=BSS_B1 bssid=2c:d0:5a:42:73:21 ctrl_interface=udp:8882 ctrl_interface_group=0" ```
 
 - Comando de Remoção de BSS no GCI:
 
