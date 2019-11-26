@@ -304,9 +304,12 @@ public class AP implements Observer {
             String v_iface_name = "", bss = "", ssid = "";
             int port = -1;
             short sta_number = -1;
-
+            boolean first_bss = false;
             for (j = startOfVAPInfo; j < (startOfVAPInfo + 5); j++) {
                 if (lines[j].startsWith("bss[")) {
+                    if(lines[j].startsWith("bss[0]")){
+                        first_bss = true;
+                    }
                     v_iface_name = lines[j].split("=")[1];
                 } else if (lines[j].startsWith("bssid[")) {
                     bss = lines[j].split("=")[1];
@@ -324,7 +327,7 @@ public class AP implements Observer {
                     String ctrlIfaceID = this.gci.getIp().getHostAddress() + ":" + port;
                     CtrlInterface vapIface = availableCtrlIfaces.get(ctrlIfaceID);
                     phy.addVAP(new VirtualAP(Csts.generateRandomUUID(),
-                            v_iface_name, new HexAddress(bss), vapIface, ssid, sta_number));
+                            v_iface_name, new HexAddress(bss), vapIface, ssid, sta_number, first_bss));
                 } else {
                     vap.setvIfaceName(v_iface_name);
                     vap.setStaNumber(sta_number);
@@ -417,7 +420,11 @@ public class AP implements Observer {
         }
         CtrlInterface ctrl = new CtrlInterface(this.gci.getIp(), getNextAvailableCtrlIfacePort());
         String vIfaceName = Csts.getNewIfaceName(bssid, phy);
-        VirtualAP newVAP = new VirtualAP(Csts.generateRandomUUID(), vIfaceName, bssid, ctrl, Csts.defaultNewSSID(bssid), (short) 0);
+        boolean main_vap = false;
+        if(phy.getNumberOfVAPs() == 0){
+            main_vap = true;
+        }
+        VirtualAP newVAP = new VirtualAP(Csts.generateRandomUUID(), vIfaceName, bssid, ctrl, Csts.defaultNewSSID(bssid), (short) 0, main_vap);
         String request = Csts.buildNewVAPRequest(newVAP, phy);
         int response = handler.sendSyncRequest(this, request);
         if (response == Csts.SYNC_REQUEST_OK) {

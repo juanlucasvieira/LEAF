@@ -10,15 +10,11 @@ import java.net.UnknownHostException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -69,46 +65,17 @@ public class REST {
 
     @PostMapping("/create/vap/at/{ap}/{phy}")
     public ResponseEntity createDefaultVAP(@PathVariable("ap") String ap_id, @PathVariable("phy") String phy_id) {
-        int returnCode = c.createDefaultVAPRESTCmd(ap_id, phy_id);
-        switch (returnCode) {
-            case 0:
-                return ResponseEntity.ok().build();
-            case -1:
-                return ResponseEntity.badRequest().body("VAP not found!");
-            case Csts.SYNC_REQUEST_FAILED:
-                return ResponseEntity.badRequest().body("Command failed.");
-            case Csts.SYNC_REQUEST_TIMEOUT:
-                return ResponseEntity.badRequest().body("Command timeout.");
-        }
-        return ResponseEntity.notFound().build();
+        return buildResponse(c.createDefaultVAPRESTCmd(ap_id, phy_id));
     }
 
     @DeleteMapping("/vap/{id}")
     public ResponseEntity deleteVAP(@PathVariable("id") String vap_id) {
-        int returnCode = c.removeVAPRESTCmd(vap_id);
-        switch (returnCode) {
-            case 0:
-                return ResponseEntity.ok().build();
-            case -1:
-                return ResponseEntity.badRequest().body("VAP not found!");
-            case Csts.SYNC_REQUEST_FAILED:
-                return ResponseEntity.badRequest().body("Command failed.");
-            case Csts.SYNC_REQUEST_TIMEOUT:
-                return ResponseEntity.badRequest().body("Command timeout.");
-        }
-        return ResponseEntity.notFound().build();
+        return buildResponse(c.removeVAPRESTCmd(vap_id));
     }
-    
+
     @DeleteMapping("/ap/{id}")
     public ResponseEntity deleteAP(@PathVariable("id") String ap_id) {
-        int returnCode = c.deleteAP(ap_id);
-        switch (returnCode) {
-            case 0:
-                return ResponseEntity.ok().build();
-            case -1:
-                return ResponseEntity.badRequest().body("AP not found!");
-        }
-        return ResponseEntity.notFound().build();
+        return buildResponse(c.deleteAP(ap_id));
     }
 
 //    @ResponseBody
@@ -147,22 +114,7 @@ public class REST {
             @PathVariable("vap_id") String vap_id,
             @PathVariable("ap_dst_id") String ap_dst_id) throws InterruptedException {
 
-        Instant start = Instant.now();
-        int returnCode = c.migrateVAPCommand(ap_src_id, ap_dst_id, vap_id, null);
-        Instant finish = Instant.now();
-        long timeElapsed = Duration.between(start, finish).toMillis();  //in millis
-        System.out.println("MIGRATION TIME: " + timeElapsed);
-
-        switch (returnCode) {
-            case 0:
-                return ResponseEntity.ok().body("Migration Successful! STA detected in new physical AP!");
-            case 1:
-                return ResponseEntity.ok().body("Migration Successful. Could not detect STA in new AP.");
-            default:
-                Log.print(Log.ERROR, "Migration Return Code: " + returnCode);
-                return ResponseEntity.badRequest().body("Command failed: " + returnCodeToString(returnCode));
-//            return ResponseEntity.notFound().build();
-        }
+        return migrateVAPRequest(ap_src_id, ap_dst_id, vap_id, null);
     }
 
     @ResponseBody
@@ -171,6 +123,10 @@ public class REST {
             @PathVariable("vap_id") String vap_id,
             @PathVariable("ap_dst_id") String ap_dst_id, @PathVariable("dst_phy") String dst_phy) throws InterruptedException {
 
+        return migrateVAPRequest(ap_src_id, ap_dst_id, vap_id, dst_phy);
+    }
+
+    public ResponseEntity migrateVAPRequest(String ap_src_id, String vap_id, String ap_dst_id, String dst_phy) throws InterruptedException {
         Instant start = Instant.now();
         int returnCode = c.migrateVAPCommand(ap_src_id, ap_dst_id, vap_id, dst_phy);
         Instant finish = Instant.now();
@@ -178,14 +134,12 @@ public class REST {
         System.out.println("MIGRATION TIME: " + timeElapsed);
 
         switch (returnCode) {
-            case 0:
+            case Csts.MIGRATION_SUCCESSFUL_STA_DETECTED:
                 return ResponseEntity.ok().body("Migration Successful! STA detected in new physical AP!");
-            case 1:
+            case Csts.MIGRATION_SUCCESSFUL:
                 return ResponseEntity.ok().body("Migration Successful. Could not detect STA in new AP.");
             default:
-                Log.print(Log.ERROR, "Migration Return Code: " + returnCode);
-                return ResponseEntity.badRequest().body("Command failed: " + returnCodeToString(returnCode));
-//            return ResponseEntity.notFound().build();
+                return buildResponse(returnCode);
         }
     }
 
@@ -211,7 +165,19 @@ public class REST {
                 s += "Destination AP not found!";
                 break;
             case Csts.VAP_NOT_FOUND:
-                s += "Migration VAP not found!";
+                s += "VAP not found!";
+                break;
+            case Csts.VAP_CANNOT_BE_MIGRATED:
+                s += "The specified VAP cannot be migrated.";
+                break;
+            case Csts.VAP_CANNOT_BE_REMOVED:
+                s += "The specified VAP cannot be removed.";
+                break;
+            case Csts.SYNC_REQUEST_FAILED:
+                s += "Command failed.";
+                break;
+            case Csts.SYNC_REQUEST_TIMEOUT:
+                s += "Command timeout.";
                 break;
         }
 //        if (returnCode > 0) {
@@ -220,5 +186,15 @@ public class REST {
 //            s += "Rollback failed!";
 //        }
         return s;
+    }
+
+    private ResponseEntity buildResponse(int returnCode) {
+        switch (returnCode) {
+            case Csts.SYNC_REQUEST_OK:
+                return ResponseEntity.ok().build();
+            default:
+                Log.print(Log.ERROR, "Command Return: " + returnCodeToString(returnCode));
+                return ResponseEntity.badRequest().body(returnCodeToString(returnCode));
+        }
     }
 }

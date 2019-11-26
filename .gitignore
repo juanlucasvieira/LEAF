@@ -6,6 +6,7 @@ hostapd-2.7/hostapd/hostapd
 hostapd-2.7/hostapd/hostapd_cli
 hostapd-2.7/hostapd/.config
 hostapd-2.7/.vscode
+hostapd-2.7/hostapd/ap_config/BSSExp/
 /vAP-controller/nbproject/private/
 /vAP-controller/build/
 /vAP-controller_old/nbproject/private/

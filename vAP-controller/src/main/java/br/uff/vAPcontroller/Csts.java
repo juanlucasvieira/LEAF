@@ -19,6 +19,8 @@ public class Csts {
     /*Creates a new vAP when all vAPs of an AP have a station associated or
      when a physical interface reaches zero APs.*/
     public static boolean CREATE_VAP_AUTOMATICALLY = true;
+    
+    public static boolean BLOCK_MAIN_VAP_OPERATIONS = true;
 
     public static final int SEND_LISTEN_PORT_ASYNC = 9999;
     public static final int SEND_LISTEN_PORT_SYNC = 9998;
@@ -53,6 +55,9 @@ public class Csts {
     public static final int DST_AP_NOT_FOUND = 8;
     public static final int UNAVAILABLE_PHY_IFACE = 9;
     public static final int SPECIFIED_PHY_NOT_FOUND = 11;
+    public static final int VAP_CANNOT_BE_MIGRATED = 12;
+    public static final int VAP_CANNOT_BE_REMOVED = 13;
+    public static final int AP_NOT_FOUND = 14;
 
     public static final int SYNC_REQUEST_OK = 0;
     public static final int SYNC_REQUEST_FAILED = 1;

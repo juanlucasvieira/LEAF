@@ -92,9 +92,9 @@ public class Controller {
         if (phy_aps.containsKey(ap_id)) {
             phy_aps.get(ap_id).deinitialize();
             phy_aps.remove(ap_id);
-            return 0;
+            return Csts.SYNC_REQUEST_OK;
         } else {
-            return -1;
+            return Csts.AP_NOT_FOUND;
         }
     }
 
@@ -111,6 +111,10 @@ public class Controller {
             return Csts.VAP_NOT_FOUND; //Target not found in specified AP code.
         }
         VirtualAP target = src_phy.getVAPByID(target_vap);
+        
+        if(Csts.BLOCK_MAIN_VAP_OPERATIONS && target.isMainVAP()){
+            return Csts.VAP_CANNOT_BE_MIGRATED;
+        }
 
         AP dst = getAPById(dst_ap_id);
         if (dst == null) {
@@ -248,10 +252,13 @@ public class Controller {
     public int removeVAPRESTCmd(String vap_id) {
         VirtualAP vap = getVAPById(vap_id);
         if (vap != null) {
+            if(Csts.BLOCK_MAIN_VAP_OPERATIONS && vap.isMainVAP()){
+                return Csts.VAP_CANNOT_BE_REMOVED;
+            }
             AP ap = getAPByVAPId(vap.getId());
             return ap.deleteVAPRequest(vap);
         }
-        return -1;
+        return Csts.VAP_NOT_FOUND;
     }
 
     public AP getAPByCtrlIfaceId(String ctrl_iface_id) {

@@ -16,6 +16,8 @@ public class VirtualAP implements Observer {
     private Station sta;
 
     private short max_sta_num;
+    
+    private boolean main_bss;
 
 //    public VirtualAP(String vap_id, String v_iface_name, InetAddress ip, int port) {
 //        this.ctrl_iface = new CtrlInterface(ip, port);
@@ -24,7 +26,7 @@ public class VirtualAP implements Observer {
 //        this.num_sta = 0;
 //        this.max_sta_num = 1;
 //    }
-    public VirtualAP(String id, String v_iface_name, HexAddress bss_id, CtrlInterface ctrl_iface, String ssid, short num_sta) {
+    public VirtualAP(String id, String v_iface_name, HexAddress bss_id, CtrlInterface ctrl_iface, String ssid, short num_sta, boolean main_bss) {
         this.id = id;
         this.v_iface_name = v_iface_name;
         this.bssid = bss_id;
@@ -32,6 +34,7 @@ public class VirtualAP implements Observer {
         this.ssid = ssid;
         this.num_sta = num_sta;
         this.max_sta_num = 1;
+        this.main_bss = main_bss;
     }
 
     @Override
@@ -74,6 +77,10 @@ public class VirtualAP implements Observer {
 
     public boolean reachedMaximum() {
         return this.num_sta == this.max_sta_num;
+    }
+    
+    public boolean isMainVAP(){
+        return this.main_bss;
     }
 
     //Fill with more options?
