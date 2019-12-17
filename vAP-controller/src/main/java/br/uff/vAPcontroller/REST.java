@@ -114,7 +114,7 @@ public class REST {
             @PathVariable("vap_id") String vap_id,
             @PathVariable("ap_dst_id") String ap_dst_id) throws InterruptedException {
 
-        return migrateVAPRequest(ap_src_id, ap_dst_id, vap_id, null);
+        return migrateVAPRequest(ap_src_id, vap_id, ap_dst_id, null);
     }
 
     @ResponseBody
@@ -123,7 +123,7 @@ public class REST {
             @PathVariable("vap_id") String vap_id,
             @PathVariable("ap_dst_id") String ap_dst_id, @PathVariable("dst_phy") String dst_phy) throws InterruptedException {
 
-        return migrateVAPRequest(ap_src_id, ap_dst_id, vap_id, dst_phy);
+        return migrateVAPRequest(ap_src_id, vap_id, ap_dst_id, dst_phy);
     }
 
     public ResponseEntity migrateVAPRequest(String ap_src_id, String vap_id, String ap_dst_id, String dst_phy) throws InterruptedException {
