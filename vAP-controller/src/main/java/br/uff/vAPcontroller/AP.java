@@ -145,6 +145,12 @@ public class AP implements Observer {
             }
         }
     }
+    
+    private void removeAvailableCtrlIface(CtrlInterface ctrl){
+        ctrl.detach(handler);
+        ctrl.deinit(handler);
+        availableCtrlIfaces.remove(ctrl.getId());
+    }
 
     private void discoverPhysicalAndVirtualIfaces(String response) {
 //        availableCtrlIfaces.get(iface.getId());
@@ -394,6 +400,7 @@ public class AP implements Observer {
         int replyCode = handler.sendSyncRequest(this, request);
         if (replyCode == 0) {
             HexAddress latestBSSID = vap.getBssId();
+            this.removeAvailableCtrlIface(vap.getCtrlIface());
             phy.removeVAP(vap.getId());
             if (phy.getNumberOfVAPs() == 0 && Csts.CREATE_VAP_AUTOMATICALLY) {
                 Log.print(Log.INFO, "Phy has no VAPs. Creating new VAP automatically. ");
