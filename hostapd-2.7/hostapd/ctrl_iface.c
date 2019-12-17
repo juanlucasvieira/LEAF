@@ -1803,9 +1803,9 @@ static void hostapd_data_test_rx(void *ctx, const u8 *src_addr, const u8 *buf,
 			return;
 		pos++;
 	}
-
-	wpa_msg(hapd->msg_ctx, MSG_INFO, "DATA-TEST-RX " MACSTR " " MACSTR,
-		MAC2STR(eth->ether_dhost), MAC2STR(eth->ether_shost));
+	//Here is the entry point of the segmentation fault
+	//wpa_msg(hapd->msg_ctx, MSG_INFO, "DATA-TEST-RX " MACSTR " " MACSTR,
+	//	MAC2STR(eth->ether_dhost), MAC2STR(eth->ether_shost));
 }
 
 
@@ -1923,7 +1923,14 @@ static int hostapd_send_frame(struct hostapd_data *hapd, char *cmd){
 			   HWSIM_PACKETLEN) < 0)
 		return -1;
 
+	//wpa_dbg(hapd->msg_ctx, MSG_DEBUG, "test data: TX frame res=%d", res);
+
+	if (packet_data)
+		l2_packet_deinit(packet_data);
+	//os_free(cmd);
+
 	return 0;
+
 }
 
 static int hostapd_ctrl_iface_data_test_tx(struct hostapd_data *hapd, char *cmd)
@@ -3877,10 +3884,12 @@ static int hostapd_ctrl_iface_add(struct hapd_interfaces *interfaces,
 static int hostapd_ctrl_iface_remove(struct hapd_interfaces *interfaces,
 				     char *buf)
 {
+	wpa_printf(MSG_INFO, "hostapd_remove_iface(interfaces, buf) called!");
 	if (hostapd_remove_iface(interfaces, buf) < 0) {
 		wpa_printf(MSG_ERROR, "Removing interface %s failed", buf);
 		return -1;
 	}
+	wpa_printf(MSG_INFO, "hostapd_remove_iface(interfaces, buf) finished!");
 	return 0;
 }
 
@@ -4179,7 +4188,7 @@ static void hostapd_global_ctrl_iface_receive(int sock, void *eloop_ctx,
 					      void *sock_ctx)
 {
 	void *interfaces = eloop_ctx;
-	char buffer[256], *buf = buffer;
+	char buffer[512], *buf = buffer;
 	int res;
 	struct sockaddr_storage from;
 	socklen_t fromlen = sizeof(from);

@@ -1,0 +1,1 @@
+sudo bash setbridge.sh up enp4s0f2 192.168.1.100 08:9e:01:6a:39:1f
