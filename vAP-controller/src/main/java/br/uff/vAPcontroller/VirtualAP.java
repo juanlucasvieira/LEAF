@@ -147,10 +147,14 @@ public class VirtualAP implements Observer {
             } else if (line.startsWith("listen_interval=")) {
                 listen_interval = Integer.parseInt(line.split("=")[1]);
             } else if (line.startsWith("supported_rates=")) {
-                String[] rates = line.split("=")[1].split(" ");
-                supported_rates = new int[rates.length];
-                for (int j = 0; j < rates.length; j++) {
-                    supported_rates[j] = Integer.parseInt(rates[j], 16);
+                if(line.split("=").length > 1){
+                    String[] rates = line.split("=")[1].split(" ");
+                    supported_rates = new int[rates.length];
+                    for (int j = 0; j < rates.length; j++) {
+                        supported_rates[j] = Integer.parseInt(rates[j], 16);
+                    }
+                } else {
+                    supported_rates = new int[0];
                 }
             } else if (line.startsWith("rx_packets=")) {
                 rx_packets = Long.parseLong(line.split("=")[1]);
