@@ -108,6 +108,7 @@ public class Controller {
         }
         PhyIface src_phy = src.getPhyByVAPId(target_vap);
         if (src_phy == null) {
+            System.out.println("PHY IFACE NOT FOUND IN SOURCE AP");
             return Csts.VAP_NOT_FOUND; //Target not found in specified AP code.
         }
         VirtualAP target = src_phy.getVAPByID(target_vap);
@@ -118,6 +119,7 @@ public class Controller {
 
         AP dst = getAPById(dst_ap_id);
         if (dst == null) {
+            System.out.println("DST AP NOT FOUND");
             return Csts.DST_AP_NOT_FOUND;
         }
         if (dst.isPhyIfacesEmpty()) {
@@ -150,10 +152,10 @@ public class Controller {
             CtrlInterface newIface = new CtrlInterface(dst.getCtrlIface().getIp(), dst.getNextAvailableCtrlIfacePort());
             if (newIface.requestCookieSync(thand) == 0 && newIface.attachSync(thand) == 0) {
                 Station movingSta = target.getSta();
-                if (target.getSta() != null) {
+                if (!Csts.DISABLE_STA_INJECTION && target.getSta() != null) {
                     exitCode = dst.STAReceiveRequest(thand, movingSta, newIface); //Send STA injection request
                     if (exitCode == 0) {
-                        if (!src_phy.channelEqualsTo(dst_phy)) { //Check different channels
+                        if (!Csts.DISABLE_CSA && !src_phy.channelEqualsTo(dst_phy)) { //Check different channels
                             exitCode = target.sendCSARequest(thand, dst_phy.getFrequency(), Csts.CSA_COUNT, true);
                             if (exitCode == 0) {
                                 Log.print(Log.DEBUG, "sendSTAFrameRequest() exitCode: " + exitCode);
@@ -181,11 +183,11 @@ public class Controller {
                     return finishMigration(src, dst, src_phy, dst_phy, target, newIface, newVIfaceName);
                 }
             } else {
-                return rollbackUnsuccessfulMigration(dst, newVIfaceName, target, Csts.STA_INJECTION_FAILED);
+                return rollbackUnsuccessfulMigration(dst, newVIfaceName, target, Csts.VAP_INJECTION_FAILED);
             }
         } else {
+            suspendUpdate = false;
             if (exitCode == Csts.SYNC_REQUEST_TIMEOUT) {
-//                suspendUpdate = false;
                 return Csts.SYNC_REQUEST_TIMEOUT;
             } else {
                 return Csts.VAP_INJECTION_FAILED;
@@ -205,8 +207,10 @@ public class Controller {
                 Log.print(Log.INFO, "Poll STA successful!");
                 pool_sta_ok = true;
             }
-            if (dst_ap.sendSTAFrameRequest(thand, s, newIface) != 0) {
-                Log.print(Log.ERROR, "Send STA frame failed!");
+            if(!Csts.DISABLE_SEND_FRAME){
+                if (dst_ap.sendSTAFrameRequest(thand, s, newIface) != 0) {
+                    Log.print(Log.ERROR, "Send STA frame failed!");
+                }
             }
         }
         returnCode = src_ap.deleteVAPRequest(src, target);
@@ -222,7 +226,7 @@ public class Controller {
         } else {
             returnCode = Csts.DEL_AP_FROM_OLD_VAP_FAILED;
         }
-//        suspendUpdate = false;
+        suspendUpdate = false;
         return returnCode;
     }
 
@@ -233,7 +237,7 @@ public class Controller {
         } else {
             returnCode = Csts.MIGRATION_ROLLBACK_FAILED * errorCode;
         }
-//        suspendUpdate = false;
+        suspendUpdate = false;
         return returnCode;
     }
 

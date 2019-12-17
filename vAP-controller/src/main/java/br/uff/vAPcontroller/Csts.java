@@ -19,6 +19,18 @@ public class Csts {
     /*Creates a new vAP when all vAPs of an AP have a station associated or
      when a physical interface reaches zero APs.*/
     public static boolean CREATE_VAP_AUTOMATICALLY = true;
+        
+    // Disables the CSA IE injection during the migration phase;
+    public static boolean DISABLE_CSA = false;
+    
+    // Disables sending client frame upon a migration.
+    public static boolean DISABLE_SEND_FRAME = false;
+    
+    // Disables STA injection client upon a migration. For test purposes.
+    public static boolean DISABLE_STA_INJECTION = false;
+    
+    // Sends Deauth frames when a BSS is removed
+    public static boolean SEND_DEAUTH_ENABLED = false;
     
     public static boolean BLOCK_MAIN_VAP_OPERATIONS = true;
 
@@ -77,6 +89,7 @@ public class Csts {
                 + "bridge=" + "vapbridge" + " "
                 + "ssid=" + target.getSsid() + " "
                 + "bssid=" + target.getBssId() + " "
+                + (SEND_DEAUTH_ENABLED ? "" : "broadcast_deauth=0 ")
                 + "ctrl_interface=udp:" + port + " "
                 + "ctrl_interface_group=0" + " "
                 + "channel=" + dst_phy.getChannel() + "\"";

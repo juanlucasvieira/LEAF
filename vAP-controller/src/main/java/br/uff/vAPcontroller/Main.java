@@ -34,6 +34,18 @@ public class Main {
                 case "-noauto":
                     Csts.CREATE_VAP_AUTOMATICALLY = false;
                     break;
+                case "-nocsa":
+                    Csts.DISABLE_CSA = true;
+                    break;
+                case "-nosendframe":
+                    Csts.DISABLE_SEND_FRAME = true;
+                    break;
+                case "-noaddsta":
+                    Csts.DISABLE_STA_INJECTION = true;
+                    break;
+                case "-deauth":
+                    Csts.SEND_DEAUTH_ENABLED = true;
+                    break;
                 default:
                     printHelpMessage();
                         break;
@@ -41,9 +53,12 @@ public class Main {
             i++;
         }
         SpringApplication.run(Main.class, args);
-        if (Csts.DEBUG_LOG_LEVEL) {
-            System.out.println("Debug Log Level is ON");
-        }
+        System.out.println("Debug Log Level is " + (Csts.DEBUG_LOG_LEVEL ? "ENABLED" : "DISABLED"));
+        System.out.println("VAP auto creation is " + (Csts.CREATE_VAP_AUTOMATICALLY ? "ENABLED" : "DISABLED"));
+        System.out.println("CSA IE sending is " + (Csts.DISABLE_CSA ? "DISABLED" : "ENABLED"));
+        System.out.println("Client Send Frame " + (Csts.DISABLE_SEND_FRAME ? "DISABLED" : "ENABLED"));
+        System.out.println("Station Injection is " + (Csts.DISABLE_STA_INJECTION ? "DISABLED" : "ENABLED"));
+        System.out.println("Send deauth is " + (Csts.SEND_DEAUTH_ENABLED ? "ENABLED" : "DISABLED"));
         Controller c = Controller.getInstance();
         c.begin(ap_list);
     }
@@ -71,6 +86,8 @@ public class Main {
     private static void printHelpMessage() {
         System.out.println("ARGS: -ap <id> <IP> <port> - Sets AP on startup\n"
                 + "\t-d - Enables Debug Logging\n"
-                + "\t-noauto - Disables VAP auto generation\n");
+                + "\t-noauto - Disables VAP auto generation\n"
+                + "\t-nocsa - Disables CSA in the migration procedure\n"
+                + "\t-nosendframe - Disables Client's Frame Sending for rerouting purposes\n");
     }
 }
