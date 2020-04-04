@@ -46,9 +46,13 @@ public class Main {
                 case "-deauth":
                     Csts.SEND_DEAUTH_ENABLED = true;
                     break;
+                case "-h":
+                    printHelpMessage();
+                    System.exit(0);
+                    break;
                 default:
                     printHelpMessage();
-                        break;
+                    break;
             }
             i++;
         }
@@ -84,10 +88,17 @@ public class Main {
     }
 
     private static void printHelpMessage() {
-        System.out.println("ARGS: -ap <id> <IP> <port> - Sets AP on startup\n"
+        System.out.println("VAP-SDN Controller\n"
+                + "----------------------\n"
+                + "OPTIONS:\n"
+                + "\t-ap <AP_Identifier> <AP_IP> <AP_Port> - Sets AP on startup\n"
                 + "\t-d - Enables Debug Logging\n"
                 + "\t-noauto - Disables VAP auto generation\n"
                 + "\t-nocsa - Disables CSA in the migration procedure\n"
-                + "\t-nosendframe - Disables Client's Frame Sending for rerouting purposes\n");
+                + "\nTESTING OPTIONS:\n"
+                + "\t-nosendframe - Disables Client's Frame Sending for rerouting purposes\n"
+                + "\t-noaddsta - Disables station injection in destination AP (for testing purposes)\n"
+                + "\t-deauth - Source AP sends deauth frame to client upon handover (for testing purposes) \n"
+                + "");
     }
 }
