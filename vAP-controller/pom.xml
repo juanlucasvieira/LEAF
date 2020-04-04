@@ -10,9 +10,9 @@
 	</parent>
 	<groupId>br.uff</groupId>
 	<artifactId>vAP-controller</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<name>vAP-controller</name>
-	<description>Demo project for Spring Boot</description>
+	<description>Controller for the VAP-SDN solution</description>
 
 	<properties>
 		<java.version>1.8</java.version>
@@ -56,9 +56,10 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-
+              
 	<build>
 		<plugins>
+                    <!--
 			<plugin>
 				<groupId>org.asciidoctor</groupId>
 				<artifactId>asciidoctor-maven-plugin</artifactId>
@@ -84,6 +85,7 @@
 					</dependency>
 				</dependencies>
 			</plugin>
+                        -->
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
