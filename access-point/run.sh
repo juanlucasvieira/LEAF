@@ -4,6 +4,7 @@ AP_MANAGEMENT_ADDR=""
 PORT_NUMBER=9000
 FILE_PATH=""
 CHANNEL="1"
+managedByNM=0
 
 while [ "$1" != "" ]; do
     case $1 in
@@ -87,8 +88,10 @@ fi
 #Check if NetworkManager is managing the wifi-iface
 result=$(nmcli dev | grep $WIFI_IFACE)
 if [[ $result == *" managed"* ]]; then
+  managedByNM=1
   echo "Disabling NetworkManager interface management"
   sudo nmcli device set $WIFI_IFACE managed no
+  sudo service NetworkManager restart
 fi
 
 #Verify if WiFi interface exists
@@ -125,8 +128,17 @@ echo "Setting bridge down"
 sudo ifconfig vapbridge down
 sudo brctl delif vapbridge $WIRED_IFACE
 sudo brctl delbr vapbridge
-sudo service NetworkManager restart
+
+if [[ $managedByNM == 1 ]]; then
+  echo "Reenabling NetworkManager interface management"
+  sudo nmcli device set $WIFI_IFACE managed yes
+  sudo service NetworkManager restart
+fi
+
 echo "Restarting Network Service"
+
+sudo /etc/init.d/networking restart
+sudo systemctl restart networking
 
 usage()
 {
