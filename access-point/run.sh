@@ -62,12 +62,12 @@ if [ -z "$FILE_PATH" ]
 then
 	echo "File Path not set. Creating configuration file."
 	if [ -e $FILE_PATH ]; then
-		rm -f hostapd/ap_config/initial.conf
+		rm -f hostapd/ap_config/startup.conf
 	fi
 	mkdir hostapd/ap_config/
-	touch hostapd/ap_config/initial.conf
-	FILE_PATH=hostapd/ap_config/initial.conf
-	cat > hostapd/ap_config/initial.conf<<EOF
+	touch hostapd/ap_config/startup.conf
+	FILE_PATH=hostapd/ap_config/startup.conf
+	cat > hostapd/ap_config/startup.conf<<EOF
 	interface=$WIFI_IFACE
 	bridge=vapbridge
 	driver=nl80211
