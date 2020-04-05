@@ -2,11 +2,11 @@
 *.o
 *.d
 #Ignore executables
-hostapd-2.7/hostapd/hostapd
-hostapd-2.7/hostapd/hostapd_cli
-hostapd-2.7/hostapd/.config
-hostapd-2.7/.vscode
-hostapd-2.7/hostapd/ap_config/BSSExp/
-/vAP-controller/nbproject/private/
-/vAP-controller/build/
-/vAP-controller_old/nbproject/private/
+access-point/hostapd/hostapd
+access-point/hostapd/hostapd_cli
+#access-point/hostapd/.config
+access-point/.vscode
+access-point/hostapd/ap_config/BSSExp/
+vap-controller/nbproject/private/
+vap-controller/build/
+vap-controller/nbproject/private/
