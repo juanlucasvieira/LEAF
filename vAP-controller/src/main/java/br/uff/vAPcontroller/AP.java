@@ -441,7 +441,6 @@ public class AP implements Observer {
     }
 
     public boolean isAPFilledWithSTAs() {
-        System.out.println("PhyIfaces size:: " + phy_ifaces.size());
         if (phy_ifaces.isEmpty()) {
             return false;
         }

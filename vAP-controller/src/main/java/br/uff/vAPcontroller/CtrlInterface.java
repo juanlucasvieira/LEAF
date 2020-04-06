@@ -79,6 +79,7 @@ public class CtrlInterface implements Observer {
         if (c.startsWith("COOKIE=")) {
             c.replaceFirst("COOKIE=", "").trim();
             this.cookie = c;
+            Log.print(Log.INFO, "Connected to "+this.ip+":"+this.port);
         }
     }
 
