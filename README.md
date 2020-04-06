@@ -13,7 +13,7 @@ It also provides abstractions for applications to implement their own decision a
 
 ## Development
 
-* [Access Point Source Code](https://github.com/juanlucasvieira/VAP-SDN/tree/master/hostapd-2.7)
+* [Access Point Source Code](https://github.com/juanlucasvieira/VAP-SDN/tree/master/access-point)
 * [Controller Source Code](https://github.com/juanlucasvieira/VAP-SDN/tree/master/vAP-controller)
 
 ## Technologies
@@ -23,7 +23,7 @@ It also provides abstractions for applications to implement their own decision a
 
 ## License
 
-* [Access Point Source Code](https://github.com/juanlucasvieira/VAP-SDN/blob/master/hostapd-2.7/README)
+* [Access Point Source Code](https://github.com/juanlucasvieira/VAP-SDN/blob/master/access-point/README)
 * [Controller Source Code](https://github.com/juanlucasvieira/VAP-SDN/tree/master/vAP-controller/LICENSE.md)
 
 
