@@ -88,9 +88,10 @@ public class Main {
     }
 
     private static void printHelpMessage() {
-        System.out.println("VAP-SDN Controller\n"
-                + "----------------------\n"
-                + "OPTIONS:\n"
+        System.out.println("------------------------------\n"
+                + "  VAP-SDN Controller v1.0.0\n"
+                + "------------------------------\n"
+                + "\nOPTIONS:\n"
                 + "\t-ap <AP_Identifier> <AP_IP> <AP_Port> - Sets AP on startup\n"
                 + "\t-d - Enables Debug Logging\n"
                 + "\t-noauto - Disables VAP auto generation\n"
@@ -99,6 +100,7 @@ public class Main {
                 + "\t-nosendframe - Disables Client's Frame Sending for rerouting purposes\n"
                 + "\t-noaddsta - Disables station injection in destination AP (for testing purposes)\n"
                 + "\t-deauth - Source AP sends deauth frame to client upon handover (for testing purposes) \n"
-                + "");
+                + "\nDeveloped by Juan Lucas Vieira\n"
+                + "https://github.com/juanlucasvieira/VAP-SDN");
     }
 }
