@@ -1,8 +1,8 @@
-# VAP-SDN
+# LEAF
 
 ## About
 
-VAP-SDN is a virtualization solution that allows the migration of wireless clients between access points operating in different channels.
+LEAF (**L**ightw**E**ight **A**P Virtualization **F**ramework) is a virtualization solution that allows the migration of wireless clients between access points operating in different channels.
 It also provides abstractions for applications to implement their own decision algorithms based on network nodes utilization.
 
 ## Documentation
